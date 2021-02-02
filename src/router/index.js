@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import HelloWorld from '@/components/HelloWorld'
+import mainLayout from '../components/layout/main.vue'
+// import { resolve } from 'core-js/fn/promise'
 
 Vue.use(Router)
 
@@ -8,8 +9,22 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'HelloWorld',
-      component: HelloWorld
+      name: 'login',
+      component: resolve => {
+        require(['../views/login'], resolve)
+      }
+    },
+    {
+      path: '/mainIndex',
+      name: 'mainIndex',
+      component: mainLayout,
+      children: [{
+        path: '/',
+        title: '首页',
+        component: resolve => {
+          require(['../views/home'], resolve)
+        }
+      }]
     }
   ]
 })
