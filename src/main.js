@@ -8,9 +8,14 @@ import './utils/rem'
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import less from 'less'
+import "./style/color.less";
 import './style/reset.less'
 import * as THREE from "three";
 import store from './store'
+import IconSvg from '@/components/Icon'
+
+Vue.prototype.$eventBus = new Vue()
+Vue.component('icon-svg', IconSvg)
 Vue.use(THREE)
 Vue.use(dataV)
 Vue.use(AMap)

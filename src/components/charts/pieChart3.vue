@@ -5,7 +5,7 @@
     <div class="chart-pie-center">
       <countTo :startVal='0'
                :endVal='total'
-               :duration='2000'></countTo>
+               :duration='2000'>{{num}}</countTo>
     </div>
   </div>
 </template>
@@ -42,7 +42,8 @@ export default {
   },
   data () {
     return {
-
+      timer: null,
+      num: 0
     }
   },
   computed: {
@@ -55,11 +56,18 @@ export default {
     }
   },
   mounted () {
+    this.num = this.total
     this.$nextTick(() => {
       this.initChart()
     })
+    this.timer = setInterval(() => {
+      this.startTimer();
+    }, 1000)
   },
   methods: {
+    startTimer () {
+      this.num++
+    },
     initChart () {
       const _this = this
       const canvasChart = echarts.init(this.$refs.chartDomPie)
@@ -130,7 +138,10 @@ export default {
       // })
       canvasChart.setOption(option)
     },
-  }
+  },
+  destroyed () {
+    clearInterval(this.timer);
+  },
 }
 </script>
 <style lang="less" scoped>

@@ -1,7 +1,8 @@
 <template>
   <div class="dz-title">
     <!-- <span class="dz-title-span">地洲智慧云平台</span> -->
-    <dv-decoration-11 class="dz-title-span">地洲智慧云平台</dv-decoration-11>
+    <!-- <dv-decoration-11 class="dz-title-span">地洲智慧云平台</dv-decoration-11> -->
+    <dv-border-box-10 class="dz-title-span">地洲智慧云平台</dv-border-box-10>
   </div>
 </template>
 <style lang="less" scoped>

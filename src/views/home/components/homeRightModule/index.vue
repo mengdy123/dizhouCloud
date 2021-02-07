@@ -36,7 +36,7 @@
                      :value='waterData4'></waterPolo>
         </div>
       </div>
-      <sinan total='522'
+      <sinan total='5256'
              name='累计减排（千克）'></sinan>
     </div>
 
@@ -66,50 +66,58 @@ export default {
       xAxisData: ['行人违章', '交通事故', '刑侦案件', '行政事件', '设备运维'],
       colorPie2: ['#91CB74'],
       valuePie2: [
-        { value: 1000, name: '累计生产清洁能源(度)' },
+        { value: 10000, name: '累计生产清洁能源(度)' },
       ],
-      totalPie2: 1000,
+      timer: null,
+      totalPie2: 10000,
       colorPie3: ['#FAC858'],
       valuePie3: [
-        { value: 400, name: '累计节约标准煤(千克)' }
+        { value: 4000, name: '累计节约标准煤(千克)' }
       ],
-      totalPie3: 400,
+      totalPie3: 4000,
       waterData1: [
         {
-          name: 'CO',
+          name: 'C',
           value: 0.45,
           num: 1088
         }
       ],
       waterData2: [
         {
-          name: 'SO2',
-          value: 0.6,
-          num: 2013
+          name: 'CO2',
+          value: 0.8,
+          num: 3988
         }
       ],
       waterData3: [
         {
-          name: 'CO2',
+          name: 'SO2',
           value: 0.25,
-          num: 1880
+          num: 120
         }
       ],
       waterData4: [
         {
-          name: 'NO2',
-          value: 0.3,
-          num: 1288
+          name: 'NOx',
+          value: 0.2,
+          num: 60
         }
       ]
     }
   },
   mounted () {
-
+    // this.timer = setInterval(() => {
+    //   this.startTimer();
+    // }, 1000)
   },
   methods: {
-
-  }
+    // startTimer () {
+    //   this.valuePie2[0].value++
+    // }
+  },
+  // destroyed () {
+  //   clearInterval(this.timer);
+  // },
 }
 </script>
 <style lang="less" scoped>
@@ -122,13 +130,13 @@ export default {
   &-div {
     position: relative;
     .energy-chart {
-      width: 100px;
-      height: 100px;
+      width: 120px;
+      height: 120px;
     }
     span {
-      width: 140px;
-      height: 22px;
-      line-height: 22px;
+      width: 160px;
+      height: 26px;
+      line-height: 26px;
       color: @white;
       text-align: center;
       position: absolute;
@@ -152,43 +160,43 @@ export default {
     background: rgb(53 233 255 / 10%);
   }
   &-div:nth-child(1) {
-    width: 58px;
-    height: 58px;
+    width: 78px;
+    height: 78px;
     left: 70px;
     top: 54%;
     .reduction-chart {
-      width: 56px;
-      height: 56px;
+      width: 76px;
+      height: 76px;
     }
   }
   &-div:nth-child(2) {
-    width: 70px;
-    height: 70px;
+    width: 90px;
+    height: 90px;
     left: 140px;
     top: 46%;
     .reduction-chart {
-      width: 68px;
-      height: 68px;
+      width: 88px;
+      height: 88px;
     }
   }
   &-div:nth-child(3) {
-    width: 52px;
-    height: 52px;
+    width: 72px;
+    height: 72px;
     left: 226px;
     top: 50%;
     .reduction-chart {
-      width: 50px;
-      height: 50px;
+      width: 70px;
+      height: 70px;
     }
   }
   &-div:nth-child(4) {
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     left: 286px;
     top: 56%;
     .reduction-chart {
-      width: 48px;
-      height: 48px;
+      width: 68px;
+      height: 68px;
     }
   }
 }
@@ -212,6 +220,7 @@ export default {
     height: 26%;
     background: @bgBlue;
     margin-top: 10px;
+    width: 100%;
   }
 }
 </style>

@@ -2,29 +2,51 @@
   <div class="container-div">
     <div id="container">
     </div>
+    <div ref='ProjectInfoBox'
+         class="project-info-box"
+         v-show="showProjectInfoBox">
+      <projectInfo v-if="showProjectInfoBox"
+                   :projectInfoData='projectInfoData'
+                   @closeInfoWindow='closeInfoWindow'
+                   @clearMarkerOnly='clearMarkerOnly'></projectInfo>
+    </div>
   </div>
 </template>
 <script>
 import { setCookie } from "@/utils/cookie";
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
+import projectInfo from '@/components/infoBox/projectInfo.vue'
+import dataP1 from '../../data/projectList.json'
+import eventBus from '@/utils/bus'
 export default {
+  components: { projectInfo },
   data () {
     return {
       map: null,
-      map3D: null,
-      objectLayer: null,
-      marker: null,
+      markerOnly: null,
       circleMarker: [],
       overlayGroups: null,
       markerFillColor: '',
       clusterMarker: [],
-      districtSearch: null
+      districtSearch: null,
+      infoWindow: null,
+      projectInfoData: {},
+      showProjectInfoBox: false,
+      layerGroup: null,
+      selectBoundsLayer: [],
+      projectLayer: null,
+      projectIcon: require('../../assets/map-icon/p_03.png'),
+      featureOldData: [],
+      addrArr: []
     }
   },
   computed: {
     ...mapState({
-      projectLayer: state => state.map2D.projectLayer,
+      projectLayerData: state => state.map2D.projectLayerData,
       markerLayerData: state => state.map2D.markerLayerData,
+      municipalityList: state => state.map2D.municipalityList,
+      addressInfo: state => state.map2D.addressInfo,
+
     })
   },
   watch: {
@@ -32,28 +54,59 @@ export default {
       deep: true,
       handler (newVal) {
         if (newVal && newVal.data) {
-          this.markerInit(newVal.data)
           this.markerFillColor = newVal.color
+          this.markerInit(newVal.data)
+        } else {
+          this.markerFillColor = ''
+          this.removeOverlayGroup()
+          this.removeRenderClusterMarker()
         }
-      }
-    }
+        // console.log('newVal', newVal)
+        // console.log('this.markerFillColor', this.markerFillColor)
+      },
+    },
+    projectLayerData: {
+      deep: true,
+      handler (newVal) {
+        if (newVal) {
+          this.addMarkerOnly(newVal)
+        } else {
+          this.clearMarkerOnly()
+        }
+      },
+    },
   },
   mounted () {
-    this.init()
     const that = this
-    setCookie('name', '马梦迪')
-    // this.map.on('zoomchange', function (e) {
-    //   //地图层级变化，执行方法
-    //   console.log('当前缩放级别：', this.getZoom())
-    //   // that.addCluster()
-    // })
-    // this.map.on('zoomend', function (e) {
-    //   //地图进行缩放的时候监听该函数, 也就是点击的时候哈.缩放
-    //   console.log(this.getZoom());
-    //   console.log(this.getCenter().toString());
-    // });
+    this.$nextTick(() => {
+      that.init()
+      // that.map.on('click', that.getMapClick);
+      that.projectLayer = that.addMaker(that.projectIcon, dataP1.points)
+      that.projectLayer.hide()
+      that.map.on('zoomchange', function (e) {
+        let zoomNum = this.getZoom()
+        //地图层级变化，执行方法
+        console.log('当前缩放级别：', zoomNum)
+        if (zoomNum > 4) {
+          that.projectLayer.show()
+        } else {
+          that.projectLayer.hide()
+        }
+        that.scaleInit()
+      })
+      // this.map.on('zoomend', function (e) {
+      //   //地图进行缩放的时候监听该函数, 也就是点击的时候哈.缩放
+      //   console.log(this.getZoom());
+      //   console.log(this.getCenter().toString());
+      // });
+      eventBus.$on('setZoomAndCenterFun', (e) => {
+        that.setZoomAndCenterFun()
+      })
+    })
   },
+
   methods: {
+    ...mapActions(['saveScaleData', 'saveAddressInfo']),
     async init () {
       // 创建地图实例
       let that = this
@@ -61,73 +114,69 @@ export default {
         resizeEnable: true,   // 是否监控地图容器尺寸变化
         zoom: 4,  //设置地图显示的缩放级别
         zooms: [2, 18],
-        center: [116.397428, 39.90923],//设置地图中心点坐标
+        center: [107.848005, 28.682565],//设置地图中心点坐标
         mapStyle: 'amap://styles/darkblue',  //设置地图的显示样式
       })
-      // that.drawBounds()
-      that.setLayer()
+      // that.setLayer()
+      that.toolBarInit()
+      that.scaleInit()
+      that.drawLineType()
       console.log('地图加载成功', that.map)
     },
-    drawBounds () {
-      const that = this
-      AMap.plugin(["AMap.DistrictSearch"], () => {
-        if (!that.districtSearch) {
-          //实例化DistrictSearch
-          let opts = {
-            subdistrict: 0,   //获取边界不需要返回下级行政区
-            extensions: 'all',  //返回行政区边界坐标组等具体信息
-            level: 'district'  //查询行政级别为 市
-          };
-
-          that.districtSearch = new AMap.DistrictSearch(opts);
-        }
-        //行政区查询
-        that.districtSearch.search('中国', (status, result) => {
-          // 获取朝阳区的边界信息
-          let bounds = result.districtList[0].boundaries
-          let polygons = []
-          if (bounds) {
-            for (let i = 0, l = bounds.length; i < l; i++) {
-              //生成行政区划polygon
-              let polygon = new AMap.Polygon({
-                strokeWeight: 1,
-                path: bounds[i],
-                fillOpacity: 0,
-                fillColor: '#CCF3FF',
-                strokeColor: 'red'
-              });
-              polygons.push(polygon);
-            }
-            that.map.add(polygons)
-            // 地图自适应
-            that.map.setFitView(polygons)
-          }
-        })
-
+    // 设置地图中心点/级别
+    setZoomAndCenterFun () {
+      this.map.setZoomAndCenter(4, [107.848005, 28.682565]);
+      this.map.setFitView()
+    },
+    // 缩放
+    toolBarInit () {
+      let that = this
+      AMap.plugin([
+        'AMap.ToolBar',
+      ], function () {
+        // 在图面添加工具条控件，工具条控件集成了缩放、平移、定位等功能按钮在内的组合控件
+        that.map.addControl(new AMap.ToolBar({
+          // 简易缩放模式，默认为 false
+          liteStyle: true,
+          position: [-120, -200]
+        }));
       });
     },
-    setLayer () {
-      var trafficLayer = new AMap.TileLayer.Traffic({
-        zIndex: 11
+    // 比例尺
+    scaleInit () {
+      let that = this
+      AMap.plugin(["AMap.Scale"], function () {
+        let scale = new AMap.Scale();
+        that.map.addControl(scale);
+        let scaleData = Math.round(that.map.getScale())
+        that.saveScaleData(scaleData)
       });
-      var roadNetLayer = new AMap.TileLayer.RoadNet({
+    },
+    // 设置图层
+    setLayer () {
+      const that = this
+      const roadNetLayer = new AMap.TileLayer.RoadNet({
         zIndex: 10
       });
 
-      var layerGroup = new AMap.LayerGroup([trafficLayer, roadNetLayer]);
-      layerGroup.setMap(this.map);
-      layerGroup.setOptions({ opacity: 0.2 })
+      that.layerGroup = new AMap.LayerGroup(roadNetLayer);
+      that.layerGroup.setMap(this.map);
+      that.layerGroup.setOptions({ opacity: 0.2 })
     },
+    // echart撒点的方法
     markerInit (layerList) {
       let that = this
       if (that.overlayGroups) {
         that.removeOverlayGroup()
       }
+      if (that.clusterMarker) {
+        that.removeRenderClusterMarker()
+      }
       that.circleMarker = []
       const iconList = {
         '#35E9FF': `<div style="background-color: hsla(187, 100%, 60%, 0.7); height: 12px; width: 12px; border: 8px solid hsl(180, 100%, 0.1); border-radius: 50%; box-shadow: hsla(187, 100%, 60%, 0.2) 0px 0px 1px;"></div>`,
         '#EE6666': `<div style="background-color: hsla(0, 80%, 67%, 0.7); height: 12px; width: 12px; border: 8px solid hsl(180, 100%, 0.1); border-radius: 50%; box-shadow: hsla(0, 80%, 67%, 0.2) 0px 0px 1px;"></div>`,
-        '#FC8452': `<div style="background-color: hsl(18, 97%, 65%, 0.7); height: 12px; width: 12px; border: 8px solid hsl(180, 100%, 0.1); border-radius: 50%; box-shadow: hsla(18, 97%, 65%, 0.2) 0px 0px 1px;"></div>`,
+        '#FC8452': `<div style="background-color: hsla(18, 97%, 65%, 0.7); height: 12px; width: 12px; border: 8px solid hsl(180, 100%, 0.1); border-radius: 50%; box-shadow: hsla(18, 97%, 65%, 0.2) 0px 0px 1px;"></div>`,
         '#91CB74': `<div style="background-color: hsla(100, 46%, 63%, 0.7); height: 12px; width: 12px; border: 8px solid hsl(180, 100%, 0.1); border-radius: 50%; box-shadow: hsla(100, 46%, 63%, 0.2) 0px 0px 1px;"></div>`,
         '#FAC858': `<div style="background-color: hsla(41, 94%, 66%, 0.7); height: 12px; width: 12px; border: 8px solid hsl(180, 100%, 0.1); border-radius: 50%; box-shadow: hsla(41, 94%, 66%, 0.2) 0px 0px 1px;"></div>`,
         '#9A60B4': `<div style="background-color: hsla(281,36%, 54%, 0.7); height: 12px; width: 12px; border: 8px solid hsl(180, 100%, 0.1); border-radius: 50%; box-shadow: hsla(281,36%, 54%, 0.2) 0px 0px 1px;"></div>`,
@@ -179,13 +228,366 @@ export default {
         });
       });
     },
+    // 撒点通用方法
+    addMaker (iconImg, layerList) {
+      let that = this
+      let layerName = null
+      let icon = new AMap.Icon({
+        size: new AMap.Size(20, 20),    // 图标尺寸
+        image: iconImg,  // Icon的图像
+        imageSize: new AMap.Size(20, 20)   // 根据所设置的大小拉伸或压缩图片
+      });
+      let layer = []
+      for (let i = 0; i < layerList.length; i++) {
+        let lnglat = layerList[i].lnglat;
+        // 创建点实例
+        let marker = new AMap.Marker({
+          position: lnglat,
+          icon: icon,
+        })
+        layer.push(marker)
+        marker.on('click', that.markerClick);
+      }
+
+      layerName = new AMap.OverlayGroup(layer);
+      that.map.add(layerName);
+      return layerName
+      console.log('layerName', layerName)
+      // AMap.plugin(["AMap.MarkerClusterer"], function () {
+      //   that.clusterMarker = new AMap.MarkerClusterer(that.map, layer, {
+      //     // renderClusterMarker: _renderClusterMarker,
+      //     gridSize: 80
+      //   });
+      // });
+    },
+    // 点击项目的图标
+    markerClick (e) {
+      console.log('点击项目的图标', e)
+      let row = {
+        row: ['扬州文昌路1', '扬州', '运行中', '交通', '43', '789']
+      }
+      let jw = e.lnglat
+      let data = {
+        ...row,
+        jw: [jw.lng, jw.lat]
+      }
+      this.customizationInfoWindow(data)
+    },
+    // 点击地图，获取信息
+    getMapClick (e) {
+      let lnglat = [e.lnglat.lng, e.lnglat.lat]
+      // console.log('getMapClick', e)
+      this.mapGeocoder(lnglat)
+    },
+    // 逆向地理编码方法
+    mapGeocoder (lnglat) {
+      const _this = this
+      AMap.plugin('AMap.Geocoder', function () {
+        const geocoder = new AMap.Geocoder({
+          // city 指定进行编码查询的城市，支持传入城市名、adcode 和 citycode
+          city: '010'
+        })
+        geocoder.getAddress(lnglat, function (status, result) {
+          if (status === 'complete' && result.info === 'OK') {
+            // result为对应的地理位置详细信息
+            console.log('result-------', result)
+            // let province = result.regeocode.addressComponent.province || null
+            // let adcode = result.regeocode.addressComponent.adcode || null
+            // _this.drawDistrict(province)
+          }
+        })
+      })
+    },
+    getColorByDGP (adcode) {
+      const GDPSpeed = {
+        '520000': 10,//贵州
+        '540000': 10,//西藏
+        '530000': 8.5,//云南 
+        '500000': 8.5,//重庆
+        '360000': 8.5,//江西
+        '340000': 8.0,//安徽
+        '510000': 7.5,//四川
+        '350000': 8.5,//福建
+        '430000': 8.0,//湖南
+        '420000': 7.5, //湖北
+        '410000': 7.5,//河南
+        '330000': 7.0,//浙江
+        '640000': 7.5,//宁夏
+        '650000': 7.0,//新疆
+        '440000': 7.0,//广东
+        '370000': 7.0,//山东
+        '450000': 7.3,//广西
+        '630000': 7.0,//青海
+        '320000': 7.0,//江苏
+        '140000': 6.5,//山西
+        '460000': 7,// 海南
+        '310000': 6.5,//上海
+        '110000': 6.5, // 北京
+        '130000': 6.5, // 河北
+        '230000': 6, // 黑龙江
+        '220000': 6,// 吉林
+        '210000': 6.5, //辽宁
+        '150000': 6.5,//内蒙古
+        '120000': 5,// 天津
+        '620000': 6,// 甘肃
+        '610000': 8.5,// 甘肃
+        '710000': 2.64, //台湾
+        '810000': 3.0, //香港
+        '820000': 4.7 //澳门
+
+      }
+      let colors = {}
+      if (!colors[adcode]) {
+        var gdp = GDPSpeed[adcode];
+        if (!gdp) {
+          colors[adcode] = 'rgb(227,227,227)'
+        } else {
+          var rg = 255 - Math.floor((gdp - 5) / 5 * 255);
+          colors[adcode] = 'rgba(' + rg + ',' + rg + ',255,0.5)';
+        }
+      }
+      return colors[adcode]
+    },
+    // 点击地图，绘制边界线
+    drawLineType () {
+      const that = this
+      //just some colors
+      const colors = [
+        "#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00",
+        "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707",
+        "#651067", "#329262", "#5574a6", "#3b3eac"
+      ];
+      AMapUI.load(['ui/geo/DistrictExplorer', 'lib/$'], function (DistrictExplorer, $) {
+        const districtExplorer = new DistrictExplorer({
+          map: that.map
+        });
+        let locMarker = new AMap.Marker();
+        function listenMouseEvents () {
+          let isLocating = false;
+          that.map.on('click', function (e) {
+            if (isLocating) {
+              return;
+            }
+            isLocating = true;
+            // $('#locTip').html('定位中......');
+            districtExplorer.locatePosition(e.lnglat, function (err, features) {
+              isLocating = false;
+              if (err) {
+                console.error(err);
+                return;
+              }
+              if (features.length > 0 && features[0].properties.adcode == 100000) {
+                // addrArr.push(features[0].properties.adcode)
+                if (that.addrArr.length == 2) {
+                  let adcode = features[1].properties.adcode.toString()
+                  if (that.municipalityList.indexOf(adcode)) {
+                    if (that.featureOldData && that.featureOldData[2] && that.featureOldData[2].properties.adcode == features[2].properties.adcode) {
+                      that.addrArr[2] = (features[2].properties.adcode)
+                    } else {
+
+                    }
+                  } else {
+                    if (that.featureOldData && that.featureOldData[3] && that.featureOldData[3].properties.adcode == features[3].properties.adcode) {
+                      // 同一个区
+                      that.addrArr[2] = (features[3].properties.adcode)
+                    } else {
+                      // 不是同一个区
+                    }
+                  }
+                }
+                if (that.addrArr.length == 1) {
+                  let adcode = features[1].properties.adcode.toString()
+                  if (that.municipalityList.indexOf(adcode)) {
+                    that.addrArr[1] = (adcode.slice(0, 3) + '100')
+                    // 
+                  } else {
+                    if (that.featureOldData && that.featureOldData[2] && that.featureOldData[2].properties.adcode == features[2].properties.adcode) {
+                      // 同一个市
+                      that.addrArr[1] = (features[2].properties.adcode)
+                    } else {
+                      // 不是同一个市
+                    }
+                  }
+                }
+                if (!(that.featureOldData && that.featureOldData[1] && that.featureOldData[1].properties.adcode == features[1].properties.adcode)) {
+                  console.log(222)
+                  // that.featureOldData = []
+                  that.addrArr = []
+                  that.addrArr = [features[1].properties.adcode]
+                  console.log('that.addrArr', that.addrArr)
+                }
+                if (that.addrArr.length == 0) {
+                  if (that.featureOldData && that.featureOldData[1] && that.featureOldData[1].properties.adcode == features[1].properties.adcode) {
+                    // 同一个省
+                    console.log(1111)
+                    that.addrArr[0] = (features[1].properties.adcode)
+                    // that.municipalityList   直辖市
+                    // 110100
+                  } else {
+                    that.featureOldData = []
+                    // 不是同一个省
+                    that.addrArr[0] = (features[1].properties.adcode)
+                  }
+                }
+
+              } else {
+                that.$message.warning('choose china!!')
+                districtExplorer.clearFeaturePolygons();
+                return false
+              }
+
+              that.saveAddressInfo(that.addrArr)
+              that.featureOldData = features // 首次赋值
+              let featuresArr = []
+              featuresArr.push(features[that.addressInfo.length])
+              renderFeatures(featuresArr);
+              // locMarker.setPosition(e.lnglat);
+              // locMarker.setMap(that.map);
+              // console.log('定位', e.lnglat)
+              // console.log('features111', features[that.addressInfo.length])
+              // let adcode = features[1].properties.adcode || 100000
+              // that.map.setCity(that.addressInfo[that.addressInfo.length - 1])
+              // that.map.setCenter(features[that.addressInfo.length].properties.center)
+              // 设置中心点，层级
+              that.map.setZoomAndCenter(that.addressInfo.length + 5, features[that.addressInfo.length].properties.center)
+              // that.mapGeocoder(e.lnglat)
+            }, {
+              levelLimit: 4
+            });
+          });
+        }
+        // 点击事件的
+        listenMouseEvents();
+        function renderFeatures (features) {
+          //清除已有的绘制内容
+          districtExplorer.clearFeaturePolygons();
+          if (!features.length) {
+            renderCountry(false);
+            return;
+          }
+          for (var i = 0, len = features.length; i < len; i++) {
+            var strokeColor = colors[i % colors.length];
+            var fillColor = strokeColor;
+            districtExplorer.renderFeature(features[i], {
+              cursor: 'default',
+              bubble: true,
+              strokeColor: strokeColor, //线颜色
+              strokeOpacity: 1, //线透明度
+              strokeWeight: 1, //线宽
+              fillColor: fillColor, //填充色
+              fillOpacity: 0.15, //填充透明度
+            });
+          }
+          // that.map.setFitView(districtExplorer)
+        }
+        // 全国
+        function renderCountry (setBounds) {
+          districtExplorer.loadCountryNode(function (err, countryNode) {
+            if (setBounds) {
+              that.map.setBounds(countryNode.getBounds());
+            }
+            districtExplorer.renderParentFeature(countryNode, {
+              cursor: 'default',
+              bubble: true,
+              strokeColor: 'rgba(188,159,135,1)', //线颜色
+              strokeOpacity: 0.7, //线透明度
+              strokeWeight: 1, //线宽
+              fillColor: colors[0], //填充色
+              fillOpacity: 0.1, //填充透明度
+            });
+          });
+        }
+        renderCountry(true);
+      })
+    },
+    drawDistrict (address) {
+      const _this = this
+      AMap.plugin('AMap.DistrictLayer', function () {
+        const disCountry = new AMap.DistrictLayer.Country({
+          zIndex: 10,
+          SOC: 'CHN',
+          depth: 2,
+          styles: {
+            // 'nation-stroke': '#22ffff',
+            // 'coastline-stroke': [0.8, 0.63, 0.94, 1],
+            // 'province-stroke': 'white',
+            'city-stroke': 'rgba(188,159,135,0.5)',//中国特有字段
+            'fill': function (props) {//中国特有字段
+              console.log('props.adcode_pro', props.adcode_pro)
+              // return _this.getColorByDGP(props.adcode_pro)
+            }
+          }
+        })
+        disCountry.setMap(_this.map);
+        _this.map.setFitView()
+      })
+    },
+    getColorByAdcode (adcode) {
+      let colors = {};
+      if (!colors[adcode]) {
+        var gb = Math.random() * 155 + 50;
+        colors[adcode] = 'rgba(' + gb + ',' + gb + ',255,0.3)';
+      }
+
+      return colors[adcode];
+      // return 'rgba(204,243,255,0.1)'
+    },
     removeOverlayGroup () {
       this.map.remove(this.overlayGroups);
     },
+    removeRenderClusterMarker () {
+      this.map.remove(this.clusterMarker);
+    },
+    addMarkerOnly (data) {
+      const that = this
+      if (that.markerOnly) {
+        that.map.remove(that.markerOnly)
+      }
+      that.markerOnly = new AMap.Marker({
+        position: data.jw,
+        size: new AMap.Size(20, 2),
+        offset: new AMap.Pixel(-13, -30)
+      });
+      that.map.setFitView(that.markerOnly);
+      that.markerOnly.setMap(that.map);
+      that.customizationInfoWindow(data, that.markerOnly)
+      // }, 800)
+
+      // });
+    },
+    // 自定义的信息窗口
+    customizationInfoWindow (data) {
+      const that = this
+      const infoBox = this.$refs.ProjectInfoBox
+      that.infoWindow = new AMap.InfoWindow({
+        isCustom: true,  //使用自定义窗体
+        content: infoBox,
+        offset: new AMap.Pixel(-6, -35)
+      });
+      //鼠标点击marker弹出自定义的信息窗体
+      that.projectInfoData = data
+      // setTimeout(() => {
+      that.infoWindow.open(that.map, data.jw);
+      that.showProjectInfoBox = true
+    },
+    //关闭信息窗体
+    closeInfoWindow () {
+      this.map.clearInfoWindow();
+    },
+    clearMarkerOnly () {
+      this.map.remove(this.markerOnly);
+    },
+    mapClear () {
+      this.map.clear()
+    }
   }
 }
 </script>
 <style lang="less" scoped>
+/deep/ .amap-icon {
+  width: 100%;
+  height: 100%;
+}
 .container-div {
   width: 100%;
   height: 100%;
@@ -201,5 +603,11 @@ export default {
 #container {
   width: 100%;
   height: 100%;
+}
+.project-info-box {
+  color: #fff;
+  font-size: 14px;
+  width: 300px;
+  height: 220px;
 }
 </style>

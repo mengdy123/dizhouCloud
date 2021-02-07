@@ -9,6 +9,20 @@
     <div class="dz-content-bottom">
       <bottomDiv></bottomDiv>
     </div>
+    <div class="dz-content-change">
+      <div class="change-map-div">3D</div>
+    </div>
+    <div class="dz-content-control">
+      <div class="dz-content-control-label">当前比例尺 1:{{scaleData}}</div>
+      <div class="dz-content-control-city">
+        <div class="zoom-map-div"
+             @click="clickMapCircle('country')"><i>国</i></div>
+        <div class="zoom-map-div"
+             @click="clickMapCircle('province')"><i>省</i></div>
+        <div class="zoom-map-div"
+             @click="clickMapCircle('district')"><i>市</i></div>
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -16,6 +30,7 @@ import leftDiv from './components/homeLeftModule'
 import rightDiv from './components/homeRightModule'
 import bottomDiv from './components/homeBottomModule'
 import { getCookie } from "@/utils/cookie";
+import eventBus from '@/utils/bus'
 import { mapState } from 'vuex'
 export default {
   components: { leftDiv, rightDiv, bottomDiv },
@@ -26,8 +41,17 @@ export default {
   },
   computed: {
     ...mapState({
-      userInfo: state => state.user.userInfo
+      userInfo: state => state.user.userInfo,
+      scaleData: state => state.map2D.scaleData,
     })
+  },
+  methods: {
+    clickMapCircle (type) {
+      if (type === 'country') {
+        eventBus.$emit('setZoomAndCenterFun')
+      }
+
+    }
   },
   mounted () {
     console.log('---------------', getCookie('name'))
@@ -64,6 +88,59 @@ export default {
     position: fixed;
     left: 430px;
     bottom: 0px;
+  }
+  .zoom-map-div {
+    width: 36px;
+    height: 36px;
+    background: url("../../assets/home/circle-map.png") no-repeat;
+    background-size: 100% 100%;
+    line-height: 36px;
+    color: @white;
+    text-align: center;
+    cursor: pointer;
+    margin: 6px auto;
+    i {
+      color: @titleTopBlue;
+      font-style: normal;
+    }
+  }
+  &-change {
+    width: 60px;
+    background: @bgBlue;
+    position: fixed;
+    right: 430px;
+    bottom: 354px;
+    padding: 6px;
+    .change-map-div {
+      width: 44px;
+      height: 44px;
+      background: url("../../assets/home/3d.png") no-repeat;
+      background-size: 100% 100%;
+      line-height: 44px;
+      color: @white;
+      text-align: center;
+      cursor: pointer;
+      margin: 0px auto;
+    }
+  }
+  &-control {
+    background: @bgBlue;
+    position: fixed;
+    left: 430px;
+    bottom: 260px;
+    padding: 6px;
+    &-label {
+      font-size: 12px;
+      margin: 0 6px;
+    }
+    &-city {
+      display: flex;
+      color: @white;
+      justify-content: start;
+      .zoom-map-div {
+        margin: 6px 2px;
+      }
+    }
   }
 }
 </style>

@@ -57,7 +57,6 @@ export default {
   },
   methods: {
     ...mapActions(['changeMarkerLayerData']),
-    ...mapMutations(['CHANGE_MARKER_LAYER_DATA']),
     initChart () {
       const _this = this
       const canvasChart = echarts.init(this.$refs.chartDomPie)
@@ -155,18 +154,12 @@ export default {
       }
       canvasChart.on('click', (e) => {
         console.log('点击了11', e.name)
-        console.log('点击了2', e)
-        if (e.name !== '园区') {
-          let data = {
-            title: e.name,
-            color: e.color,
-            data: pointsData.points
-          }
-          this.changeMarkerLayerData(data)
-        } else {
-          this.changeMarkerLayerData(null)
+        let data = {
+          title: e.name,
+          color: e.color,
+          data: pointsData.points
         }
-
+        this.changeMarkerLayerData(data)
       })
       canvasChart.setOption(option)
     },

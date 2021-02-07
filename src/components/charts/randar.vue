@@ -7,6 +7,12 @@
 </template>
 <script>
 import * as echarts from 'echarts';
+import layerData from '../../data/layerProject.json'
+import pointsData from '../../data/clusterPoints.json'
+import pointsData2 from '../../data/clusterPoints2.json'
+import pointsData3 from '../../data/clusterPoints3.json'
+
+import { mapActions, mapMutations } from 'vuex'
 export default {
   props: {
     value: {
@@ -22,7 +28,7 @@ export default {
   },
   data () {
     return {
-
+      itemKey: ''
     }
   },
   computed: {
@@ -40,6 +46,7 @@ export default {
     })
   },
   methods: {
+    ...mapActions(['changeMarkerLayerData']),
     initChart () {
       const _this = this
       const lineStyle = {
@@ -63,11 +70,11 @@ export default {
           text: '',
           subtext: ''
         },
-        tooltip: {
-          //雷达图的tooltip不会超出div，也可以设置position属性，position定位的tooltip 不会随着鼠标移动而位置变化，不友好
-          confine: true,
-          enterable: true, //鼠标是否可以移动到tooltip区域内
-        },
+        // tooltip: {
+        //   //雷达图的tooltip不会超出div，也可以设置position属性，position定位的tooltip 不会随着鼠标移动而位置变化，不友好
+        //   confine: true,
+        //   enterable: true, //鼠标是否可以移动到tooltip区域内
+        // },
         legend: {
           show: false
         },
@@ -82,9 +89,21 @@ export default {
               color: '#E1E6FA',
               lineHeight: 20
             },
-            // 只有一条数据时，可以使用该方法，显示单数据
-            formatter: (a, b) => {
-              return `${a}\n${b.value}`
+            // // 只有一条数据时，可以使用该方法，显示单数据
+            formatter: function (value, indicator) {
+              // console.log('value', value)
+              // console.log('indicator', indicator)
+              return `{name|${value}}\n{num|${indicator.value}}`;
+            },
+            rich: {
+              name: {
+                fontSize: 10,
+                color: '#ccc'
+              },
+              num: {
+                fontSize: 14,
+                color: '#E1E6FA'
+              }
             }
           },
           // 设置雷达图中间射线的颜色
@@ -140,7 +159,17 @@ export default {
         }],
       }
       canvasChart.on('click', (e) => {
-        console.log('点击了', e)
+        let data = {
+          title: e.name,
+          data: pointsData.points
+        }
+        if (_this.itemKey !== e.name) {
+          _this.changeMarkerLayerData(data)
+          _this.itemKey = e.name
+        } else {
+          _this.changeMarkerLayerData(null)
+          _this.itemKey = ''
+        }
       })
       canvasChart.setOption(option)
     },

@@ -1,0 +1,30 @@
+{
+  "id": "2360302",
+  "name": "地洲智慧云平台",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "14012438",
+      "name": "关 闭",
+      "font_class": "guanbi",
+      "unicode": "e6de",
+      "unicode_decimal": 59102
+    },
+    {
+      "icon_id": "10630632",
+      "name": "齿轮",
+      "font_class": "chilun-o",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "1347850",
+      "name": "头像",
+      "font_class": "touxiang",
+      "unicode": "e60d",
+      "unicode_decimal": 58893
+    }
+  ]
+}

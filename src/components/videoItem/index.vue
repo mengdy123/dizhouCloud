@@ -1,11 +1,10 @@
 <template>
   <div class="video-div">
     <video id="myvideo"
-           :src="videoSrc"
+           :src="url"
            :poster="videoImg"
            :muted="muteStatus"
            autoplay
-           controls
            loop
            class="input_video">
       your browser does not support the video tag
@@ -22,13 +21,21 @@
 <script>
 export default {
   name: 'BusImg',
+  props: {
+    url: {
+      type: String,
+      default: ''
+    }
+  },
   data () {
     return {
       _dom: "",
-      videoSrc: 'http://babylife.qiniudn.com/FtRVyPQHHocjVYjeJSrcwDkApTLQ',
-      videoImg: 'http://static.fdc.com.cn/avatar/usercenter/5996999fa093c04d4b4dbaf1_162.jpg',
+      videoSrc: '',
+      // videoSrc: 'http://babylife.qiniudn.com/FtRVyPQHHocjVYjeJSrcwDkApTLQ',
+      // videoImg: 'http://static.fdc.com.cn/avatar/usercenter/5996999fa093c04d4b4dbaf1_162.jpg',
+      videoImg: '',
       playStatus: '',
-      muteStatus: '',
+      muteStatus: true,
       isMute: true,
       isPlay: false
     }
@@ -65,6 +72,8 @@ export default {
 .video-div {
   width: 100%;
   height: 100%;
+  // background: url("../../assets/video.png") no-repeat;
+  background: #000000;
 }
 .input_video {
   width: 100%;

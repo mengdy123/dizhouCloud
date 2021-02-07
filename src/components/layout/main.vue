@@ -7,12 +7,29 @@
           <dzTitle></dzTitle>
         </div>
         <div class="dz-time-module">
-          <dzTopTime></dzTopTime>
+          <dzTopMenu></dzTopMenu>
         </div>
 
       </div>
       <div class="dz-main-body-content">
         <router-view></router-view>
+      </div>
+      <div class="dz-video-screen"
+           v-if="videoData.status">
+        <dv-border-box-13>
+          <div class="dz-video-screen-img">
+            <videoItem :url='videoData.url'
+                       v-if="videoData.status && videoData.type === 'video'"></videoItem>
+            <img :src='videoData.url'
+                 v-if="videoData.status && videoData.type === 'img'"
+                 alt="">
+            <div class="dz-video-screen-close"
+                 @click="closeScreenBox(false)">
+              <icon-svg icon-class="guanbi" />
+            </div>
+          </div>
+        </dv-border-box-13>
+
       </div>
     </div>
   </div>
@@ -21,26 +38,53 @@
 <script>
 import map3D from '../map3D'
 import dzTitle from '../dzTitle'
-import dzTopTime from '../dzTopTime'
+import dzTopMenu from '../dzTopMenu'
+import videoItem from '@/components/videoItem'
+import eventBus from '@/utils/bus'
 export default {
   name: 'mainIndex',
-  components: { map3D, dzTitle, dzTopTime },
+  components: { map3D, dzTitle, dzTopMenu, videoItem },
   data () {
     return {
-      screenWidth: null
+      screenWidth: null,
+      videoData: {
+        status: false,
+        url: '',
+        type: ''
+      }
     }
   },
   methods: {
-
+    closeScreenBox (data) {
+      this.videoData = data
+    }
   },
   mounted () {
     const that = this
+    eventBus.$on('closeScreenBox', data => {
+      that.closeScreenBox(data)
+    })
+    // let docEle = document.documentElement;
+    // let screenRatioByDesign = 16 / 9;
+    // function setHtmlFontSize () {
+    //   var screenRatio = docEle.clientWidth / docEle.clientHeight;
+    //   var fontSize =
+    //     ((screenRatio > screenRatioByDesign
+    //       ? screenRatioByDesign / screenRatio
+    //       : 1) *
+    //       docEle.clientWidth) /
+    //     10;
 
+    //   docEle.style.fontSize = fontSize.toFixed(3) + "px";
+    // }
+    // setHtmlFontSize();
+    // window.addEventListener("resize", setHtmlFontSize);
 
   }
 }
 </script>
 <style lang="less" scoped>
+@import "../../style/color.less";
 .dz-title-module {
   width: 260px;
   height: 60px;
@@ -66,8 +110,38 @@ export default {
 .dz-main {
   width: 100%;
   height: 100%;
+  position: relative;
   &-body {
     display: flex;
+  }
+}
+.dz-video-screen {
+  position: absolute;
+  top: 100px;
+  height: 650px;
+  width: 1350px;
+  left: 20%;
+  &-img {
+    width: 100%;
+    height: 100%;
+    padding: 30px;
+    position: relative;
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+  &-close {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    cursor: pointer;
+    /deep/ .svg-icon {
+      width: 16px;
+      height: 16px;
+      fill: @white;
+      opacity: 0.7;
+    }
   }
 }
 </style>

@@ -1,9 +1,44 @@
 body,ul, li {
   margin: 0;
   padding: 0;
+  list-style: none;
 }
-// .dv-scroll-board {
-//   .header {
-//     background-color: linear-gradient(180deg, #090E45 0%, rgba(8, 13, 68, 0.401989) 100%)!important;
-//   }
-// }
+.amap-touch-toolbar .amap-zoomcontrol {
+    position: fixed;
+    right: 430px;
+    bottom: 260px;
+    padding: 6px;
+     width: 60px;
+    background:linear-gradient(90deg, #090E45 20%, rgba(8, 13, 68, 0.501202) 100%);
+    padding: 6px;
+    box-shadow: 0px 0px 0px 0 #ccc;;
+    border: 0;
+}
+.amap-zoom-touch-plus>div, .amap-zoom-touch-minus>div {
+  color: #35e9ff;
+  font-size: 20px;
+  line-height: 36px;
+}
+.amap-zoom-touch-plus, .amap-zoom-touch-minus {
+  width: 36px;
+  height: 36px;
+  background: url("../assets/home/circle-map.png") no-repeat;
+  background-size: 100% 100%;
+  color: #E1E6FA;
+  text-align: center;
+  cursor: pointer;
+  margin: 6px auto;
+}
+.amap-touch-toolbar .amap-zoomcontrol:after {
+  display: none;
+}
+.amap-scalecontrol {
+  position: fixed;
+    left: 430px !important;
+    bottom: 260px!important;
+    color: red;
+    display: none;
+}
+.amap-scale-line {
+  display: none;
+}

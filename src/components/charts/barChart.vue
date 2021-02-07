@@ -50,9 +50,9 @@ export default {
           }
         },
         grid: {
-          top: 20,
-          left: 0,
-          right: '2%',
+          top: 40,
+          left: '-30px',
+          right: 0,
           bottom: '3%',
           containLabel: true
         },
@@ -66,7 +66,11 @@ export default {
               show: false
             },
             axisLabel: {
-              color: '#E1E6FA'
+              color: '#E1E6FA',
+              interval: 0
+              // formatter: function (value) {
+              //   return value.split(0, 2).join("\n");
+              // }
             },
             axisLine: {
               show: false
@@ -108,7 +112,10 @@ export default {
 
               barBorderRadius: [4, 4, 0, 0], //设置柱状条的边框圆角
             },
-            data: _this.value
+            data: _this.value,
+            animationDelay: function (idx) {
+              return idx * 10;
+            }
           }
         ]
 
@@ -131,20 +138,7 @@ export default {
   height: 100%;
 }
 .chart-pie {
-  position: relative;
   height: 100%;
-  &-center {
-    position: absolute;
-    width: 100px;
-    height: 22px;
-    left: 50%;
-    top: 64px;
-    font-size: 22px;
-    line-height: 22px;
-    text-align: center;
-    color: @white;
-    margin-left: -50px;
-    font-weight: 600;
-  }
+  width: 100%;
 }
 </style>

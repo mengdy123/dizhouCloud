@@ -102,6 +102,7 @@ export default {
 }
 .chart-pie {
   position: relative;
+  margin-top: 10px;
   &-bg {
     width: 140px;
     height: 140px;
