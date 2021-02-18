@@ -35,9 +35,10 @@ export default {
       layerGroup: null,
       selectBoundsLayer: [],
       projectLayer: null,
-      projectIcon: require('../../assets/map-icon/p_03.png'),
+      projectIcon: require('../../assets/map-icon/p_04.svg'),
       featureOldData: [],
-      addrArr: []
+      addrArr: [],
+      districtExplorer: null
     }
   },
   computed: {
@@ -80,13 +81,12 @@ export default {
     const that = this
     this.$nextTick(() => {
       that.init()
-      // that.map.on('click', that.getMapClick);
       that.projectLayer = that.addMaker(that.projectIcon, dataP1.points)
       that.projectLayer.hide()
       that.map.on('zoomchange', function (e) {
         let zoomNum = this.getZoom()
         //地图层级变化，执行方法
-        console.log('当前缩放级别：', zoomNum)
+        // console.log('当前缩放级别：', zoomNum)
         if (zoomNum > 4) {
           that.projectLayer.show()
         } else {
@@ -94,19 +94,28 @@ export default {
         }
         that.scaleInit()
       })
-      // this.map.on('zoomend', function (e) {
-      //   //地图进行缩放的时候监听该函数, 也就是点击的时候哈.缩放
-      //   console.log(this.getZoom());
-      //   console.log(this.getCenter().toString());
-      // });
       eventBus.$on('setZoomAndCenterFun', (e) => {
         that.setZoomAndCenterFun()
       })
+      eventBus.$on('removeRenderClusterMarker', (e) => {
+        that.removeRenderClusterMarker()
+      })
+      eventBus.$on('mapClear', (e) => {
+        that.mapClear()
+      })
+      eventBus.$on('setFitViewByCode', data => {
+        that.setFitViewByCode(data)
+      })
+      eventBus.$on('drawLineType', data => {
+        that.drawLineType()
+      })
+
     })
   },
 
   methods: {
-    ...mapActions(['saveScaleData', 'saveAddressInfo']),
+    //  this.changeProjectData(data)
+    ...mapActions(['saveScaleData', 'saveAddressInfo', 'changeProjectData']),
     async init () {
       // 创建地图实例
       let that = this
@@ -126,7 +135,9 @@ export default {
     // 设置地图中心点/级别
     setZoomAndCenterFun () {
       this.map.setZoomAndCenter(4, [107.848005, 28.682565]);
-      this.map.setFitView()
+    },
+    setFitViewByCode (code) {
+      this.map.setCity(code)
     },
     // 缩放
     toolBarInit () {
@@ -186,16 +197,18 @@ export default {
         '#73C0DE': `<div style="background-color: hsla(197, 62%, 66%, 0.7); height: 12px; width: 12px; border: 8px solid hsl(180, 100%, 0.1); border-radius: 50%; box-shadow: hsla(197, 62%, 66%, 0.2)) 0px 0px 1px;"></div>`
 
       }
-      for (let i = 0; i < layerList.length; i++) {
-        let lnglat = layerList[i].lnglat;
-        // 创建点实例
-        that.circleMarker.push(new AMap.Marker({
-          position: lnglat,
-          size: new AMap.Size(200, 2),
-          content: iconList[that.markerFillColor],
-          // offset: new AMap.Pixel(-15, -15)
-        }))
-      }
+      // for (let i = 0; i < layerList.length; i++) {
+      //   let lnglat = layerList[i].lnglat;
+      //   // 创建点实例
+      //   that.circleMarker.push(new AMap.Marker({
+      //     position: lnglat,
+      //     size: new AMap.Size(200, 2),
+      //     content: iconList[that.markerFillColor],
+      //     // offset: new AMap.Pixel(-15, -15)
+      //   }))
+      // }
+
+
       that.overlayGroups = new AMap.OverlayGroup(this.circleMarker);
       that.map.add(this.overlayGroups);
       let count = that.circleMarker.length;
@@ -221,11 +234,87 @@ export default {
         context.marker.setOffset(new AMap.Pixel(-size / 2, -size / 2));
         context.marker.setContent(div)
       };
-      AMap.plugin(["AMap.MarkerClusterer"], function () {
-        that.clusterMarker = new AMap.MarkerClusterer(that.map, that.circleMarker, {
-          renderClusterMarker: _renderClusterMarker,
-          gridSize: 80
+      // AMap.plugin(["AMap.MarkerClusterer"], function () {
+      //   that.clusterMarker = new AMap.MarkerClusterer(that.map, that.circleMarker, {
+      //     renderClusterMarker: _renderClusterMarker,
+      //     gridSize: 80
+      //   });
+      // });
+      AMapUI.load(['ui/geo/DistrictCluster', 'lib/$'], function (DistrictCluster, $) {
+        that.clusterMarker = new DistrictCluster({
+          map: that.map, //所属的地图实例
+          zIndex: 11,
+          //返回数据项中的经纬度位置
+          getPosition: function (item) {
+            console.log('item', item)
+            if (!item) {
+              return null;
+            }
+            var parts = item.lnglat
+
+            //返回经纬度
+            return [parseFloat(parts[0]), parseFloat(parts[1])];
+          },
+          renderOptions: {
+            //基础样式
+            featureStyle: {
+              cursor: 'default',
+              bubble: true,
+              strokeColor: 'rgba(188,159,135,1)', //线颜色
+              lineWidth: 1, //描边线宽
+              fillStyle: 'rgba(51,102,204,.1)', //填充色
+            },
+            featureStyleByLevel: {
+              //全国
+              country: {
+                fillStyle: 'rgba(51,102,204,0.1)',
+                lineWidth: 1, //描边线宽
+              },
+              //省
+              province: {
+                fillStyle: 'rgba(51,102,204,0.1)',
+                lineWidth: 1, //描边线宽
+              },
+              //市
+              city: {
+                fillStyle: 'rgba(51,102,204,0.1)',
+                lineWidth: 1, //描边线宽
+              },
+              //区县
+              district: {
+                fillStyle: 'rgba(51,102,204,0.1)',
+                lineWidth: 1, //描边线宽
+              }
+            },
+            //显示在所辖数据点的平均位置
+            getClusterMarkerPosition: DistrictCluster.ClusterMarkerPositionStrategy.AVERAGE_POINTS_POSITION,
+            getClusterMarker: function (feature, dataItems, recycledMarker) {
+
+              //label内容
+              var content = feature.properties.name + ' (' + dataItems.length + ')';
+              var label = {
+                offset: new AMap.Pixel(16, 18), //修改label相对于marker的位置
+                content: content
+              };
+              //存在可回收利用的marker
+              if (recycledMarker) {
+                //直接更新内容返回
+                recycledMarker.setLabel(label);
+                return recycledMarker;
+              }
+              //返回一个新的Marker
+              return new AMap.Marker({
+                label: label,
+                size: new AMap.Size(200, 2),
+                content: iconList[that.markerFillColor],
+              });
+            }
+          },
+
         });
+        console.log('that.clusterMarker', that.clusterMarker)
+        //设置数据
+        that.clusterMarker.setData(layerList);
       });
     },
     // 撒点通用方法
@@ -233,9 +322,9 @@ export default {
       let that = this
       let layerName = null
       let icon = new AMap.Icon({
-        size: new AMap.Size(20, 20),    // 图标尺寸
+        size: new AMap.Size(32, 32),    // 图标尺寸
         image: iconImg,  // Icon的图像
-        imageSize: new AMap.Size(20, 20)   // 根据所设置的大小拉伸或压缩图片
+        imageSize: new AMap.Size(32, 32)   // 根据所设置的大小拉伸或压缩图片
       });
       let layer = []
       for (let i = 0; i < layerList.length; i++) {
@@ -269,8 +358,10 @@ export default {
       let jw = e.lnglat
       let data = {
         ...row,
+        type: 'project',
         jw: [jw.lng, jw.lat]
       }
+      this.changeProjectData(data)
       this.customizationInfoWindow(data)
     },
     // 点击地图，获取信息
@@ -358,10 +449,9 @@ export default {
         "#651067", "#329262", "#5574a6", "#3b3eac"
       ];
       AMapUI.load(['ui/geo/DistrictExplorer', 'lib/$'], function (DistrictExplorer, $) {
-        const districtExplorer = new DistrictExplorer({
+        that.districtExplorer = new DistrictExplorer({
           map: that.map
         });
-        let locMarker = new AMap.Marker();
         function listenMouseEvents () {
           let isLocating = false;
           that.map.on('click', function (e) {
@@ -370,7 +460,7 @@ export default {
             }
             isLocating = true;
             // $('#locTip').html('定位中......');
-            districtExplorer.locatePosition(e.lnglat, function (err, features) {
+            that.districtExplorer.locatePosition(e.lnglat, function (err, features) {
               isLocating = false;
               if (err) {
                 console.error(err);
@@ -414,12 +504,10 @@ export default {
                   // that.featureOldData = []
                   that.addrArr = []
                   that.addrArr = [features[1].properties.adcode]
-                  console.log('that.addrArr', that.addrArr)
                 }
                 if (that.addrArr.length == 0) {
                   if (that.featureOldData && that.featureOldData[1] && that.featureOldData[1].properties.adcode == features[1].properties.adcode) {
                     // 同一个省
-                    console.log(1111)
                     that.addrArr[0] = (features[1].properties.adcode)
                     // that.municipalityList   直辖市
                     // 110100
@@ -429,28 +517,20 @@ export default {
                     that.addrArr[0] = (features[1].properties.adcode)
                   }
                 }
-
+                console.log('that.districtExplorer', that.districtExplorer)
               } else {
                 that.$message.warning('choose china!!')
-                districtExplorer.clearFeaturePolygons();
+                // that.districtExplorer.clearFeaturePolygons();
                 return false
               }
-
               that.saveAddressInfo(that.addrArr)
               that.featureOldData = features // 首次赋值
               let featuresArr = []
               featuresArr.push(features[that.addressInfo.length])
+
               renderFeatures(featuresArr);
-              // locMarker.setPosition(e.lnglat);
-              // locMarker.setMap(that.map);
-              // console.log('定位', e.lnglat)
-              // console.log('features111', features[that.addressInfo.length])
-              // let adcode = features[1].properties.adcode || 100000
-              // that.map.setCity(that.addressInfo[that.addressInfo.length - 1])
-              // that.map.setCenter(features[that.addressInfo.length].properties.center)
               // 设置中心点，层级
-              that.map.setZoomAndCenter(that.addressInfo.length + 5, features[that.addressInfo.length].properties.center)
-              // that.mapGeocoder(e.lnglat)
+              that.map.setZoomAndCenter(that.addressInfo.length + 6, features[that.addressInfo.length].properties.center)
             }, {
               levelLimit: 4
             });
@@ -460,7 +540,7 @@ export default {
         listenMouseEvents();
         function renderFeatures (features) {
           //清除已有的绘制内容
-          districtExplorer.clearFeaturePolygons();
+          that.districtExplorer.clearFeaturePolygons();
           if (!features.length) {
             renderCountry(false);
             return;
@@ -468,7 +548,7 @@ export default {
           for (var i = 0, len = features.length; i < len; i++) {
             var strokeColor = colors[i % colors.length];
             var fillColor = strokeColor;
-            districtExplorer.renderFeature(features[i], {
+            that.districtExplorer.renderFeature(features[i], {
               cursor: 'default',
               bubble: true,
               strokeColor: strokeColor, //线颜色
@@ -478,19 +558,18 @@ export default {
               fillOpacity: 0.15, //填充透明度
             });
           }
-          // that.map.setFitView(districtExplorer)
         }
         // 全国
         function renderCountry (setBounds) {
-          districtExplorer.loadCountryNode(function (err, countryNode) {
+          that.districtExplorer.loadCountryNode(function (err, countryNode) {
             if (setBounds) {
               that.map.setBounds(countryNode.getBounds());
             }
-            districtExplorer.renderParentFeature(countryNode, {
+            that.districtExplorer.renderParentFeature(countryNode, {
               cursor: 'default',
               bubble: true,
               strokeColor: 'rgba(188,159,135,1)', //线颜色
-              strokeOpacity: 0.7, //线透明度
+              strokeOpacity: 1, //线透明度
               strokeWeight: 1, //线宽
               fillColor: colors[0], //填充色
               fillOpacity: 0.1, //填充透明度
@@ -536,7 +615,10 @@ export default {
       this.map.remove(this.overlayGroups);
     },
     removeRenderClusterMarker () {
-      this.map.remove(this.clusterMarker);
+      if (this.clusterMarker) {
+        this.map.remove(this.clusterMarker);
+      }
+      this.map.clearInfoWindow();
     },
     addMarkerOnly (data) {
       const that = this
@@ -546,7 +628,8 @@ export default {
       that.markerOnly = new AMap.Marker({
         position: data.jw,
         size: new AMap.Size(20, 2),
-        offset: new AMap.Pixel(-13, -30)
+        offset: new AMap.Pixel(-13, -30),
+        icon: that.projectIcon,
       });
       that.map.setFitView(that.markerOnly);
       that.markerOnly.setMap(that.map);
@@ -592,14 +675,7 @@ export default {
   width: 100%;
   height: 100%;
 }
-.jingqu {
-  background-color: hsla(180, 100%, 50%, 0.7);
-  height: 10px;
-  width: 10px;
-  border: 4px solid hsl(180, 100%, 40%);
-  border-radius: 50%;
-  box-shadow: hsl(180, 100%, 50%) 0px 0px 1px;
-}
+
 #container {
   width: 100%;
   height: 100%;
@@ -607,7 +683,8 @@ export default {
 .project-info-box {
   color: #fff;
   font-size: 14px;
-  width: 300px;
-  height: 220px;
+  width: 320px;
+  height: 200px;
+  border: 1px solid #354881;
 }
 </style>

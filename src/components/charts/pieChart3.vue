@@ -46,6 +46,16 @@ export default {
       num: 0
     }
   },
+  watch: {
+    value: {
+      deep: true,
+      handler (newVal, oldVal) {
+        if (newVal.length > 0) {
+          this.initChart()
+        }
+      }
+    }
+  },
   computed: {
     randomId () {
       var Num = "";

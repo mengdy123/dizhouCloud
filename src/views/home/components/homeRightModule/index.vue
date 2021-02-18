@@ -58,6 +58,7 @@ import waterPolo from "@/components/charts/waterPolo.vue";
 import sinan from '@/components/Animation/sinan.vue'
 import pieChart3 from "@/components/charts/pieChart3.vue";
 import videoModule from '../videoModule'
+import { mapState, mapActions } from 'vuex'
 export default {
   components: { titleDiv, barChart, waterPolo, sinan, pieChart3, videoModule },
   data () {
@@ -105,11 +106,30 @@ export default {
       ]
     }
   },
+  computed: {
+    ...mapState({
+      addressInfo: state => state.map2D.addressInfo,
+
+    })
+  },
+  watch: {
+    addressInfo (newVal, oldVal) {
+      console.log('newVal11', newVal)
+      if (newVal.length > 0) {
+        this.valueBar.forEach(item => {
+          item = parseInt(item / 1.5)
+        })
+      } else {
+        this.valueBar = [941, 490, 560, 279, 210]
+      }
+    }
+  },
   mounted () {
     // this.timer = setInterval(() => {
     //   this.startTimer();
     // }, 1000)
   },
+
   methods: {
     // startTimer () {
     //   this.valuePie2[0].value++

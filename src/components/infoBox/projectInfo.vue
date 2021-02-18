@@ -1,6 +1,7 @@
 <template>
-  <dv-border-box-13>
-    <div class="project-info">
+  <div ref="infoProject"
+       class="project-box">
+    <div class="project-box-info">
       <ul v-if="projectInfoData.type === 'project'">
         <li><span>项目名称：</span>{{projectInfoData.row[0] || '暂无数据'}}</li>
         <li><span>项目位置：</span>{{projectInfoData.row[1] || '暂无数据'}}广陵区金地广场120号</li>
@@ -13,16 +14,16 @@
         <li><span>设备地址：</span>{{projectInfoData.row.address || '暂无数据'}}</li>
         <li><span>维修进度：</span>{{projectInfoData.row.plan || '暂无数据'}}</li>
       </ul>
-      <div class="project-info-close"
+      <div class="project-box-info-close"
            @click="closeInfoBox">
         <icon-svg icon-class="guanbi" />
       </div>
       <el-button type="primary"
                  @click="showDetail"
-                 class="project-info-button"
+                 class="project-box-info-button"
                  size="mini">详情</el-button>
     </div>
-  </dv-border-box-13>
+  </div>
 </template>
 <script>
 export default {
@@ -48,18 +49,59 @@ export default {
   },
   mounted () {
     console.log('projectInfoData', this.projectInfoData)
+    console.log('this.$refs.offsetHeight', this.$refs.infoProject.offsetHeight)
+    console.log('this.$refs.offsetWidth', this.$refs.infoProject.offsetWidth)
   }
 }
 </script>
 <style lang="less" scoped>
 @import "../../style/color.less";
-.project-info {
-  width: 300px;
-  min-height: 180px;
-  padding: 40px 30px 30px 30px;
+@keyframes divAni {
+  0%,
+  100% {
+    clip-path: inset(0 0 98% 0);
+  }
+  25% {
+    clip-path: inset(0 0 0 98%);
+  }
+  50% {
+    clip-path: inset(98% 0 0 0);
+  }
+  75% {
+    clip-path: inset(0 98% 0 0);
+  }
+}
+.project-box {
+  width: 100%;
+  height: 100%;
+  border: 1px solid #354881;
   position: relative;
+  transition: all 0.3s;
+}
+.project-box::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  border: 1px solid #2db3d9;
+  animation: divAni 6s infinite linear;
+}
+.project-box-info {
+  display: flex;
+  flex-direction: column;
+  background: rgba(7, 14, 71, 0.5);
+  top: 10px;
+  left: 10px;
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  padding: 16px;
+  z-index: 9;
   ul {
     width: 100%;
+    margin-top: 14px;
     li {
       line-height: 26px;
       span {
@@ -68,9 +110,10 @@ export default {
     }
   }
   &-button {
+    width: 60px;
     position: absolute;
-    right: 20px;
-    bottom: 20px;
+    right: 10px;
+    bottom: 10px;
   }
   /deep/ .el-button--primary {
     color: #35e9ff;
@@ -80,8 +123,8 @@ export default {
   }
   &-close {
     position: absolute;
-    right: 20px;
-    top: 20px;
+    right: 10px;
+    top: 10px;
     cursor: pointer;
     /deep/ .svg-icon {
       width: 16px;

@@ -50,6 +50,16 @@ export default {
       return Num;
     }
   },
+  watch: {
+    value: {
+      deep: true,
+      handler (newVal, oldVal) {
+        if (newVal.length > 0) {
+          this.initChart()
+        }
+      }
+    }
+  },
   mounted () {
     this.$nextTick(() => {
       this.initChart()
@@ -123,6 +133,7 @@ export default {
                 name: {
                   fontSize: 10,
                   color: '#ccc',
+                  opacity: 0.5
                 },
                 num: {
                   fontSize: 14,

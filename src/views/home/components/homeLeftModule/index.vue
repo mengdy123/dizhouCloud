@@ -16,7 +16,7 @@
                  :value='valuePie3'
                  :labelShow='true'
                  :legendShow='true'></pieChart4>
-      <div class="chart-pie-center">{{totalPie2}}</div>
+      <div class="chart-pie-center">{{totalPie3}}</div>
     </div>
     <div class="dz-left-module-row system-div">
       <titleDiv title='设备总数'></titleDiv>
@@ -30,6 +30,7 @@ import titleDiv from "@/components/titleModule";
 import pieChartBg from "@/components/charts/pieChartBg.vue";
 import pieChart4 from "@/components/charts/pieChart4.vue";
 import randarChart from "@/components/charts/randar.vue";
+import { mapState, mapActions } from 'vuex'
 export default {
   components: { titleDiv, pieChartBg, pieChart4, randarChart },
   data () {
@@ -73,6 +74,62 @@ export default {
       { name: '智慧路灯', value: 2871, id: 'c8' },
       ],
       randarTotal: 18900
+    }
+  },
+  computed: {
+    ...mapState({
+      addressInfo: state => state.map2D.addressInfo,
+
+    })
+  },
+  watch: {
+    addressInfo (newVal, oldVal) {
+      if (newVal.length > 0) {
+        this.valuePie2.forEach(item => {
+          item.value = parseInt(item.value / 1.5)
+        })
+        this.valuePie3.forEach(item => {
+          item.value = parseInt(item.value / 1.5)
+        })
+        this.randar.forEach(item => {
+          item.value = parseInt(item.value / 1.5)
+        })
+        this.totalPie2 = parseInt(this.totalPie2 / 2)
+        this.totalPie3 = parseInt(this.totalPie3 / 2)
+        this.randarTotal = parseInt(this.randarTotal / 2)
+      } else {
+        this.totalPie2 = 2983
+        this.totalPie3 = 3553
+        this.randarTotal = 18900
+        this.randar = [{ name: '发光标线', value: 2023, id: 'c1' },
+        { name: '停车立柱', value: 1908, id: 'c2' },
+        { name: '过街立柱', value: 1708, id: 'c3' },
+        { name: '景观椅', value: 808, id: 'c4' },
+        { name: '合杆', value: 2189, id: 'c5' },
+        { name: '智慧砖', value: 2354, id: 'c6' },
+        { name: '井盖', value: 1271, id: 'c7' },
+        { name: '智慧路灯', value: 2871, id: 'c8' },
+        ]
+        this.valuePie3 = [
+          { value: 89, name: '过街系统', id: 's1' },
+          { value: 75, name: '步道系统', id: 's2' },
+          { value: 51, name: '停车系统', id: 's3' },
+          { value: 49, name: '市政系统', id: 's4' },
+          { value: 46, name: '公交站系统', id: 's5' },
+          { value: 37, name: '引导系统', id: 's6' },
+          { value: 29, name: '照明系统', id: 's7' },
+          { value: 31, name: '幕墙系统', id: 's8' }
+        ]
+        this.valuePie2 = [
+          { value: 800, name: '市政', id: 'p1' },
+          { value: 600, name: '交通', id: 'p2' },
+          { value: 520, name: '园林', id: 'p3' },
+          { value: 370, name: '企业', id: 'p4' },
+          { value: 290, name: '景区', id: 'p5' },
+          { value: 310, name: '园区', id: 'p6' }
+        ]
+      }
+
     }
   },
   mounted () {

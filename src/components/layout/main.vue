@@ -126,6 +126,7 @@ export default {
     height: 100%;
     padding: 30px;
     position: relative;
+    z-index: 999;
     img {
       width: 100%;
       height: 100%;

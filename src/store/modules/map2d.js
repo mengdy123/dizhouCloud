@@ -9,7 +9,7 @@ const map2D = {
     cityInfo: '',
     districtInfo: '',
     addressInfo: [],
-    municipalityList: ['110000', '310000', '500000', '120000']
+    municipalityList: ['110000', '310000', '500000', '120000'],
   },
   actions: {
     changeMarkerLayerData ({ commit, state }, params) {
