@@ -39,6 +39,7 @@
 import scrollTable from '@/components/Table/scrollTable.vue'
 import titleDiv from "@/components/titleModule";
 import { mapActions } from 'vuex'
+import eventBus from '@/utils/bus'
 export default {
   components: { scrollTable, titleDiv },
   data () {
@@ -103,19 +104,19 @@ export default {
     ...mapActions(['changeProjectData']),
     getTableRow (row) {
       const jwList = [
-        [119.42217, 32.383022],
-        [119.42217, 32.383022],
-        [119.42217, 32.383022],
-        [119.42217, 32.383022],
-        [119.42217, 32.383022],
-        [119.42217, 32.383022],
-        [119.42217, 32.383022],
-        [119.42217, 32.383022],
-        [119.42217, 32.383022],
-        [119.42217, 32.383022],
-        [119.42217, 32.383022],
-        [119.42217, 32.383022],
-        [119.42217, 32.383022],
+        [106.540223, 39.231666],
+        [106.540223, 39.231666],
+        [106.540223, 39.231666],
+        [106.540223, 39.231666],
+        [106.540223, 39.231666],
+        [106.540223, 39.231666],
+        [106.540223, 39.231666],
+        [106.540223, 39.231666],
+        [106.540223, 39.231666],
+        [106.540223, 39.231666],
+        [106.540223, 39.231666],
+        [106.540223, 39.231666],
+        [106.540223, 39.231666],
       ]
       let data = {
         ...row,
@@ -123,20 +124,19 @@ export default {
         jw: jwList[row.rowIndex]
       }
       // console.log('所在行数据', data)
-      this.changeProjectData(data)
+      eventBus.$emit('addMarkerOnly', data)
     },
     clickSpan (num) {
       this.spanIndex = num
     },
     showBugDetail (item) {
-      let jw = item.jw
       let data = {
         type: 'bug',
         row: item,
         jw: item.jw
       }
       // console.log('查看BUG详情', data)
-      this.changeProjectData(data)
+      eventBus.$emit('addMarkerOnly', data)
     }
   }
 }

@@ -21,6 +21,10 @@ export default {
         return []
       }
     },
+    type: {
+      type: String,
+      default: ''
+    },
     total: {
       type: Number,
       default: 0
@@ -160,14 +164,19 @@ export default {
       }
       canvasChart.on('click', (e) => {
         let data = {
+          type: _this.type,
           title: e.name,
           data: pointsData.points
+        }
+        let data2 = {
+          title: e.name,
+          data: []
         }
         if (_this.itemKey !== e.name) {
           _this.changeMarkerLayerData(data)
           _this.itemKey = e.name
         } else {
-          _this.changeMarkerLayerData(null)
+          _this.changeMarkerLayerData(data2)
           _this.itemKey = ''
         }
       })

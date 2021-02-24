@@ -114,7 +114,7 @@ export default {
   },
   watch: {
     addressInfo (newVal, oldVal) {
-      console.log('newVal11', newVal)
+      console.log('newVal11--homeRightModule', newVal)
       if (newVal.length > 0) {
         this.valueBar.forEach(item => {
           item = parseInt(item / 1.5)

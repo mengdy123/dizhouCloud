@@ -12,8 +12,6 @@
     <div class="dz-content-change">
       <div class="change-map-div"
            @click="clearMapLayer">
-        <!-- <img src="../../assets/icon/zuixing-81.png"
-             alt=""> -->
         <i class="el-icon-refresh"></i>
       </div>
     </div>
@@ -22,13 +20,11 @@
       <div class="dz-content-control-city">
         <div class="zoom-map-div"
              @click="clickMapCircle('country')"><i>国</i></div>
-        <!-- :class="{'gray-color': !provinceShow}" -->
         <div class="zoom-map-div"
-             @click="clickMapCircle('province')"><i>省</i></div>
-        <!-- :class="{'gray-color': !districtShow}" -->
+             @click="clickMapCircle('province')"><i :class="{'gray-color': !provinceShow}">省</i></div>
         <div class="zoom-map-div"
-             @click="clickMapCircle('district')">
-          <i>市</i>
+             @click="clickMapCircle('city')">
+          <i :class="{'gray-color': !cityShow}">市</i>
         </div>
       </div>
     </div>
@@ -46,7 +42,7 @@ export default {
   data () {
     return {
       provinceShow: false,
-      districtShow: false
+      cityShow: false
     }
   },
   computed: {
@@ -54,20 +50,29 @@ export default {
       userInfo: state => state.user.userInfo,
       scaleData: state => state.map2D.scaleData,
       addressInfo: state => state.map2D.addressInfo,
+      provinceSelectData: state => state.map2D.provinceSelectData,
+      citySelectData: state => state.map2D.citySelectData,
     })
   },
   watch: {
-    addressInfo: {
+    provinceSelectData: {
       deep: true,
       handler (newVal, oldVal) {
-        console.log('newVal', newVal)
-        if (newVal && newVal.length === 1) {
+        if (newVal) {
           this.provinceShow = true
-        } else if (newVal && newVal.length > 1) {
-          this.districtShow = true
         } else {
           this.provinceShow = false
-          this.districtShow = false
+        }
+      },
+      immediate: true
+    },
+    citySelectData: {
+      deep: true,
+      handler (newVal, oldVal) {
+        if (newVal) {
+          this.cityShow = true
+        } else {
+          this.cityShow = false
         }
       },
       immediate: true
@@ -77,30 +82,26 @@ export default {
     clickMapCircle (type) {
       if (type === 'country') {
         eventBus.$emit('setZoomAndCenterFun')
+      } else {
+        if (this.provinceShow || this.cityShow) {
+          eventBus.$emit('afreshRenderFeatures', type)
+        }
       }
-      // else if (type === 'province') {
-      //   eventBus.$emit('setFitViewByCode', this.addressInfo[0])
-      // } else if (type === 'district') {
-      //   eventBus.$emit('setFitViewByCode', this.addressInfo[1])
-      // } else {
-      //   return
-      // }
-
     },
     clearMapLayer () {
       eventBus.$emit('removeRenderClusterMarker')
     }
   },
   mounted () {
-    // console.log('---------------', getCookie('name'))
-    console.log('addressInfo', this.addressInfo)
   }
 }
 </script>
 <style lang="less" scoped>
 @import "../../style/color.less";
 .gray-color {
-  color: #333 !important;
+  color: #999 !important;
+  pointer-events: none !important;
+  cursor: not-allowed !important;
 }
 .dz-content {
   display: flex;

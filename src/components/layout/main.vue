@@ -9,7 +9,6 @@
         <div class="dz-time-module">
           <dzTopMenu></dzTopMenu>
         </div>
-
       </div>
       <div class="dz-main-body-content">
         <router-view></router-view>

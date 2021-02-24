@@ -71,7 +71,7 @@ export default {
     })
   },
   methods: {
-    ...mapActions(['changeMarkerLayerData', 'changeVideoStatus']),
+    ...mapActions(['changeVideoStatus']),
     backVideo () {
       this.changeVideoStatus(null)
     },

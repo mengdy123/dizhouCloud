@@ -21,6 +21,10 @@ export default {
         return []
       }
     },
+    type: {
+      type: String,
+      default: ''
+    },
     color: {
       type: Array,
       default: function () {
@@ -170,16 +174,23 @@ export default {
 
       }
       canvasChart.on('click', (e) => {
-        let data = {
+        console.log('e', e)
+        let data1 = {
           title: e.name,
           color: e.color,
           data: pointsData.points
         }
+        let data2 = {
+          type: _this.type,
+          title: e.name,
+          color: e.color,
+          data: []
+        }
         if (_this.itemKey !== e.data.id) {
-          _this.changeMarkerLayerData(data)
+          _this.changeMarkerLayerData(data1)
           _this.itemKey = e.data.id
         } else {
-          _this.changeMarkerLayerData(null)
+          _this.changeMarkerLayerData(data2)
           _this.itemKey = ''
         }
       })

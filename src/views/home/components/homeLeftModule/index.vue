@@ -7,21 +7,27 @@
     <div class="dz-left-module-row progect-div">
       <titleDiv title='项目总数'></titleDiv>
       <pieChart4 :color='colorPie2'
-                 :value='valuePie2'></pieChart4>
-      <div class="chart-pie-center">{{totalPie2}}</div>
+                 :value='valuePie2'
+                 :type='"project"'></pieChart4>
+      <div class="chart-pie-center"
+           @click="getAllPoint('project')">{{totalPie2}}</div>
     </div>
     <div class="dz-left-module-row chart-div">
       <titleDiv title='系统总数'></titleDiv>
       <pieChart4 :color='colorPie3'
                  :value='valuePie3'
                  :labelShow='true'
-                 :legendShow='true'></pieChart4>
-      <div class="chart-pie-center">{{totalPie3}}</div>
+                 :legendShow='true'
+                 :type='"system"'></pieChart4>
+      <div class="chart-pie-center"
+           @click="getAllPoint('system')">{{totalPie3}}</div>
     </div>
     <div class="dz-left-module-row system-div">
       <titleDiv title='设备总数'></titleDiv>
-      <randarChart :value='randar'></randarChart>
-      <div class="chart-randar-center">{{randarTotal}}</div>
+      <randarChart :value='randar'
+                   :type='"equipment"'></randarChart>
+      <div class="chart-randar-center"
+           @click="getAllPoint('equipment')">{{randarTotal}}</div>
     </div>
   </div>
 </template>
@@ -31,6 +37,7 @@ import pieChartBg from "@/components/charts/pieChartBg.vue";
 import pieChart4 from "@/components/charts/pieChart4.vue";
 import randarChart from "@/components/charts/randar.vue";
 import { mapState, mapActions } from 'vuex'
+import eventBus from '@/utils/bus'
 export default {
   components: { titleDiv, pieChartBg, pieChart4, randarChart },
   data () {
@@ -73,7 +80,8 @@ export default {
       { name: '井盖', value: 1271, id: 'c7' },
       { name: '智慧路灯', value: 2871, id: 'c8' },
       ],
-      randarTotal: 18900
+      randarTotal: 18900,
+      clickType: ''
     }
   },
   computed: {
@@ -136,7 +144,22 @@ export default {
 
   },
   methods: {
+    getAllPoint (type) {
+      // if (type === 'project') {
 
+      // } else if (type === 'system') {
+
+      // } else if (type === 'equipment') {
+
+      // }
+      if (this.clickType === type) {
+        eventBus.$emit('changeProjectLayerStatus', false)
+        this.clickType = ''
+      } else {
+        eventBus.$emit('changeProjectLayerStatus', true)
+        this.clickType = type
+      }
+    }
   }
 }
 </script>
@@ -171,6 +194,7 @@ export default {
     color: @white;
     margin-left: -50px;
     font-weight: 600;
+    cursor: pointer;
   }
   .chart-div {
     height: 30%;

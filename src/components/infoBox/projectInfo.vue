@@ -1,6 +1,7 @@
 <template>
   <div ref="infoProject"
-       class="project-box">
+       class="project-box"
+       :class="[{'project-div':projectInfoData.type === 'project' },{'bug-div':projectInfoData.type === 'bug' }]">
     <div class="project-box-info">
       <ul v-if="projectInfoData.type === 'project'">
         <li><span>项目名称：</span>{{projectInfoData.row[0] || '暂无数据'}}</li>
@@ -41,16 +42,15 @@ export default {
   methods: {
     closeInfoBox () {
       this.$emit('closeInfoWindow')
-      this.$emit('clearMarkerOnly')
     },
     showDetail () {
       this.$router.push('/sceneIndex')
     }
   },
   mounted () {
-    console.log('projectInfoData', this.projectInfoData)
-    console.log('this.$refs.offsetHeight', this.$refs.infoProject.offsetHeight)
-    console.log('this.$refs.offsetWidth', this.$refs.infoProject.offsetWidth)
+    // console.log('projectInfoData', this.projectInfoData)
+    // console.log('this.$refs.offsetHeight', this.$refs.infoProject.offsetHeight)
+    // console.log('this.$refs.offsetWidth', this.$refs.infoProject.offsetWidth)
   }
 }
 </script>
@@ -72,11 +72,17 @@ export default {
   }
 }
 .project-box {
-  width: 100%;
-  height: 100%;
-  border: 1px solid #354881;
   position: relative;
   transition: all 0.3s;
+  border: 1px solid #354881;
+}
+.project-div {
+  width: 320px;
+  height: 200px;
+}
+.bug-div {
+  width: 340px;
+  height: 260px;
 }
 .project-box::after {
   content: "";
@@ -88,6 +94,15 @@ export default {
   border: 1px solid #2db3d9;
   animation: divAni 6s infinite linear;
 }
+// .project-box::before {
+//   content: "";
+//   width: 1px;
+//   height: 20px;
+//   position: absolute;
+//   left: 50%;
+//   bottom: -20px;
+//   border-left: 1px dashed #fa7355;
+// }
 .project-box-info {
   display: flex;
   flex-direction: column;

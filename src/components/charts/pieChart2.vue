@@ -153,7 +153,7 @@ export default {
 
       }
       canvasChart.on('click', (e) => {
-        console.log('点击了11', e.name)
+        // console.log('点击了11', e.name)
         let data = {
           title: e.name,
           color: e.color,
