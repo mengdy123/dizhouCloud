@@ -13,13 +13,13 @@ export default {
       default: function () {
         return []
       },
-      xAxisBar: {
-        type: Array,
-        default: function () {
-          return []
-        },
-      }
     },
+    xAxisData: {
+      type: Array,
+      default: function () {
+        return []
+      }
+    }
   },
   data () {
     return {
@@ -27,9 +27,8 @@ export default {
     }
   },
   mounted () {
-
     this.$nextTick(() => {
-      console.log('_this.xAxisBar', this.xAxisBar)
+      console.log('252525', this.xAxisData)
       this.initChart()
     })
   },
@@ -56,27 +55,23 @@ export default {
           bottom: '3%',
           containLabel: true
         },
-        xAxis: [
-          {
-            type: 'category',
-            data: ['行人违章', '交通事故', '刑侦案件', '行政事件', '设备运维'],
-            triggerEvent: true,
-            axisTick: {
-              alignWithLabel: false,
-              show: false
-            },
-            axisLabel: {
-              color: '#E1E6FA',
-              interval: 0
-              // formatter: function (value) {
-              //   return value.split(0, 2).join("\n");
-              // }
-            },
-            axisLine: {
-              show: false
-            }
+        xAxis:
+        {
+          type: 'category',
+          data: _this.xAxisData,
+          triggerEvent: true,
+          axisTick: {
+            alignWithLabel: false,
+            show: false
+          },
+          axisLabel: {
+            color: '#E1E6FA',
+            interval: 0
+          },
+          axisLine: {
+            show: false
           }
-        ],
+        },
         yAxis: [
           {
             type: 'value',

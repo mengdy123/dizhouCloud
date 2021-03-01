@@ -8,14 +8,14 @@
                      :value='valuePie2'
                      :total='totalPie2'
                      class='energy-chart'></pieChart3>
-          <span>累计生产清洁能源(度)</span>
+          <span>累计生产清洁能源(万度)</span>
         </div>
         <div class="energy-chart-list-div">
           <pieChart3 :color='colorPie3'
                      :value='valuePie3'
                      :total='totalPie3'
                      class='energy-chart'></pieChart3>
-          <span>累计节约标准煤(千克)</span>
+          <span>累计节约标准煤(吨)</span>
         </div>
       </div>
       <div class="reduction-chart-list">
@@ -36,14 +36,14 @@
                      :value='waterData4'></waterPolo>
         </div>
       </div>
-      <sinan total='5256'
-             name='累计减排（千克）'></sinan>
+      <sinan :total='grandData'
+             name='累计减排（吨）'></sinan>
     </div>
 
     <div class="dz-left-module-row system-div">
       <titleDiv title='告警信息'></titleDiv>
-      <barChart :value='valueBar'
-                :xAxisBar='xAxisData'></barChart>
+      <barChart :xAxisData='xAxisData'
+                :value='valueBar'></barChart>
     </div>
     <div class="dz-left-module-row system-div">
       <titleDiv title='重点项目监控'></titleDiv>
@@ -64,13 +64,14 @@ export default {
   data () {
     return {
       valueBar: [941, 490, 560, 279, 210],
-      xAxisData: ['行人违章', '交通事故', '刑侦案件', '行政事件', '设备运维'],
+      // xAxisData: ['行人违章', '交通事故', '刑侦案件', '行政事件', '设备运维'],
+      xAxisData: [],
       colorPie2: ['#91CB74'],
       valuePie2: [
         { value: 10000, name: '累计生产清洁能源(度)' },
       ],
       timer: null,
-      totalPie2: 10000,
+      totalPie2: 0,
       colorPie3: ['#FAC858'],
       valuePie3: [
         { value: 4000, name: '累计节约标准煤(千克)' }
@@ -103,41 +104,62 @@ export default {
           value: 0.2,
           num: 60
         }
-      ]
+      ],
+      grandData: 0
     }
   },
   computed: {
     ...mapState({
-      addressInfo: state => state.map2D.addressInfo,
-
+      homeIndexInfo: state => state.home.homeIndexInfo,
     })
   },
   watch: {
-    addressInfo (newVal, oldVal) {
-      console.log('newVal11--homeRightModule', newVal)
-      if (newVal.length > 0) {
-        this.valueBar.forEach(item => {
-          item = parseInt(item / 1.5)
-        })
-      } else {
-        this.valueBar = [941, 490, 560, 279, 210]
+    homeIndexInfo: {
+      deep: true,
+      handler (newVal, oldVal) {
+        // console.log('homeIndexInfo---newVal', newVal)
+        if (newVal) {
+          this.resetEnergyData(newVal.energy)
+          this.resetWarningList(newVal.warGroupList)
+        }
       }
     }
   },
   mounted () {
-    // this.timer = setInterval(() => {
-    //   this.startTimer();
-    // }, 1000)
+    console.log('homeIndexInfo----homeBottomModule', this.homeIndexInfo.warGroupList)
+    if (JSON.stringify(this.homeIndexInfo) != '{}') {
+      this.resetEnergyData(this.homeIndexInfo.energy)
+      this.resetWarningList(this.homeIndexInfo.warGroupList)
+    }
   },
 
   methods: {
-    // startTimer () {
-    //   this.valuePie2[0].value++
-    // }
+    resetEnergyData (data) {
+      this.totalPie2 = data.energy
+      this.totalPie3 = data.coal
+      this.valuePie2.num = data.energy
+      this.valuePie3.num = data.coal
+      this.waterData1[0].num = data.c
+      this.waterData2[0].num = data.co2
+      this.waterData3[0].num = data.so2
+      this.waterData4[0].num = data.nox
+      this.waterData1[0].value = data.c / data.count
+      this.waterData2[0].value = data.co2 / data.count
+      this.waterData3[0].value = data.so2 / data.count
+      this.waterData4[0].value = data.nox / data.count
+      this.grandData = data.count
+    },
+    resetWarningList (data) {
+      this.valueBar = []
+      this.xAxisData = []
+      data.forEach(item => {
+        this.valueBar.push(item.typeNumber)
+        this.xAxisData.push(item.warningType)
+      })
+      console.log('this.xAxisData', this.xAxisData)
+    }
   },
-  // destroyed () {
-  //   clearInterval(this.timer);
-  // },
+
 }
 </script>
 <style lang="less" scoped>

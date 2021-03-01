@@ -2,7 +2,7 @@
   <div class="dz-left-module">
     <div class="dz-left-module-row progect-div">
       <titleDiv title='项目分布'></titleDiv>
-      <pieChartBg></pieChartBg>
+      <pieChartBg :value='projectPlan'></pieChartBg>
     </div>
     <div class="dz-left-module-row progect-div">
       <titleDiv title='项目总数'></titleDiv>
@@ -14,7 +14,7 @@
     </div>
     <div class="dz-left-module-row chart-div">
       <titleDiv title='系统总数'></titleDiv>
-      <pieChart4 :color='colorPie3'
+      <pieChart4 :color='colorPie2'
                  :value='valuePie3'
                  :labelShow='true'
                  :legendShow='true'
@@ -42,116 +42,43 @@ export default {
   components: { titleDiv, pieChartBg, pieChart4, randarChart },
   data () {
     return {
-      // xdata: ['a', 'b', 'c', 'd'],
-      // data: [120, 200, 150, 80],
-      // teamX: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月', '1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
-      // teamData: [
-      //   [2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162.2, 32.6, 20.0, 6.4, 3.3, 2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162.2, 32.6, 20.0, 6.4, 3.3],
-      //   [2.6, 5.9, 9.0, 26.4, 28.7, 70.7, 175.6, 182.2, 48.7, 18.8, 6.0, 2.3, 2.6, 5.9, 9.0, 26.4, 28.7, 70.7, 175.6, 182.2, 48.7, 18.8, 6.0, 2.3]
-      // ],
+      projectPlan: [],
       colorPie2: ['#35E9FF', '#EE6666', '#FC8452', '#91CB74', '#FAC858', '#9A60B4', '#5470C6', '#F264DB', '#3CA272', '#73C0DE'],
-      valuePie2: [
-        { value: 800, name: '市政', id: 'p1' },
-        { value: 600, name: '交通', id: 'p2' },
-        { value: 520, name: '园林', id: 'p3' },
-        { value: 370, name: '企业', id: 'p4' },
-        { value: 290, name: '景区', id: 'p5' },
-        { value: 310, name: '园区', id: 'p6' }
-      ],
-      totalPie2: 2983,
-      totalPie3: 3553,
-      colorPie3: ['#35E9FF', '#EE6666', '#FC8452', '#91CB74', '#FAC858', '#9A60B4', '#5470C6', '#F264DB', '#3CA272', '#73C0DE'],
-      valuePie3: [
-        { value: 89, name: '过街系统', id: 's1' },
-        { value: 75, name: '步道系统', id: 's2' },
-        { value: 51, name: '停车系统', id: 's3' },
-        { value: 49, name: '市政系统', id: 's4' },
-        { value: 46, name: '公交站系统', id: 's5' },
-        { value: 37, name: '引导系统', id: 's6' },
-        { value: 29, name: '照明系统', id: 's7' },
-        { value: 31, name: '幕墙系统', id: 's8' }
-      ],
-      randar: [{ name: '发光标线', value: 2023, id: 'c1' },
-      { name: '停车立柱', value: 1908, id: 'c2' },
-      { name: '过街立柱', value: 1708, id: 'c3' },
-      { name: '景观椅', value: 808, id: 'c4' },
-      { name: '合杆', value: 2189, id: 'c5' },
-      { name: '智慧砖', value: 2354, id: 'c6' },
-      { name: '井盖', value: 1271, id: 'c7' },
-      { name: '智慧路灯', value: 2871, id: 'c8' },
-      ],
-      randarTotal: 18900,
+      valuePie2: [],
+      totalPie2: 0,
+      totalPie3: 0,
+      valuePie3: [],
+      randar: [],
+      randarTotal: 0,
       clickType: ''
     }
   },
   computed: {
     ...mapState({
-      addressInfo: state => state.map2D.addressInfo,
-
+      homeIndexInfo: state => state.home.homeIndexInfo,
     })
   },
   watch: {
-    addressInfo (newVal, oldVal) {
-      if (newVal.length > 0) {
-        this.valuePie2.forEach(item => {
-          item.value = parseInt(item.value / 1.5)
-        })
-        this.valuePie3.forEach(item => {
-          item.value = parseInt(item.value / 1.5)
-        })
-        this.randar.forEach(item => {
-          item.value = parseInt(item.value / 1.5)
-        })
-        this.totalPie2 = parseInt(this.totalPie2 / 2)
-        this.totalPie3 = parseInt(this.totalPie3 / 2)
-        this.randarTotal = parseInt(this.randarTotal / 2)
-      } else {
-        this.totalPie2 = 2983
-        this.totalPie3 = 3553
-        this.randarTotal = 18900
-        this.randar = [{ name: '发光标线', value: 2023, id: 'c1' },
-        { name: '停车立柱', value: 1908, id: 'c2' },
-        { name: '过街立柱', value: 1708, id: 'c3' },
-        { name: '景观椅', value: 808, id: 'c4' },
-        { name: '合杆', value: 2189, id: 'c5' },
-        { name: '智慧砖', value: 2354, id: 'c6' },
-        { name: '井盖', value: 1271, id: 'c7' },
-        { name: '智慧路灯', value: 2871, id: 'c8' },
-        ]
-        this.valuePie3 = [
-          { value: 89, name: '过街系统', id: 's1' },
-          { value: 75, name: '步道系统', id: 's2' },
-          { value: 51, name: '停车系统', id: 's3' },
-          { value: 49, name: '市政系统', id: 's4' },
-          { value: 46, name: '公交站系统', id: 's5' },
-          { value: 37, name: '引导系统', id: 's6' },
-          { value: 29, name: '照明系统', id: 's7' },
-          { value: 31, name: '幕墙系统', id: 's8' }
-        ]
-        this.valuePie2 = [
-          { value: 800, name: '市政', id: 'p1' },
-          { value: 600, name: '交通', id: 'p2' },
-          { value: 520, name: '园林', id: 'p3' },
-          { value: 370, name: '企业', id: 'p4' },
-          { value: 290, name: '景区', id: 'p5' },
-          { value: 310, name: '园区', id: 'p6' }
-        ]
+    homeIndexInfo: {
+      deep: true,
+      handler (newVal, oldVal) {
+        // console.log('homeIndexInfo---newVal', newVal)
+        if (newVal) {
+          this.resetLeftModuleData(newVal)
+        }
       }
-
     }
   },
   mounted () {
-
+    // console.log('homeIndexInfo', this.homeIndexInfo)
+    if (JSON.stringify(this.homeIndexInfo) != '{}') {
+      this.resetLeftModuleData(this.homeIndexInfo)
+    }
   },
   methods: {
+    ...mapActions(['saveBoxTypeTitle']),
     getAllPoint (type) {
-      // if (type === 'project') {
-
-      // } else if (type === 'system') {
-
-      // } else if (type === 'equipment') {
-
-      // }
+      this.saveBoxTypeTitle(type)
       if (this.clickType === type) {
         eventBus.$emit('changeProjectLayerStatus', false)
         this.clickType = ''
@@ -159,7 +86,40 @@ export default {
         eventBus.$emit('changeProjectLayerStatus', true)
         this.clickType = type
       }
-    }
+    },
+    changeArrayFun (arr, type) {
+      let newArr = []
+      let oldArr
+      if (arr) {
+        oldArr = JSON.parse(JSON.stringify(arr))
+        oldArr.forEach((item, index) => {
+          newArr.push({
+            name: item.projectType || item.systemType || item.deviceType,
+            value: item.typeNumber,
+            id: 's' + (index + 1),
+            type: type
+          })
+        })
+      }
+      return newArr
+    },
+    summationFun (arr) {
+      let total = 0
+      let oldArr = JSON.parse(JSON.stringify(arr))
+      oldArr.forEach((item, index) => {
+        total += item.typeNumber
+      })
+      return total
+    },
+    resetLeftModuleData (data) {
+      this.projectPlan = this.homeIndexInfo.companyGroupList
+      this.valuePie2 = this.changeArrayFun(this.homeIndexInfo.typeGroupList, 'project')
+      this.valuePie3 = this.changeArrayFun(this.homeIndexInfo.sysGroupList, 'system')
+      this.randar = this.changeArrayFun(this.homeIndexInfo.deGroupList, 'equipment')
+      this.totalPie2 = this.summationFun(this.homeIndexInfo.typeGroupList)
+      this.totalPie3 = this.summationFun(this.homeIndexInfo.sysGroupList)
+      this.randarTotal = this.summationFun(this.homeIndexInfo.deGroupList)
+    },
   }
 }
 </script>

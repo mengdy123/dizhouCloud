@@ -49,7 +49,6 @@ export default {
     ...mapState({
       userInfo: state => state.user.userInfo,
       scaleData: state => state.map2D.scaleData,
-      addressInfo: state => state.map2D.addressInfo,
       provinceSelectData: state => state.map2D.provinceSelectData,
       citySelectData: state => state.map2D.citySelectData,
     })
@@ -82,6 +81,7 @@ export default {
     clickMapCircle (type) {
       if (type === 'country') {
         eventBus.$emit('setZoomAndCenterFun')
+
       } else {
         if (this.provinceShow || this.cityShow) {
           eventBus.$emit('afreshRenderFeatures', type)

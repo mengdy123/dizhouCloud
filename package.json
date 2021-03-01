@@ -11,7 +11,9 @@
     "e2e": "node test/e2e/runner.js",
     "test": "npm run unit && npm run e2e",
     "lint": "eslint --ext .js,.vue src test/unit test/e2e/specs",
-    "build": "node build/build.js"
+    "build": "cross-env NODE_ENV=production env_config=prod node build/build.js",
+    "build:test": "cross-env NODE_ENV=selfTest env_config=selfTest node build/selfTest.js",
+    "build:uat": "cross-env NODE_ENV=uat env_config=uat node build/uat.js"
   },
   "dependencies": {
     "@jiaminghi/data-view": "^2.10.0",
@@ -21,9 +23,11 @@
     "echarts": "^5.0.1",
     "echarts-liquidfill": "^3.0.0",
     "element-ui": "^2.15.0",
+    "js-cookie": "^2.2.1",
     "less": "^3.13.1",
     "less-loader": "^4.1.0",
     "lib-flexible": "^0.3.2",
+    "nprogress": "^0.2.0",
     "three": "^0.125.2",
     "three-css2drender": "^1.0.0",
     "three-obj-mtl-loader": "^1.0.3",

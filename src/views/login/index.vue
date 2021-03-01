@@ -35,7 +35,7 @@
 </template>
 <script>
 
-
+import sourceMirror from '@/resource/sourceMirror'
 export default {
   name: "login",
   data () {

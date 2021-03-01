@@ -9,6 +9,7 @@ const map2D = {
     provinceSelectData: null,
     citySelectData: null,
     countySelectData: null,
+    boxTypeTitle: ''
   },
   actions: {
     changeMarkerLayerData ({ commit, state }, params) {
@@ -27,6 +28,7 @@ const map2D = {
       commit('CHANGE_VIDEO_STATUS', data)
     },
     saveAddressInfo ({ commit, state }, data) {
+      console.log('saveAddressInfo', data)
       commit('SAVE_ADDRESS_INFO', data)
     },
     saveProvinceSelectData ({ commit, state }, data) {
@@ -40,6 +42,9 @@ const map2D = {
     saveCountySelectData ({ commit, state }, data) {
       console.log('区', data)
       commit('SAVE_COUNTY_SELECT', data)
+    },
+    saveBoxTypeTitle ({ commit, state }, data) {
+      commit('SAVE_BOX_TYPE_TITLE', data)
     },
 
 
@@ -73,7 +78,9 @@ const map2D = {
       console.log('countySelectData', data)
       state.countySelectData = data
     },
-
+    SAVE_BOX_TYPE_TITLE (state, data) {
+      state.boxTypeTitle = data
+    },
   }
 }
 

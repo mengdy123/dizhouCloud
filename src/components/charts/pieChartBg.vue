@@ -2,16 +2,15 @@
   <div class="chart-pie">
     <div id="chartDom"></div>
     <div class="chart-pie-bg"></div>
-    <div class="chart-pie-center">4590</div>
+    <div class="chart-pie-center">{{total}}</div>
     <div class="chart-pie-style">
       <ul>
-        <li @click="resetChartClick('亚洲')">亚洲<em>71%</em></li>
-        <li @click="resetChartClick('中国')">中国<em>65%</em></li>
+        <li v-for="item in rightList "
+            :key="item.continent">{{item.continent}}<em>{{parseInt(item.conNumber/total * 100)}}%</em></li>
       </ul>
       <ul>
-        <li @click="resetChartClick('欧洲')">欧洲<em>16%</em></li>
-        <li @click="resetChartClick('非洲')">非洲<em>10%</em></li>
-        <li @click="resetChartClick('北美洲')">北美洲<em>3%</em></li>
+        <li v-for="item in leftList"
+            :key="item.continent">{{item.continent}}<em>{{parseInt(item.conNumber/total * 100)}}%</em></li>
       </ul>
     </div>
   </div>
@@ -19,16 +18,56 @@
 </template>
 <script>
 import * as echarts from 'echarts';
-
 export default {
+  props: {
+    value: {
+      type: Array,
+      default: function () {
+        return []
+      }
+    }
+  },
   data () {
     return {
+      leftList: [],
+      rightList: [],
+      total: 0,
+      pieList: []
+    }
+  },
+  watch: {
+    value (newVal, oldVal) {
+      if (newVal.length > 0) {
+        this.rightList = newVal.slice(0, 2)
+        this.leftList = newVal.slice(2, 5)
+        this.pieList = []
+        this.total = 0
+        this.value.forEach(item => {
+          this.total += item.conNumber
+          this.pieList.push({
+            value: item.conNumber,
+            name: item.continent,
+          })
+        })
+        this.initChart()
+      }
     }
   },
   mounted () {
     this.$nextTick(() => {
+      this.pieList = []
+      this.total = 0
+      this.value.forEach(item => {
+        this.total += item.conNumber
+        this.pieList.push({
+          value: item.conNumber,
+          name: item.continent,
+        })
+      })
       this.initChart()
     })
+    this.rightList = this.value.slice(0, 2)
+    this.leftList = this.value.slice(2, 5)
   },
   methods: {
     initChart () {
@@ -52,7 +91,7 @@ export default {
         },
         series: [
           {
-            name: '访问来源',
+            name: '项目分布',
             type: 'pie',
             radius: ['70%', '90%'],
             avoidLabelOverlap: false,
@@ -72,13 +111,7 @@ export default {
             labelLine: {
               show: false
             },
-            data: [
-              { value: 3048, name: '中国' },
-              { value: 635, name: '欧洲' },
-              { value: 580, name: '非洲' },
-              { value: 484, name: '亚洲' },
-              { value: 300, name: '北美洲' }
-            ]
+            data: this.pieList
           }
         ],
 

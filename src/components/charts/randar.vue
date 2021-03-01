@@ -44,9 +44,23 @@ export default {
       return Num;
     }
   },
+  watch: {
+    value: {
+      deep: true,
+      handler (newVal, oldVal) {
+        if (newVal.length > 0) {
+          this.initChart()
+        }
+      }
+    }
+  },
   mounted () {
     this.$nextTick(() => {
-      this.initChart()
+      // console.log('value---randar', this.value)
+      if (this.value.length > 0) {
+        this.initChart()
+      }
+
     })
   },
   methods: {
@@ -66,16 +80,18 @@ export default {
         })()
       }
       let areaData = []
-      _this.value.map(item => {
-        return areaData.push(item.value)
-      })
+      if (_this.value.length > 0) {
+        _this.value.map(item => {
+          return areaData.push(item.value)
+        })
+      }
       const option = {
         title: {
           text: '',
           subtext: ''
         },
         // tooltip: {
-        //   //雷达图的tooltip不会超出div，也可以设置position属性，position定位的tooltip 不会随着鼠标移动而位置变化，不友好
+        //雷达图的tooltip不会超出div，也可以设置position属性，position定位的tooltip 不会随着鼠标移动而位置变化，不友好
         //   confine: true,
         //   enterable: true, //鼠标是否可以移动到tooltip区域内
         // },
@@ -84,7 +100,7 @@ export default {
         },
         radar: {
           shape: 'rect',
-          splitNumber: 5, // 雷达图圈数设置
+          splitNumber: 5, // 雷达图圈数设置 
           center: ['50%', '50%'],
           // 圆中心坐标，数组的第一项是横坐标，第二项是纵坐标。[ default: ['50%', '50%'] ]
           radius: 60,
@@ -93,7 +109,7 @@ export default {
               color: '#E1E6FA',
               lineHeight: 20
             },
-            // // 只有一条数据时，可以使用该方法，显示单数据
+            // 只有一条数据时，可以使用该方法，显示单数据
             formatter: function (value, indicator) {
               // console.log('value', value)
               // console.log('indicator', indicator)

@@ -7,10 +7,7 @@
 </template>
 <script>
 import * as echarts from 'echarts';
-import layerData from '../../data/layerProject.json'
 import pointsData from '../../data/clusterPoints.json'
-import pointsData2 from '../../data/clusterPoints2.json'
-import pointsData3 from '../../data/clusterPoints3.json'
 
 import { mapActions, mapMutations } from 'vuex'
 export default {
@@ -70,7 +67,7 @@ export default {
     })
   },
   methods: {
-    ...mapActions(['changeMarkerLayerData', 'changeVideoStatus']),
+    ...mapActions(['changeMarkerLayerData', 'changeVideoStatus', 'saveBoxTypeTitle']),
     initChart () {
       const _this = this
       const canvasChart = echarts.init(this.$refs.chartDomPie)
@@ -178,14 +175,16 @@ export default {
         let data1 = {
           title: e.name,
           color: e.color,
-          data: pointsData.points
+          data: pointsData.points,
+          type: e.data.type
         }
         let data2 = {
-          type: _this.type,
+          type: e.data.type,
           title: e.name,
           color: e.color,
           data: []
         }
+        _this.saveBoxTypeTitle(e.data.type)
         if (_this.itemKey !== e.data.id) {
           _this.changeMarkerLayerData(data1)
           _this.itemKey = e.data.id
@@ -197,7 +196,7 @@ export default {
       // 图例的点击事件
       canvasChart.on('legendselectchanged', function (obj) {
         const { selected, name } = obj;
-        console.log('obj', selected[name])
+        // console.log('obj', selected[name])
         if (obj.name) {
           if (!selected[name]) {
             selected[name] = true
@@ -208,7 +207,7 @@ export default {
             name: name,
             url: require('../../../static/video/1.mp4')
           }
-          console.log('videoData', videoData)
+          // console.log('videoData', videoData)
           _this.changeVideoStatus(videoData)
         }
       });

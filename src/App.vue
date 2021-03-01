@@ -6,7 +6,16 @@
 
 <script>
 export default {
-  name: 'App'
+  name: 'App',
+  mounted () {
+    let params = {
+      country: '',
+      province: '',
+      city: '',
+      county: ''
+    }
+    this.$store.dispatch('getHomeIndexInfo', params)
+  }
 }
 </script>
 

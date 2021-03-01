@@ -8,9 +8,9 @@
     <div class="dz-content-bottom-detail">
       <div class="detail-type">
         <span :class="{'span-active' : spanIndex === '0'}"
-              @click="clickSpan('0')">待解决（18）</span>
+              @click="clickSpan('0')">待解决（{{solve}}）</span>
         <span :class="{'span-active' : spanIndex === '1'}"
-              @click="clickSpan('1')">已解决（20）</span>
+              @click="clickSpan('1')">已解决（{{solved}}）</span>
       </div>
       <div class="detail-list">
         <el-carousel trigger="click"
@@ -22,11 +22,11 @@
               <img src="../../../../assets/yellow-light.png"
                    alt="">
               <ul>
-                <li>异常预判：{{item.name + index}}</li>
-                <li>设备类型：{{item.type}}</li>
-                <li>设备编号：{{item.num}}</li>
-                <li>设备地址：{{item.address}}</li>
-                <li>维修进度：{{item.plan}}</li>
+                <li>异常预判：{{item.prediction || '暂无数据'}}</li>
+                <li>设备类型：{{item.deviceType || '暂无数据'}}</li>
+                <li>设备编号：{{item.deviceCode || '暂无数据'}}</li>
+                <li>设备地址：{{item.deivceSite || '暂无数据'}}</li>
+                <li>维修进度：{{item.schedule || '暂无数据'}}</li>
               </ul>
             </div>
           </el-carousel-item>
@@ -38,8 +38,8 @@
 <script>
 import scrollTable from '@/components/Table/scrollTable.vue'
 import titleDiv from "@/components/titleModule";
-import { mapActions } from 'vuex'
 import eventBus from '@/utils/bus'
+import { mapState, mapActions } from 'vuex'
 export default {
   components: { scrollTable, titleDiv },
   data () {
@@ -63,41 +63,30 @@ export default {
           ['扬州文昌路10', '扬州', '运行中', '交通', '89', '1025'],
         ]
       },
-      bugList: [
-        {
-          name: '电路短路',
-          type: '太阳能地砖',
-          num: 'NO.7859',
-          address: '上海市松江区姚北路1518号',
-          plan: '维修中',
-          jw: [121.307849, 31.3731]
-        },
-        {
-          name: '电路短路',
-          type: '太阳能地砖',
-          num: 'NO.7859',
-          address: '上海市松江区姚北路1518号',
-          plan: '维修中',
-          jw: [121.176013, 31.018336]
-        },
-        {
-          name: '电路短路',
-          type: '太阳能地砖',
-          num: 'NO.7859',
-          address: '上海市松江区姚北路1518号',
-          plan: '维修中',
-          jw: [120.3026, 31.656418]
-        },
-        {
-          name: '电路短路',
-          type: '太阳能地砖',
-          num: 'NO.7859',
-          address: '上海市松江区姚北路1518号',
-          plan: '维修中',
-          jw: [119.695605, 30.721293]
+      bugList: [],
+      spanIndex: '0',
+      solve: 0,
+      solved: 0
+    }
+  },
+  computed: {
+    ...mapState({
+      homeIndexInfo: state => state.home.homeIndexInfo,
+    })
+  },
+  watch: {
+    homeIndexInfo: {
+      deep: true,
+      handler (newVal, oldVal) {
+        console.log('homeIndexInfo---homeBottomModule', newVal)
+        if (newVal) {
+          this.resetTableList(this.homeIndexInfo.projectInfoList)
+          this.spanIndex = '0'
+          this.bugList = this.homeIndexInfo.warningList
+          this.solve = this.homeIndexInfo.warSolveList[0].solveNumber
+          this.solved = this.homeIndexInfo.warSolveList[1].solveNumber
         }
-      ],
-      spanIndex: '0'
+      }
     }
   },
   methods: {
@@ -128,6 +117,11 @@ export default {
     },
     clickSpan (num) {
       this.spanIndex = num
+      if (num === '0') {
+        this.bugList = this.homeIndexInfo.warningList
+      } else {
+        this.bugList = this.homeIndexInfo.warningListByReso
+      }
     },
     showBugDetail (item) {
       let data = {
@@ -137,7 +131,36 @@ export default {
       }
       // console.log('查看BUG详情', data)
       eventBus.$emit('addMarkerOnly', data)
+    },
+    resetTableList (data) {
+      this.config.data = []
+      let arrData = []
+      let arr = []
+      data.forEach(item => {
+        arr = []
+        for (let val of Object.values(item)) {
+          arr.push(val)
+        }
+        arrData.push(arr)
+        this.config.data.push(arr)
+      });
+    },
+  },
+  mounted () {
+    // console.log('homeIndexInfo----homeBottomModule', this.homeIndexInfo.warningList)
+    if (this.homeIndexInfo && this.homeIndexInfo.projectInfoList) {
+      this.resetTableList(this.homeIndexInfo.projectInfoList)
     }
+    if (this.homeIndexInfo && this.homeIndexInfo.warningList) {
+      this.solve = this.homeIndexInfo.warSolveList[0].solveNumber
+      this.solved = this.homeIndexInfo.warSolveList[1].solveNumber
+      if (this.spanIndex === '0') {
+        this.bugList = this.homeIndexInfo.warningList
+      } else {
+        this.bugList = this.homeIndexInfo.warningListByReso
+      }
+    }
+
   }
 }
 </script>

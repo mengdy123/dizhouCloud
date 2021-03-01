@@ -57,6 +57,7 @@ export default {
       provinceSelectData: state => state.map2D.provinceSelectData,
       citySelectData: state => state.map2D.citySelectData,
       countySelectData: state => state.map2D.countySelectData,
+      boxTypeTitle: state => state.map2D.boxTypeTitle,
     })
   },
   watch: {
@@ -79,15 +80,31 @@ export default {
     const that = this
     this.$nextTick(() => {
       that.init()
-      // that.projectLayer = that.addMaker(that.projectIcon, dataP1.points)
-      // that.addMaker(that.projectIcon, dataP1.points)
-      // this.markerAreaInit(dataP1.points)
-      // that.projectLayer.hide()
       //地图层级变化，执行方法
       // console.log('当前缩放级别：', zoomNum)
       that.map.on('zoomchange', function (e) {
         that.scaleInit()
       })
+      that.map.on('click', function (ev) {
+        // 触发事件的地理坐标，AMap.LngLat 类型
+        let lnglat = [ev.lnglat.lng, ev.lnglat.lat];
+        that.mapGeocoder(lnglat)
+        setTimeout(() => {
+          let addressInfo = that.mapGeocoderInfo.addressComponent
+          console.log('%c mapGeocoderInfo', 'color:green', that.mapGeocoderInfo)
+          if (addressInfo) {
+            let params = {
+              country: addressInfo.country,
+              province: addressInfo.province,
+              city: addressInfo.city,
+              county: addressInfo.district,
+            }
+            that.$store.dispatch('getHomeIndexInfo', params)
+          }
+
+        }, 500)
+      })
+
     })
     eventBus.$on('setZoomAndCenterFun', (e) => {
       that.setZoomAndCenterFun()
@@ -114,8 +131,6 @@ export default {
       that.addMarkerOnly(data)
     })
 
-
-
   },
 
   methods: {
@@ -138,6 +153,13 @@ export default {
     },
     // 设置地图中心点/级别
     setZoomAndCenterFun () {
+      let params = {
+        country: '',
+        province: '',
+        city: '',
+        county: '',
+      }
+      this.$store.dispatch('getHomeIndexInfo', params)
       this.map.setZoomAndCenter(4, [107.848005, 28.682565]);
       if (this.selectDistrictExplorer) {
         this.selectDistrictExplorer.clearFeaturePolygons();
@@ -146,6 +168,7 @@ export default {
       this.saveProvinceSelectData(null)
       this.saveCitySelectData(null)
       this.saveCountySelectData(null)
+
     },
     setFitViewByCode (code) {
       this.map.setCity(code)
@@ -229,8 +252,11 @@ export default {
                 lineWidth: 1, //描边线宽
               }
             },
-            //显示在所辖数据点的平均位置
-            getClusterMarkerPosition: DistrictCluster.ClusterMarkerPositionStrategy.CENTROID,
+            // zoomToShowSubFeatures: {
+
+            // },
+            //显示在所辖数据点的平均位置 CENTROID
+            getClusterMarkerPosition: DistrictCluster.ClusterMarkerPositionStrategy.AVERAGE_POINTS_POSITION,
             getClusterMarker: function (feature, dataItems, recycledMarker) {
               let name = feature.properties.name
               // console.log('recycledMarker', recycledMarker)
@@ -245,8 +271,16 @@ export default {
               } else if (name === '西藏自治区') {
                 name = '西藏'
               }
+              let type
+              if (that.boxTypeTitle === 'project') {
+                type = '项目'
+              } else if (that.boxTypeTitle === 'system') {
+                type = '系统'
+              } else if (that.boxTypeTitle === 'equipment') {
+                type = '设备'
+              }
               //label内容
-              let content = name + '    ' + '项目' + '    ' + dataItems.length
+              let content = name + '    ' + type + '    ' + dataItems.length
               // let content = dataItems.length
               let label = null
               // if (dataItems.length > 1) {
@@ -273,21 +307,27 @@ export default {
                   // content: iconList[that.markerFillColor],
                 });
                 Marker.on('click', function (e) {
+                  console.log('e', e)
+                  console.log('dataItems', dataItems)
                   if (that.heightMarkerLayer) {
                     that.map.remove(that.heightMarkerLayer)
                   }
                   let row = {
                     row: ['扬州文昌路1', '扬州', '运行中', '交通', '43', '789']
                   }
-                  return
-                  // let lnglat = [e.lnglat.lng, e.lnglat.lat]
+                  // return
+                  let lnglat = dataItems[0].dataItem.lnglat
                   let data = {
                     ...row,
                     type: 'project',
-                    jw: [parseFloat(parts[0]), parseFloat(parts[1])]
+                    jw: lnglat
                   }
-                  that.heightMarkerLayer = that.markerHeightLayer(that.projectIconHeight, parts)
-                  that.customizationInfoWindow(data)
+                  if (dataItems.length === 1) {
+                    that.heightMarkerLayer = that.markerHeightLayer(that.projectIconHeight, lnglat)
+                    that.customizationInfoWindow(data)
+                  }
+                  // that.heightMarkerLayer = that.markerHeightLayer(that.projectIconHeight, lnglat)
+                  // that.customizationInfoWindow(data)
                 });
                 return Marker
 
@@ -341,6 +381,7 @@ export default {
     },
     // 高亮撒点  marker  
     markerHeightLayer (iconImg, data) {
+      console.log('markerHeightLayer', data)
       const icon = new AMap.Icon({
         size: new AMap.Size(20, 20),    // 图标尺寸
         image: iconImg,  // Icon的图像
@@ -385,8 +426,6 @@ export default {
             // result为对应的地理位置详细信息
             console.log('逆向地理编码方法-------', result.regeocode)
             _this.mapGeocoderInfo = result.regeocode
-            // let province = result.regeocode.addressComponent.province || null
-            // let adcode = result.regeocode.addressComponent.adcode || null
 
           }
         })
@@ -419,9 +458,9 @@ export default {
       })
     },
     // 根据某一区域的名称查询该区域所包含的子集列表
-    getProvienceCity (code) {
+    getProvienceCity (name) {
       const that = this
-      console.log('某一区域', code)
+      // console.log('某一区域', name)
       //行政区划查询
       AMap.plugin('AMap.DistrictSearch', function () {
         let districtSearch = new AMap.DistrictSearch({
@@ -430,11 +469,11 @@ export default {
         })
         that.cityList = []
         // 搜索所有省/直辖市信息
-        districtSearch.search(code, function (status, result) {
+        districtSearch.search(name, function (status, result) {
           // 查询成功时，result即为对应的行政区信息
           // console.log('行政区划查询', result)
           result.districtList.forEach(item => {
-            if (item.name === code) {
+            if (item.name === name) {
               if (item.districtList.length > 0) {
                 item.districtList.forEach(it => {
                   that.cityList.push(it)
@@ -448,12 +487,15 @@ export default {
     },
     // 省市
     afreshRenderFeatures (data) {
+      // console.log('afreshRenderFeatures', data)
+      // console.log('mapGeocoderInfo', this.mapGeocoderInfo)
       if (data === 'province') {
         this.switch2AreaNode(this.provinceSelectData)
       } else if (data === 'city') {
         this.switch2AreaNode(this.citySelectData)
       }
     },
+    // 关于省市区的一些判断 
     drawLineTypeNew () {
       const that = this
       AMapUI.load(['ui/geo/DistrictExplorer', 'lib/$'], function (DistrictExplorer, $) {
@@ -465,15 +507,12 @@ export default {
         //当前聚焦的区域
         that.currentAreaNode = null;
         that.switch2AreaNode(100000)
-        // that.saveProvinceSelectData([])
-        // that.saveCitySelectData([])
-        // that.saveCountySelectData([])
         //feature被点击
         that.districtExplorer.on('featureClick', function (e, feature) {
           // 获取点击图层的adcode
           let featureType = feature.properties.level
           let adcode = feature.properties.adcode;
-          console.log('feature', feature)
+          // console.log('feature', feature)
           that.switch2AreaNode(adcode)
           if (featureType === 'province') {
             that.saveProvinceSelectData(adcode)
@@ -490,7 +529,7 @@ export default {
         that.districtExplorer.on('outsideClick', function (e) {
           let lnglat = [e.originalEvent.lnglat.lng, e.originalEvent.lnglat.lat]
           that.districtExplorer.locatePosition(e.originalEvent.lnglat, function (error, routeFeatures) {
-            // console.log('routeFeatures[1]', routeFeatures[1])
+            console.log('routeFeatures[1]', routeFeatures)
             if (routeFeatures && routeFeatures.length > 1) {
               let adcode = routeFeatures[1].properties.adcode
               let citycode
@@ -546,6 +585,18 @@ export default {
             } else {
               //切换到全国
               that.switch2AreaNode(100000);
+              if (that.mapGeocoderInfo) {
+                that.mapGeocoderInfo = null
+                let params = {
+                  country: '',
+                  province: '',
+                  city: '',
+                  county: '',
+                }
+                that.$store.dispatch('getHomeIndexInfo', params)
+              }
+
+              return false
             }
           }, {
             levelLimit: 2
@@ -586,6 +637,8 @@ export default {
         fillColor: areaNode.getSubFeatures().length ? null : that.colors[0], //填充色
         fillOpacity: 0.1, //填充透明度
       });
+      //更新地图视野以适合区划面
+      that.map.setFitView(that.districtExplorer.getAllFeaturePolygons());
     },
     //切换区域后刷新显示内容
     refreshAreaNode (areaNode) {
@@ -598,6 +651,9 @@ export default {
       const that = this
       console.log('切换区域---adcode', adcode)
       if (adcode === 100000) {
+        if (that.currentAreaNode && that.currentAreaNode.adcode === 100000) {
+          return
+        }
         that.saveProvinceSelectData(null)
         that.saveCitySelectData(null)
         that.saveCountySelectData(null)
@@ -613,7 +669,7 @@ export default {
           return;
         }
         that.currentAreaNode = window.currentAreaNode = areaNode;
-        console.log('that.currentAreaNode-----', that.currentAreaNode)
+        // console.log('that.currentAreaNode-----', that.currentAreaNode)
         //设置当前使用的定位用节点
         that.districtExplorer.setAreaNodesForLocating([that.currentAreaNode]);
         that.refreshAreaNode(areaNode);
@@ -626,8 +682,8 @@ export default {
     // 按钮清空图层
     removeRenderClusterMarker () {
       // 清空地图的区域绘制
-      if (this.selectDistrictExplorer) {
-        this.selectDistrictExplorer.clearFeaturePolygons();
+      if (this.districtExplorer) {
+        this.switch2AreaNode(100000)
       }
       // 清除项目撒点
       if (this.markerOnly) {
@@ -635,6 +691,9 @@ export default {
       }
       if (this.projectLayer) {
         this.projectLayer.hide()
+      }
+      if (this.heightMarkerLayer) {
+        this.map.remove(this.heightMarkerLayer)
       }
       // 清除echart区域聚合撒点
       if (this.clusterAreaMarker) {
@@ -645,6 +704,7 @@ export default {
     },
     //点击项目列表撒点
     addMarkerOnly (data) {
+      let city, province, citycode, cityAdcode, provinceAdcode
       if (this.markerOnly) {
         this.map.remove(this.markerOnly)
       }
@@ -661,6 +721,24 @@ export default {
         clickable: true,
       })
       this.map.add(this.markerOnly)
+      this.mapGeocoder(data.jw)
+      setTimeout(() => {
+        city = this.mapGeocoderInfo.addressComponent.city
+        province = this.mapGeocoderInfo.addressComponent.province
+        citycode = this.mapGeocoderInfo.addressComponent.citycode
+        this.getProvienceCity(province)
+        setTimeout(() => {
+          this.cityList.forEach(item => {
+            if (item.citycode == citycode) {
+              cityAdcode = item.adcode
+            }
+          })
+          provinceAdcode = cityAdcode.toString().slice(0, 2) + '0000'
+          this.saveProvinceSelectData(provinceAdcode)
+          this.saveCitySelectData(cityAdcode)
+        }, 500)
+      }, 500)
+
       this.heightMarkerLayer = this.markerHeightLayer(this.projectIconHeight, data.jw)
       // console.log('点击项目列表撒点', data)
       this.customizationInfoWindow(data)

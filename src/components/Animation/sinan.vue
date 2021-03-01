@@ -35,8 +35,8 @@ export default {
   name: "sinan",
   props: {
     total: {
-      type: String,
-      default: ''
+      type: Number,
+      default: 0
     },
     name: {
       type: String,
@@ -46,57 +46,16 @@ export default {
   data () {
     return {
       timer: null,
-      number: null,
-      arr: [{
-        id: 1,
-        itemNum: 258,
-        dataItem: 1288,
-        dataSize: 12306,
-        workUnit: 'JS'
-      }, {
-        id: 2,
-        itemNum: 568,
-        dataItem: 5623,
-        dataSize: 12306,
-        workUnit: 'Nodejs'
-      }, {
-        id: 3,
-        itemNum: 208,
-        dataItem: 1755,
-        dataSize: 12043,
-        workUnit: 'Vuejs'
-      }, {
-        id: 4,
-        itemNum: 358,
-        dataItem: 1812,
-        dataSize: 12306,
-        workUnit: 'CSS3'
-      }, {
-        id: 5,
-        itemNum: 128,
-        dataItem: 4718,
-        dataSize: 12580,
-        workUnit: 'jQuery'
-      }]
+      arr: []
     }
   },
   mounted () {
-    setTimeout(() => {
-      this.number = 0;
-      this.initData();
-    }, 4000)
+
   },
   methods: {
-    initData () {
-      this.number = this.number == this.arr.length ? 0 : this.number;
-      this.timer = setTimeout(() => {
-        this.number++;
-        this.initData();
-      }, 5000)
-    }
+
   },
   beforeDestroy () {
-    clearTimeout(this.timer);
   }
 };
 </script>
