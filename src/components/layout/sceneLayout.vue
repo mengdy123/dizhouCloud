@@ -1,14 +1,14 @@
 <template>
   <div class="dz-scene">
-    <!-- <model3D></model3D> -->
+    <!-- <model3D style='width: 100%;height: 100%'></model3D> -->
     <div class="dz-scene-body">
       <div class="dz-scene-body-top">
-        <!-- <div class="dz-title-module">
+        <div class="dz-title-module">
           <dzTitle></dzTitle>
         </div>
         <div class="dz-time-module">
           <dzTopMenu></dzTopMenu>
-        </div> -->
+        </div>
       </div>
       <div class="go-back"
            @click="goBack">
@@ -16,7 +16,7 @@
       <div class="dz-scene-body-content">
         <router-view></router-view>
       </div>
-      <div class="zebra-button"
+      <!-- <div class="zebra-button"
            @click="zebraShow = true"></div>
       <div class="well-button"
            @click="wellShow = true"></div>
@@ -98,7 +98,6 @@
                       </div>
                     </li>
 
-                    <!-- @click="showDetail"  -->
                     <el-button type="primary"
                                class="project-info-button"
                                size="mini">参数配置</el-button>
@@ -112,13 +111,13 @@
              @click="wellShow = false">
           <icon-svg icon-class="guanbi" />
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
 
 <script>
-import model3D from '../model3D'
+import model3D from '../HelloWorld'
 import dzTitle from '../dzTitle'
 import dzTopMenu from '../dzTopMenu'
 export default {
@@ -307,7 +306,7 @@ export default {
 .dz-scene {
   width: 100%;
   height: 100%;
-  background: url("../../assets/scene_03.png") no-repeat;
+  background: url("../../assets/scene_01.png") no-repeat;
   background-size: 100% 100%;
   position: relative;
   &-body {

@@ -22,6 +22,9 @@ export default {
 
     }
   },
+  mounted () {
+
+  },
   methods: {
     tableClick (row) {
       this.$emit('getTableRow', row)

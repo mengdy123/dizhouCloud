@@ -8,14 +8,14 @@
                      :value='valuePie2'
                      :total='totalPie2'
                      class='energy-chart'></pieChart3>
-          <span>累计生产清洁能源(万度)</span>
+          <span>累计生产清洁能源(度)</span>
         </div>
         <div class="energy-chart-list-div">
           <pieChart3 :color='colorPie3'
                      :value='valuePie3'
                      :total='totalPie3'
                      class='energy-chart'></pieChart3>
-          <span>累计节约标准煤(吨)</span>
+          <span>累计节约标准煤(千克)</span>
         </div>
       </div>
       <div class="reduction-chart-list">
@@ -37,7 +37,7 @@
         </div>
       </div>
       <sinan :total='grandData'
-             name='累计减排（吨）'></sinan>
+             name='累计减排（千克）'></sinan>
     </div>
 
     <div class="dz-left-module-row system-div">
@@ -63,8 +63,7 @@ export default {
   components: { titleDiv, barChart, waterPolo, sinan, pieChart3, videoModule },
   data () {
     return {
-      valueBar: [941, 490, 560, 279, 210],
-      // xAxisData: ['行人违章', '交通事故', '刑侦案件', '行政事件', '设备运维'],
+      valueBar: [],
       xAxisData: [],
       colorPie2: ['#91CB74'],
       valuePie2: [
@@ -152,9 +151,23 @@ export default {
     resetWarningList (data) {
       this.valueBar = []
       this.xAxisData = []
+      let name = ''
       data.forEach(item => {
-        this.valueBar.push(item.typeNumber)
-        this.xAxisData.push(item.warningType)
+        this.valueBar.push(item.typeNumber || 0)
+        if (item.warningType === '1') {
+          name = '设备故障'
+        } else if (item.warningType === '2') {
+          name = '行人违章'
+        } else if (item.warningType === '3') {
+          name = '交通事故'
+        } else if (item.warningType === '4') {
+          name = '刑侦案件'
+        } else if (item.warningType === '5') {
+          name = '行政事件'
+        } else {
+          name = '其他'
+        }
+        this.xAxisData.push(name)
       })
       console.log('this.xAxisData', this.xAxisData)
     }

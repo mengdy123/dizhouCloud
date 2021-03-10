@@ -26,7 +26,8 @@
                 <li>设备类型：{{item.deviceType || '暂无数据'}}</li>
                 <li>设备编号：{{item.deviceCode || '暂无数据'}}</li>
                 <li>设备地址：{{item.deivceSite || '暂无数据'}}</li>
-                <li>维修进度：{{item.schedule || '暂无数据'}}</li>
+                <li>维修进度：进行中</li>
+                <!-- {{item.schedule || '暂无数据'}} -->
               </ul>
             </div>
           </el-carousel-item>
@@ -50,18 +51,7 @@ export default {
         evenRowBGC: '',
         hoverPause: true,
         header: ['名称', '位置', '状态', '类型', '系统数量', '设备数量'],
-        data: [
-          ['扬州文昌路1', '扬州', '运行中', '交通', '43', '789'],
-          ['扬州文昌路2', '扬州', '运行中', '交通', '21', '1025'],
-          ['扬州文昌路3', '扬州', '运行中', '交通', '36', '333'],
-          ['扬州文昌路4', '扬州', '运行中', '交通', '83', '569'],
-          ['扬州文昌路5', '扬州', '运行中', '交通', '63', '1024'],
-          ['扬州文昌路6', '扬州', '运行中', '交通', '48', '356'],
-          ['扬州文昌路7', '扬州', '运行中', '交通', '55', '256'],
-          ['扬州文昌路8', '扬州', '运行中', '交通', '33', '896'],
-          ['扬州文昌路9', '扬州', '运行中', '交通', '13', '1236'],
-          ['扬州文昌路10', '扬州', '运行中', '交通', '89', '1025'],
-        ]
+        data: []
       },
       bugList: [],
       spanIndex: '0',
@@ -80,11 +70,30 @@ export default {
       handler (newVal, oldVal) {
         console.log('homeIndexInfo---homeBottomModule', newVal)
         if (newVal) {
-          this.resetTableList(this.homeIndexInfo.projectInfoList)
+          this.resetTableList(newVal.projectInfoList)
           this.spanIndex = '0'
-          this.bugList = this.homeIndexInfo.warningList
-          this.solve = this.homeIndexInfo.warSolveList[0].solveNumber
-          this.solved = this.homeIndexInfo.warSolveList[1].solveNumber
+          this.bugList = newVal.warningList || []
+          this.solve = newVal.warSolveList[0].solveNumber || 0
+          this.solved = newVal.warSolveList[1].solveNumber || 0
+          this.bugList.forEach(item => {
+            if (item.deviceType && item.deviceType === '1') {
+              item.deviceType = '发光标线'
+            } else if (item.deviceType && item.deviceType === '2') {
+              item.deviceType = '智慧路灯'
+            } else if (item.deviceType && item.deviceType === '3') {
+              item.deviceType = '井盖'
+            } else if (item.deviceType && item.deviceType === '4') {
+              item.deviceType = '智慧砖'
+            } else if (item.deviceType && item.deviceType === '5') {
+              item.deviceType = '合杆'
+            } else if (item.deviceType && item.deviceType === '6') {
+              item.deviceType = '井盖系统'
+            } else if (item.deviceType && item.deviceType === '7') {
+              item.deviceType = '过街立柱'
+            } else if (item.deviceType && item.deviceType === '8') {
+              item.deviceType = '停车立柱'
+            }
+          })
         }
       }
     }
@@ -93,19 +102,19 @@ export default {
     ...mapActions(['changeProjectData']),
     getTableRow (row) {
       const jwList = [
-        [106.540223, 39.231666],
-        [106.540223, 39.231666],
-        [106.540223, 39.231666],
-        [106.540223, 39.231666],
-        [106.540223, 39.231666],
-        [106.540223, 39.231666],
-        [106.540223, 39.231666],
-        [106.540223, 39.231666],
-        [106.540223, 39.231666],
-        [106.540223, 39.231666],
-        [106.540223, 39.231666],
-        [106.540223, 39.231666],
-        [106.540223, 39.231666],
+        [121.231733, 31.032311],
+        [121.231733, 31.032311],
+        [121.231733, 31.032311],
+        [121.231733, 31.032311],
+        [121.231733, 31.032311],
+        [121.231733, 31.032311],
+        [121.231733, 31.032311],
+        [121.231733, 31.032311],
+        [121.231733, 31.032311],
+        [121.231733, 31.032311],
+        [121.231733, 31.032311],
+        [121.231733, 31.032311],
+        [121.231733, 31.032311],
       ]
       let data = {
         ...row,
@@ -119,8 +128,46 @@ export default {
       this.spanIndex = num
       if (num === '0') {
         this.bugList = this.homeIndexInfo.warningList
+        this.bugList.forEach(item => {
+          if (item.deviceType && item.deviceType === '1') {
+            item.deviceType = '发光标线'
+          } else if (item.deviceType && item.deviceType === '2') {
+            item.deviceType = '智慧路灯'
+          } else if (item.deviceType && item.deviceType === '3') {
+            item.deviceType = '井盖'
+          } else if (item.deviceType && item.deviceType === '4') {
+            item.deviceType = '智慧砖'
+          } else if (item.deviceType && item.deviceType === '5') {
+            item.deviceType = '合杆'
+          } else if (item.deviceType && item.deviceType === '6') {
+            item.deviceType = '井盖系统'
+          } else if (item.deviceType && item.deviceType === '7') {
+            item.deviceType = '过街立柱'
+          } else if (item.deviceType && item.deviceType === '8') {
+            item.deviceType = '停车立柱'
+          }
+        })
       } else {
         this.bugList = this.homeIndexInfo.warningListByReso
+        this.bugList.forEach(item => {
+          if (item.deviceType && item.deviceType === '1') {
+            item.deviceType = '发光标线'
+          } else if (item.deviceType && item.deviceType === '2') {
+            item.deviceType = '智慧路灯'
+          } else if (item.deviceType && item.deviceType === '3') {
+            item.deviceType = '井盖'
+          } else if (item.deviceType && item.deviceType === '4') {
+            item.deviceType = '智慧砖'
+          } else if (item.deviceType && item.deviceType === '5') {
+            item.deviceType = '合杆'
+          } else if (item.deviceType && item.deviceType === '6') {
+            item.deviceType = '井盖系统'
+          } else if (item.deviceType && item.deviceType === '7') {
+            item.deviceType = '过街立柱'
+          } else if (item.deviceType && item.deviceType === '8') {
+            item.deviceType = '停车立柱'
+          }
+        })
       }
     },
     showBugDetail (item) {
@@ -136,14 +183,28 @@ export default {
       this.config.data = []
       let arrData = []
       let arr = []
-      data.forEach(item => {
-        arr = []
-        for (let val of Object.values(item)) {
-          arr.push(val)
-        }
-        arrData.push(arr)
-        this.config.data.push(arr)
-      });
+      let val = null
+      if (data.length > 0) {
+        data.forEach(item => {
+          arr = []
+          if (item.states === '1') {
+            item.states = '正常'
+          } else {
+            item.states = '正常'
+          }
+          if (item.projectType === '1') {
+            item.projectType = '交通'
+          } else {
+            item.projectType = '其他'
+          }
+          for (val of Object.values(item)) {
+            arr.push(val)
+          }
+          arrData.push(arr)
+          this.config.data.push(arr)
+        });
+      }
+
     },
   },
   mounted () {
@@ -152,12 +213,50 @@ export default {
       this.resetTableList(this.homeIndexInfo.projectInfoList)
     }
     if (this.homeIndexInfo && this.homeIndexInfo.warningList) {
-      this.solve = this.homeIndexInfo.warSolveList[0].solveNumber
-      this.solved = this.homeIndexInfo.warSolveList[1].solveNumber
+      this.solve = this.homeIndexInfo.warSolveList[0].solveNumber || 0
+      this.solved = this.homeIndexInfo.warSolveList[1].solveNumber || 0
       if (this.spanIndex === '0') {
         this.bugList = this.homeIndexInfo.warningList
+        this.bugList.forEach(item => {
+          if (item.deviceType && item.deviceType === '1') {
+            item.deviceType = '发光标线'
+          } else if (item.deviceType && item.deviceType === '2') {
+            item.deviceType = '智慧路灯'
+          } else if (item.deviceType && item.deviceType === '3') {
+            item.deviceType = '井盖'
+          } else if (item.deviceType && item.deviceType === '4') {
+            item.deviceType = '智慧砖'
+          } else if (item.deviceType && item.deviceType === '5') {
+            item.deviceType = '合杆'
+          } else if (item.deviceType && item.deviceType === '6') {
+            item.deviceType = '井盖系统'
+          } else if (item.deviceType && item.deviceType === '7') {
+            item.deviceType = '过街立柱'
+          } else if (item.deviceType && item.deviceType === '8') {
+            item.deviceType = '停车立柱'
+          }
+        })
       } else {
         this.bugList = this.homeIndexInfo.warningListByReso
+        this.bugList.forEach(item => {
+          if (item.deviceType && item.deviceType === '1') {
+            item.deviceType = '发光标线'
+          } else if (item.deviceType && item.deviceType === '2') {
+            item.deviceType = '智慧路灯'
+          } else if (item.deviceType && item.deviceType === '3') {
+            item.deviceType = '井盖'
+          } else if (item.deviceType && item.deviceType === '4') {
+            item.deviceType = '智慧砖'
+          } else if (item.deviceType && item.deviceType === '5') {
+            item.deviceType = '合杆'
+          } else if (item.deviceType && item.deviceType === '6') {
+            item.deviceType = '井盖系统'
+          } else if (item.deviceType && item.deviceType === '7') {
+            item.deviceType = '过街立柱'
+          } else if (item.deviceType && item.deviceType === '8') {
+            item.deviceType = '停车立柱'
+          }
+        })
       }
     }
 
@@ -174,12 +273,12 @@ export default {
     line-height: 50px;
     text-align: center;
     color: #e1e6fa;
-    font-size: 16px;
+    font-size: 14px;
     opacity: 0.5;
     cursor: pointer;
   }
   .span-active {
-    font-size: 18px !important;
+    font-size: 14px !important;
     opacity: 1 !important;
   }
 }

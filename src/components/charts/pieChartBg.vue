@@ -85,6 +85,8 @@ export default {
         color: ['#3CA272', '#73C0DE', '#9A60B4', '#EE6666', '#FAC858', '#FC8452', '#91CB74', '#5470C6', '#F264DB'],
         tooltip: {
           trigger: 'item',
+          backgroundColor: 'rgba(0,0,0,0.9)',//背景颜色（此时为默认色）
+          borderColor: 'rgba(0,0,0,0.9)'
         },
         legend: {
           show: false

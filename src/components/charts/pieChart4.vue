@@ -8,7 +8,6 @@
 <script>
 import * as echarts from 'echarts';
 import pointsData from '../../data/clusterPoints.json'
-
 import { mapActions, mapMutations } from 'vuex'
 export default {
   props: {
@@ -51,18 +50,9 @@ export default {
       return Num;
     }
   },
-  watch: {
-    value: {
-      deep: true,
-      handler (newVal, oldVal) {
-        if (newVal.length > 0) {
-          this.initChart()
-        }
-      }
-    }
-  },
   mounted () {
     this.$nextTick(() => {
+      console.log('value', this.value)
       this.initChart()
     })
   },
@@ -93,6 +83,8 @@ export default {
         color: this.color,
         tooltip: {
           trigger: 'item',
+          backgroundColor: 'rgba(0,0,0,0.9)',//背景颜色（此时为默认色）
+          borderColor: 'rgba(0,0,0,0.9)'
         },
         legend: {
           show: this.legendShow,
@@ -119,7 +111,7 @@ export default {
             type: 'pie',
             radius: radiusData,
             center: centerData,
-            roseType: 'area',
+            roseType: 'radius',
             itemStyle: {
               borderRadius: 2,
               borderWidth: 1,
@@ -154,8 +146,8 @@ export default {
             },
             labelLayout: function (params) {
               // console.log('params', params)
-              var isLeft = params.labelRect.x < canvasChart.getWidth() / 2;
-              var points = params.labelLinePoints;
+              let isLeft = params.labelRect.x < canvasChart.getWidth() / 2;
+              let points = params.labelLinePoints;
               // Update the end point.
               points[2][0] = isLeft
                 ? params.labelRect.x
@@ -165,7 +157,7 @@ export default {
                 labelLinePoints: points
               };
             },
-            data: this.value
+            data: _this.value || []
           }
         ],
 
@@ -184,7 +176,10 @@ export default {
           color: e.color,
           data: []
         }
+
         _this.saveBoxTypeTitle(e.data.type)
+        // console.log('_this.itemKey', _this.itemKey)
+        // console.log('e.data.id', e.data.id)
         if (_this.itemKey !== e.data.id) {
           _this.changeMarkerLayerData(data1)
           _this.itemKey = e.data.id
@@ -201,6 +196,7 @@ export default {
           if (!selected[name]) {
             selected[name] = true
           }
+          // console.log('option', option)
           option.legend.selected = selected;
           this.setOption(option);
           let videoData = {

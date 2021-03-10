@@ -1,15 +1,23 @@
 <!--suppress ALL -->
 <template>
   <div id="container">
+    <div class="detail-box"
+         ref="detailBox"
+         :style="boxStyle"
+         v-if="showDetailBox"></div>
   </div>
 </template>
 <script>
 import * as THREE from 'three'
 import { OBJLoader, MTLLoader } from 'three-obj-mtl-loader'
-// import MTLLoader from  'three-mtl-loader';
-// import OBJLoader from  'three-obj-loader';
 import { CSS2DRenderer, CSS2DObject } from 'three-css2drender'
-
+// import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+// 声明 raycaster 和 mouse 变量
+let raycaster = new THREE.Raycaster(); //射线
+let mouse = new THREE.Vector2()//鼠标位置
+let hit = new THREE.Vector3(); //射线在参考面上的拾取点
+const objLoader = new OBJLoader()
+const mtlLoade = new MTLLoader()
 const OrbitControls = require('three-orbit-controls')(THREE)
 export default {
   name: 'threeMap',
@@ -23,23 +31,35 @@ export default {
       renderer: '',
       geometry: '',
       material: '',
-      cube: '',
-      fov: 60,
+      fov: 45,
       biaozhudiv: '',
       img: '',
-      biaozhuLabel: ''
-
+      biaozhuLabel: '',
+      requestId: null,
+      group: null,
+      selectedObject: null,
+      showDetailBox: false,
+      boxStyle: {
+        left: 0,
+        right: 0
+      },
+      oldChildren: []
     }
   },
   mounted () {
+    this.selectedObject = null
     this.init()
     this.addObj()
     this.animate()
+    // window.addEventListener('click', this.onMouseClick, false);
   },
-  // destroyed(){
-  //   console.log("实例已经被销毁");
-  // },
+
   methods: {
+    empty (elem) {
+      while (elem.lastChild) {
+        elem.removeChild(elem.lastChild)
+      }
+    },
     init () {
       this.scene = new THREE.Scene()
       this.scene.add(new THREE.AmbientLight(0x999999))// 环境光
@@ -48,19 +68,25 @@ export default {
       this.light.position.multiplyScalar(0.3)
       this.scene.add(this.light)
       // 初始化相机
-      this.camera = new THREE.PerspectiveCamera(this.fov, window.innerWidth / window.innerHeight, 1, 1000)
-      this.camera.position.set(10, 90, 65)
+      this.camera = new THREE.PerspectiveCamera(this.fov, window.innerWidth / window.innerHeight, 0.1, 1000)
+      this.camera.position.set(90, 90, 120)
+      // this.camera.position.z = 5;
       this.camera.lookAt(this.scene.position)
+
+      this.group = new THREE.Group();
+      this.scene.add(this.group)
+
+
       // 初始化控制器
       this.controls = new OrbitControls(this.camera)
       this.controls.target.set(0, 0, 0)
-      this.controls.minDistance = 80
-      this.controls.maxDistance = 400
+      this.controls.minDistance = 10
+      this.controls.maxDistance = 2400
       this.controls.maxPolarAngle = Math.PI / 3
       this.controls.update()
       // 渲染
       this.renderer = new THREE.WebGLRenderer({
-        alpha: true
+        alpha: true // 开启抗锯齿，加载熟速度会变慢
       })// 会在body里面生成一个canvas标签,
       this.renderer.setPixelRatio(window.devicePixelRatio)// 为了兼容高清屏幕
       this.renderer.setSize(window.innerWidth, window.innerHeight)
@@ -68,189 +94,113 @@ export default {
       const container = document.getElementById('container')
       container.appendChild(this.renderer.domElement)
       // 标注渲染
-      this.labelRenderer = new CSS2DRenderer()
-      this.labelRenderer.setSize(window.innerWidth, window.innerHeight)
-      this.labelRenderer.domElement.style.position = 'absolute'
-      this.labelRenderer.domElement.style.top = 0
-      container.appendChild(this.labelRenderer.domElement)
-      window.addEventListener('resize', this.onWindowResize, false)// 添加窗口监听事件（resize-onresize即窗口或框架被重新调整大小）
+      // this.labelRenderer = new CSS2DRenderer()
+      // this.labelRenderer.setSize(window.innerWidth, window.innerHeight)
+      // this.labelRenderer.domElement.style.position = 'absolute'
+      // this.labelRenderer.domElement.style.top = 0
+      // container.appendChild(this.labelRenderer.domElement)
+      // window.addEventListener('resize', this.onWindowResize, false)// 添加窗口监听事件（resize-onresize即窗口或框架被重新调整大小）
+      this.renderer.domElement.addEventListener('click', this.onMouseClick, false);
+      window.addEventListener('resize', this.onWindowResize, false);
     },
     onWindowResize () {
       this.camera.aspect = window.innerWidth / window.innerHeight
       this.camera.updateProjectionMatrix()
       this.renderer.setSize(window.innerWidth, window.innerHeight)
-      this.labelRenderer.setSize(window.innerWidth, window.innerHeight)
+      // this.labelRenderer.setSize(window.innerWidth, window.innerHeight)
     },
     animate () {
-      requestAnimationFrame(this.animate)
+      this.requestId = requestAnimationFrame(this.animate.bind(this));
+      // requestAnimationFrame(this.animate)
       this.render()
+      if (!window.cancelAnimationFrame) {
+        window.cancelAnimationFrame = function () {
+          clearTimeout(this.requestId);
+        };
+      }
     },
+    // render 执行渲染操作   指定场景、相机作为参数
     render () {
       this.renderer.render(this.scene, this.camera)
-      this.labelRenderer.render(this.scene, this.camera)
+      // this.labelRenderer.render(this.scene, this.camera)
+    },
+    stop () {
+      window.cancelAnimationFrame(this.requestId);
     },
     addObj () {
-      // 包含材质
-      new MTLLoader().setPath('/static/model/modelFirst/').load('modelFirst.mtl', materials => {
-        console.log('materials', materials)
+      // 场景
+      // mtlLoade.setPath('/static/dz-model/modelFirst/').load('scene.mtl', materials => {
+      //   materials.preload()
+      //   objLoader.setMaterials(materials).setPath('/static/dz-model/modelFirst/').load('scene.obj', obj => {
+      //     obj.scale.set(0.004, 0.004, 0.004)
+      //     obj.position.set(-2000, -150, 0)
+      // this.oldChildren = this.dealMeshMaterial(obj.children)
+      //     this.scene.add(obj)
+      //   })
+      // })
+      // 路灯1
+      mtlLoade.setPath('/static/dz-model/modelFirst/').load('light.mtl', materials => {
         materials.preload()
-        new OBJLoader().setMaterials(materials).setPath('/static/model/modelFirst/').load('modelFirst.obj', obj => {
-          obj.scale.set(0.8, 0.8, 0.8)
-          obj.position.set(-40, -50, 10)
-          this.addSprite(-95, -55, -110, '/static/image/shoop.png', -70, 'SKECH', obj, function () {
-          });
-          this.addSprite(-80, -65, -90, '/static/image/cloth.png', -52, 'FILA', obj, function () {
-          });
-          this.addSprite(-100, -45, -80, '/static/image/apple.png', -63, 'APPLE', obj, function () {
-          });
+        objLoader.setMaterials(materials).setPath('/static/dz-model/modelFirst/').load('light.obj', obj => {
+          // console.log('obj---222', obj)
+          console.log('obj---children', obj.children)
+          obj.scale.set(0.025, 0.025, 0.025)
+          obj.position.set(-100, -40, -10)
+          obj.name = 'light1'
+          obj.children.map(item => {
+            item.name = 'light1'
+
+          })
+          this.dealMeshMaterial(obj.children)
           this.scene.add(obj)
+          this.group.add(obj)
         })
       })
-      new MTLLoader().setPath('/static/model/VANS/').load('VANS.mtl', materials => {
-        materials.preload();
-        new OBJLoader().setMaterials(materials).setPath('/static/model/VANS/').load('VANS.obj', obj => {
-          obj.scale.set(0.8, 0.8, 0.8);
-          obj.position.set(-40, -50, 10);
-          this.addSprite(-165, -55, -170, '/static/image/vans.png', -58, 'VANS', obj, () => {
-            this.viewDetailModel();
-          });
+      // 路灯2
+      mtlLoade.setPath('/static/dz-model/modelFirst/').load('light.mtl', materials => {
+        materials.preload()
+        objLoader.setMaterials(materials).setPath('/static/dz-model/modelFirst/').load('light.obj', obj => {
+          obj.scale.set(0.025, 0.025, 0.025)
+          obj.position.set(10, -45, -12)
+          obj.name = 'light2'
+          obj.children.map(item => {
+            item.name = 'light2'
+          })
+          this.dealMeshMaterial(obj.children)
           this.scene.add(obj)
+          this.group.add(obj)
+        })
+      })
+      // 斑马线1
+      mtlLoade.setPath('/static/dz-model/modelFirst/').load('zebra1.mtl', materials => {
+        materials.preload();
+        objLoader.setMaterials(materials).setPath('/static/dz-model/modelFirst/').load('zebra1.obj', obj => {
+          obj.scale.set(0.08, 0.08, 0.04);
+          obj.position.set(-90, -40, 0);
+          obj.name = 'zebra1'
+          obj.children.map(item => {
+            item.name = 'zebra1'
+          })
+          this.dealMeshMaterial(obj.children)
+          this.scene.add(obj)
+          this.group.add(obj)
         })
       });
-      new MTLLoader().setPath('/static/model/LEVIS/').load('LEVIS.mtl', materials => {
-        materials.preload();
-        new OBJLoader().setMaterials(materials).setPath('/static/model/LEVIS/').load('LEVIS.obj', obj => {
-          obj.scale.set(0.8, 0.8, 0.8);
-          obj.position.set(-40, -50, 10);
-          this.addSprite(-170, -40, -100, '/static/image/television.png', -64, 'LEVIS', obj, function () {
-
-          });
-          this.addSprite(-170, -35, -120, '/static/image/jac.png', -100, 'KORADIOP', obj, function () {
-
-          });
-          this.addSprite(-170, -40, -140, '/static/image/clo.png', -47, '天意', obj, function () {
-
-          });
-          this.scene.add(obj)
-        })
-      });
-      new MTLLoader().setPath('/static/model/sanxing/').load('sanxing.mtl', materials => {
-        materials.preload();
-        new OBJLoader().setMaterials(materials).setPath('/static/model/sanxing/').load('sanxing.obj', obj => {
-          obj.scale.set(0.8, 0.8, 0.8);
-          obj.position.set(-40, -50, 10);
-          this.addSprite(-125, -40, -98, '/static/image/phone.png', -50, '三星', obj, function () {
-
-          });
-          this.scene.add(obj)
-        })
-      });
-      new MTLLoader().setPath('/static/model/CA/').load('CA.mtl', materials => {
-        materials.preload();
-        new OBJLoader().setMaterials(materials).setPath('/static/model/CA/').load('CA.obj', obj => {
-          obj.scale.set(0.8, 0.8, 0.8);
-          obj.position.set(-40, -50, 10);
-          this.addSprite(-130, -35, -60, '/static/image/car.png', -37, 'CA', obj, function () {
-
-          });
-          this.scene.add(obj)
-        })
-      });
-      new MTLLoader().setPath('/static/model/SHOES/').load('SHOES.mtl', materials => {
-        materials.preload();
-        new OBJLoader().setMaterials(materials).setPath('/static/model/SHOES/').load('SHOES.obj', obj => {
-          obj.scale.set(0.8, 0.8, 0.8);
-          obj.position.set(-40, -50, 10);
-          this.addSprite(-90, -50, -155, '/static/image/shoes.png', -70, 'SHOES', obj, function () {
-
-          });
-          this.scene.add(obj)
-        })
-      });
-      new MTLLoader().setPath('/static/model/square/').load('zhengfangxing.mtl', materials => {
-        materials.preload();
-        new OBJLoader().setMaterials(materials).setPath('/static/model/square/').load('zhengfangxing.obj', obj => {
-          obj.scale.set(0.8, 0.8, 0.8);
-          obj.position.set(-40, -50, 10);
-          this.addSprite(-90, -50, -55, '/static/image/sensor.png', -95, '传感器节点', obj, () => {
-            this.alarmDetail();
-          });
-          this.scene.add(obj)
-        })
-      });
-      new MTLLoader().setPath('/static/model/LOHO/').load('LOHO.mtl', materials => {
-        materials.preload();
-        new OBJLoader().setMaterials(materials).setPath('/static/model/LOHO/').load('LOHO.obj', obj => {
-          obj.scale.set(0.8, 0.8, 0.8);
-          obj.position.set(-40, -50, 10);
-          this.addSprite(-30, -55, -180, '/static/image/lv.png', -67, 'LOHO', obj, () => {
-          });
-          this.addSprite(-30, -55, -160, '/static/image/card.png', -68, '卡连劳', obj, () => {
-          });
-          this.addSprite(50, -55, -160, '/static/image/liangshi.png', -79, '无印良品', obj, () => {
-          });
-          this.scene.add(obj)
-        })
-      });
-      new MTLLoader().setPath('/static/model/TWICE/').load('TWICE.mtl', materials => {
-        materials.preload();
-        new OBJLoader().setMaterials(materials).setPath('/static/model/TWICE/').load('TWICE.obj', obj => {
-          obj.scale.set(0.8, 0.8, 0.8);
-          obj.position.set(-40, -50, 10);
-          this.addSprite(-20, -55, -110, '/static/image/demand.png', -71, 'TWICE', obj, () => {
-          });
-          this.addSprite(-20, -55, -90, '/static/image/lifang.png', -64, '3D-JP', obj, () => {
-          });
-          this.addSprite(-20, -55, -70, '/static/image/dance.png', -69, 'CASIO', obj, () => {
-          });
-          this.addSprite(30, -55, -120, '/static/image/sleep.png', -80, 'HAZZYS', obj, () => {
-          });
-          this.scene.add(obj)
-        })
-      });
-      new MTLLoader().setPath('/static/model/manji/').load('manji.mtl', materials => {
-        materials.preload();
-        new OBJLoader().setMaterials(materials).setPath('/static/model/manji/').load('manji.obj', obj => {
-          obj.scale.set(0.8, 0.8, 0.8);
-          obj.position.set(-40, -50, 10);
-          this.addSprite(30, -55, -70, '/static/image/candy.png', -79, '满记甜食', obj, () => {
-          });
-
-          this.scene.add(obj)
-        })
-      });
-      new MTLLoader().setPath('/static/model/REPUBLIC/').load('REPUBLIC.mtl', materials => {
-        materials.preload();
-        new OBJLoader().setMaterials(materials).setPath('/static/model/REPUBLIC/').load('REPUBLIC.obj', obj => {
-          obj.scale.set(0.8, 0.8, 0.8);
-          obj.position.set(-40, -50, 10);
-          this.addSprite(90, -45, -70, '/static/image/puhblic.png', -126, 'REPUBLIC&CO', obj, () => {
-          });
-          this.addSprite(70, -70, -70, '/static/image/humbar.png', -66, '汉堡王', obj, () => {
-          });
-          this.scene.add(obj)
-        })
-      });
-      new MTLLoader().setPath('/static/model/JUSTCAVALLI/').load('JUSTCAVALLI.mtl', materials => {
-        materials.preload();
-        new OBJLoader().setMaterials(materials).setPath('/static/model/JUSTCAVALLI/').load('JUSTCAVALLI.obj', obj => {
-          obj.scale.set(0.8, 0.8, 0.8);
-          obj.position.set(-40, -50, 10);
-          this.addSprite(140, -45, -80, '/static/image/juice.png', -126, 'JUST CAVALLI', obj, () => {
-          });
-          this.scene.add(obj)
-        })
-      });
-      new MTLLoader().setPath('/static/model/taizhuolong/').load('taizhuolong.mtl', materials => {
-        materials.preload();
-        new OBJLoader().setMaterials(materials).setPath('/static/model/taizhuolong/').load('taizhuolong.obj', obj => {
-          obj.scale.set(0.8, 0.8, 0.8);
-          obj.position.set(-40, -50, 10);
-          this.addSprite(120, -45, -120, '/static/image/long.png', -73, '泰卓龙', obj, () => {
-          });
-          this.scene.add(obj)
-        })
-      });
+    },
+    /**
+     * 留住每个模型的 原材质
+     */
+    dealMeshMaterial (arrs) {
+      let result = []
+      for (let i = 0; i < arrs.length; i++) {
+        let obj = {
+          'name': arrs[i].name,
+          'material': arrs[i].material,
+          'parent': arrs[i].parent,
+        }
+        result.push(obj)
+      }
+      return result
     },
     addSprite (x, y, z, image, loc, text, Mash, callback) {
       // 添加div标签
@@ -276,30 +226,110 @@ export default {
       this.biaozhuLabel.position.set(x, y, z)
       Mash.add(this.biaozhuLabel)
     },
-    // 传感器详情界面
-    alarmDetail () {
-      this.$router.push('alarmPage')
-      console.log('跳转到传感器详情界面')
-    },
     // 点击模块查看信息的3D界面
     viewDetailModel () {
-      // this.fov = 80;
-      // //改变相机
-      // this.camera = new THREE.PerspectiveCamera(this.fov, window.innerWidth / window.innerHeight, 1, 1000);
-      // this.camera.position.set(-20, 20, 35);
-      // this.camera.lookAt(this.scene.position);
-      // //控制器
-      // this.controls = new OrbitControls(this.camera);
-      // this.controls.target.set(0, 0, 0);
-      // this.controls.minDistance = 80;
-      // this.controls.maxDistance = 400;
-      // this.controls.maxPolarAngle = Math.PI / 3;
-      // this.controls.update();
       console.log('清除场景')
+    },
+    onMouseClick (event) {
+      event.preventDefault();
+      console.log('event', event)
+      console.log('this.scene', this.scene.children)
+      console.log('this.group', this.group.children)
+      if (this.selectedObject) {
+        this.selectedObject.material.color.set('#69f');
+        this.selectedObject = null;
+      }
+      // 获取与射线相交的对象数组，其中的元素按照距离排序，越近的越靠前
+      let intersects = this.getIntersects(event.clientX, event.clientY);
+      console.log('intersects---选中的模型', intersects)
+      //将所有的相交的模型的颜色设置为红色
+      if (intersects.length > 0 && this.selectedObject != intersects[0].object) {
+        this.selectedObject = intersects[0].object
+        console.log('this.selectObject000', this.selectedObject)
+        this.showObject(this.selectedObject, event);
+      } else {
+        this.showDetailBox = false
+      }
+
+    },
+    getIntersects (x, y) {
+      // 处理坐标
+      this.showDetailBox = true
+      this.boxStyle.top = y - 350 + 'px'
+      this.boxStyle.left = x - 200 + 'px'
+      // 通过鼠标点击位置,计算出 raycaster 所需点的位置,以屏幕为中心点,范围 -1 到 1
+      x = (x / window.innerWidth) * 2 - 1;
+      y = - (y / window.innerHeight) * 2 + 1;
+      mouse.set(x, y, 0.05);
+      raycaster.setFromCamera(mouse, this.camera);
+      return raycaster.intersectObjects(this.group.children, true);
+    },
+    showObject (obj, event) {
+      let key = obj.name
+      console.log('key', key)
+      console.log('this.oldChildren', this.oldChildren)
+      // 显示内容，高亮
+      // let oldOneMaterial = this.oldChildren.filter(item => item.name === key)[0]
+      // let nameNode = this.scene.getObjectByName(this.selectedObject.name);
+      // this.selectedObject.material.color.set('#f00')
+      // console.log('this.selectedObject', this.selectedObject)
+      // nameNode.material.color.set('#f00');
+      // console.log('oldOneMaterial', oldOneMaterial)
+      // oldOneMaterial.parent.name
+      // if (oldOneMaterial) {
+      //   this.group.children.forEach(item => {
+      //     if (item.name = oldOneMaterial.parent.name) {
+      //       console.log('item', item)
+      //       item.children.forEach(it => {
+      //         it.material = new THREE.MeshPhongMaterial({
+      //           color: '#f00',
+      //           map: oldOneMaterial.material.map
+      //         });
+      //       })
+      //     }
+      //   });
+      // }
+      // if (oldOneMaterial) {
+      //   obj.material = new THREE.MeshPhongMaterial({
+      //     color: '#69f',
+      //     map: oldOneMaterial.material.map
+      //   });
+      // }
+
+
     }
-  }
+  },
+  beforeDestroy () {
+    window.cancelAnimationFrame(this.requestId)
+    this.renderer = null
+    this.scene = null
+    this.camera = null
+    this.controls = null
+  },
+  // destroyed () {
+  //   console.log("实例已经被销毁");
+  //   window.cancelAnimationFrame(this.requestId) //停止动画
+  //   this.renderer.domElement.addEventListener('click', null, false); //删除侦听器来渲染
+  //   this.scene = null;
+  //   this.camera = null;
+  //   this.controls = null;
+  //   // this.empty(this.modelContainer);
+  // },
 }
 </script>
 
 <style scoped>
+#container {
+  width: 100%;
+  height: 100%;
+  background: #121b31;
+  position: relative;
+}
+.detail-box {
+  width: 500px;
+  height: 300px;
+  background: rgba(red, green, blue, 0.1);
+  position: absolute;
+  border: 1px solid #124859;
+}
 </style>

@@ -28,7 +28,22 @@ export default {
     total: {
       type: Number,
       default: 0
+    },
+    color: {
+      type: String,
+      default: ''
+    },
+    name: {
+      type: String,
+      default: ''
+    },
+    center: {
+      type: Array,
+      default: function () {
+        return []
+      }
     }
+
   },
   data () {
     return {
@@ -45,14 +60,14 @@ export default {
     }
   },
   watch: {
-    value: {
-      deep: true,
-      handler (newVal, oldVal) {
-        if (newVal.length > 0) {
-          this.initChart()
-        }
-      }
-    }
+    // value: {
+    //   deep: true,
+    //   handler (newVal, oldVal) {
+    //     if (newVal.length > 0) {
+    //       this.initChart()
+    //     }
+    //   }
+    // }
   },
   mounted () {
     this.$nextTick(() => {
@@ -64,7 +79,7 @@ export default {
     })
   },
   methods: {
-    ...mapActions(['changeMarkerLayerData']),
+    ...mapActions(['changeMarkerLayerData', 'saveBoxTypeTitle']),
     initChart () {
       const _this = this
       const lineStyle = {
@@ -87,36 +102,41 @@ export default {
       }
       const option = {
         title: {
-          text: '',
-          subtext: ''
+
         },
-        // tooltip: {
-        //雷达图的tooltip不会超出div，也可以设置position属性，position定位的tooltip 不会随着鼠标移动而位置变化，不友好
-        //   confine: true,
-        //   enterable: true, //鼠标是否可以移动到tooltip区域内
-        // },
         legend: {
           show: false
         },
         radar: {
           shape: 'rect',
-          splitNumber: 5, // 雷达图圈数设置 
-          center: ['50%', '50%'],
+          splitNumber: 8, // 雷达图圈数设置 
+          center: _this.center,
           // 圆中心坐标，数组的第一项是横坐标，第二项是纵坐标。[ default: ['50%', '50%'] ]
-          radius: 60,
+          radius: '60%',
           name: {
             textStyle: {
               color: '#E1E6FA',
-              lineHeight: 20
+              lineHeight: 18
             },
             // 只有一条数据时，可以使用该方法，显示单数据
             formatter: function (value, indicator) {
               // console.log('value', value)
               // console.log('indicator', indicator)
-              return `{name|${value}}\n{num|${indicator.value}}`;
+              let titleDiv = null
+              if (_this.type === 'equipment') {
+                titleDiv = `{name|${value}}\n{num|${indicator.value}}`;
+              } else if (_this.type === 'regulations') {
+                titleDiv = `{name|${value}}({n|${indicator.value}})`;
+              }
+
+              return titleDiv
             },
             rich: {
               name: {
+                fontSize: 10,
+                color: '#ccc'
+              },
+              n: {
                 fontSize: 10,
                 color: '#ccc'
               },
@@ -160,25 +180,28 @@ export default {
               opacity: 0.2,
             },
           },
+          symbol: 'circle',
+          symbolSize: 5,
           data: [
             {
               value: areaData,
               name: '',
               itemStyle: {
                 normal: {
-                  color: '#F9713C',
+                  color: _this.color,
                   lineStyle: lineStyle,
                 },
               },
               lineStyle: {
                 width: 1,
-                color: '#F9713C', // 雷达构成的区域边框
+                color: _this.color, // 雷达构成的区域边框
               }
             },
           ],
         }],
       }
       canvasChart.on('click', (e) => {
+        console.log('e', e)
         let data = {
           type: _this.type,
           title: e.name,
@@ -188,6 +211,7 @@ export default {
           title: e.name,
           data: []
         }
+        _this.saveBoxTypeTitle(_this.type)
         if (_this.itemKey !== e.name) {
           _this.changeMarkerLayerData(data)
           _this.itemKey = e.name

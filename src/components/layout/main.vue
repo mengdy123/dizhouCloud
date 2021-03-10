@@ -1,6 +1,6 @@
 <template>
   <div class="dz-main">
-    <map3D></map3D>
+    <map2D></map2D>
     <div class="dz-main-body">
       <div class="dz-main-body-top">
         <div class="dz-title-module">
@@ -35,14 +35,14 @@
 </template>
 
 <script>
-import map3D from '../map3D'
+import map2D from '../map2D'
 import dzTitle from '../dzTitle'
 import dzTopMenu from '../dzTopMenu'
 import videoItem from '@/components/videoItem'
 import eventBus from '@/utils/bus'
 export default {
   name: 'mainIndex',
-  components: { map3D, dzTitle, dzTopMenu, videoItem },
+  components: { map2D, dzTitle, dzTopMenu, videoItem },
   data () {
     return {
       screenWidth: null,

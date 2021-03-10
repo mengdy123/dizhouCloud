@@ -24,6 +24,8 @@ export default {
   font-size: 14px;
   color: @white;
   display: flex;
+  font-weight: 600;
+  line-height: 16px;
 }
 .dz-title::before {
   content: "";
@@ -32,6 +34,6 @@ export default {
   background: @themeBlue;
   display: block;
   margin-right: 6px;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 </style>

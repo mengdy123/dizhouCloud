@@ -94,6 +94,8 @@ export default {
         color: this.color,
         tooltip: {
           trigger: 'item',
+          backgroundColor: 'rgba(0,0,0,0.9)',//背景颜色（此时为默认色）
+          borderColor: 'rgba(0,0,0,0.9)'
         },
         legend: {
           show: this.legendShow,

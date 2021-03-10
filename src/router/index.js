@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import mainLayout from '../components/layout/main.vue'
 import sceneLayout from '../components/layout/sceneLayout.vue'
+import layout from '../components/layout/layout.vue'
 // import { resolve } from 'core-js/fn/promise'
 
 Vue.use(Router)
@@ -40,14 +41,26 @@ export default new Router({
       }]
     },
     {
-      path: '/test',
-      name: 'test',
+      path: '/system',
+      name: 'system',
       component: sceneLayout,
       children: [{
         path: '/',
-        title: '场景',
+        title: '后台管理系统',
         component: resolve => {
-          require(['../views/scene'], resolve)
+          require(['../views/system'], resolve)
+        }
+      }]
+    },
+    {
+      path: '/test',
+      name: 'test',
+      component: layout,
+      children: [{
+        path: '/',
+        title: '场景测试',
+        component: resolve => {
+          require(['../components/HelloWorld.vue'], resolve)
         }
       }]
     }

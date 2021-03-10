@@ -1,0 +1,28 @@
+#
+## Alias OBJ Material File
+# Exported from SketchUp, (c) 2000-2012 Trimble Navigation Limited
+
+newmtl _Color_H05_1
+Ka 0.000000 0.000000 0.000000
+Kd 0.207843 0.913725 1.000000
+Ks 0.330000 0.330000 0.330000
+d 0.720000
+
+newmtl Formica_Laminate_Dark
+Ka 0.000000 0.000000 0.000000
+Kd 0.196078 0.207843 0.235294
+Ks 0.330000 0.330000 0.330000
+map_Kd 红外感应柱/Formica_Laminate_Dark.jpg
+
+newmtl _Color_I08_1
+Ka 0.000000 0.000000 0.000000
+Kd 0.000000 0.000000 0.400000
+Ks 0.330000 0.330000 0.330000
+
+newmtl _Translucent_Glass_Safety_1
+Ka 0.000000 0.000000 0.000000
+Kd 0.235294 0.407843 0.956863
+Ks 0.330000 0.330000 0.330000
+d 0.500000
+map_Kd 红外感应柱/_Translucent_Glass_Safety_1.jpg
+

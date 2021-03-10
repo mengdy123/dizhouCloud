@@ -46,7 +46,9 @@ export default {
           trigger: 'axis',
           axisPointer: {            // 坐标轴指示器，坐标轴触发有效
             type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
-          }
+          },
+          backgroundColor: 'rgba(0,0,0,0.9)',//背景颜色（此时为默认色）
+          borderColor: 'rgba(0,0,0,0.9)'
         },
         grid: {
           top: 40,
