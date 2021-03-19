@@ -47,7 +47,6 @@ export default {
   },
   mounted () {
     this.$nextTick(() => {
-      console.log('title', this.title)
       this.initChart()
     })
   },
@@ -74,7 +73,7 @@ export default {
           name: _this.title[i],
           type: 'line',
           smooth: smooth,
-          symbol: 'circle',
+          symbol: 'none',
           // symbolSize: 5,
           // showSymbol: true,
           data: _this.yAxisData[i]
@@ -128,25 +127,28 @@ export default {
             show: true
           },
         },
-        yAxis: {
-          axisLine: {
-            show: true
-          },
-          lineStyle: {
-            color: '#7A7D9B'
-          },
-          splitLine: {
-            show: false
-          },
-          axisTick: {
-            show: false
-          },
-          axisLabel: {
-            textStyle: {
-              color: '#BACCFD'
+        yAxis: [
+          {
+            minInterval: 1,//只显示整数
+            axisLine: {
+              show: true
+            },
+            lineStyle: {
+              color: '#7A7D9B'
+            },
+            splitLine: {
+              show: false
+            },
+            axisTick: {
+              show: false
+            },
+            axisLabel: {
+              textStyle: {
+                color: '#BACCFD'
+              }
             }
-          }
-        },
+          },
+        ],
         series: series
 
       }

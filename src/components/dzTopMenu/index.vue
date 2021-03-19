@@ -1,8 +1,10 @@
 <template>
   <div class="dz-time-div">
     <div class="time">{{nowTime}}</div>
-    <div class="set">
+    <div class="set"
+         @click="goBackName('/system')">
       <icon-svg icon-class="chilun-o" />后台
+      <!-- <router-link :to="{name:'system'}"> 后台</router-link> -->
     </div>
     <div class="user-info">
       <el-dropdown trigger="click">
@@ -48,6 +50,9 @@ export default {
     clear () {
       clearInterval(this.nowTimes)
       this.nowTimes = null;
+    },
+    goBackName (name) {
+      this.$router.push(name)
     }
   }
 }
@@ -72,11 +77,13 @@ export default {
     color: @white;
     padding-right: 6px;
     display: flex;
+    a,
     /deep/ .el-dropdown {
       color: @white;
       display: flex;
       cursor: pointer;
       border: 0;
+      text-decoration: none;
     }
   }
   .set {

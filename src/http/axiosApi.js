@@ -23,7 +23,7 @@ class Interceptor {
 
     this.beforeRequest = [
       config => {
-        config.headers.Authorization = Cookies.get('token')
+        // config.headers.Authorization = Cookies.get('token')
         progress && this.progressStart()
         if (beforeRequest[0]) {
           beforeRequest[0](config)

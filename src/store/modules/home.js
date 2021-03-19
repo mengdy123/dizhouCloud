@@ -5,7 +5,9 @@ import Interceptor, {
 } from '@/http/axiosApi'
 const home = {
   state: {
-    homeIndexInfo: {}
+    homeIndexInfo: {},
+    sceneInfo: {},
+
   },
   actions: {
     // this.$store.dispatch('getHomeIndexInfo')
@@ -19,10 +21,23 @@ const home = {
           console.log(error)
         })
     },
+    getProjectsum ({ commit }, params) {
+      // console.log('params', params)
+      axios.get(`${DUTY_URL}/projectinfo/getProjectsum?projectId=${params}`)
+        .then(res => {
+          commit("GET_PROJECT_SUM", res.data.result);
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+    },
   },
   mutations: {
     GET_HOME_INDEX_INFO (state, data) {
       state.homeIndexInfo = data
+    },
+    GET_PROJECT_SUM (state, data) {
+      state.sceneInfo = data
     },
   }
 }

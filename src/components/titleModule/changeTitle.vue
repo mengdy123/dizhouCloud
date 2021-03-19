@@ -3,7 +3,7 @@
     <span v-for="(item, index) in title"
           :key="index"
           :class="[{'span-selected': titleEd === index}]"
-          @click="changeResource(index)">{{item.name}}</span>
+          @click.stop="changeResource(item,index)">{{item.name}}</span>
   </div>
 </template>
 <script>
@@ -25,8 +25,11 @@ export default {
     }
   },
   methods: {
-    changeResource (data) {
-      this.$emit('changeResource', data)
+    changeResource (data, index) {
+      // console.log('data', data)
+      // console.log('123456', event)
+      this.$emit('changeResource', index)
+      // event.preventDefault();
     }
   }
 }

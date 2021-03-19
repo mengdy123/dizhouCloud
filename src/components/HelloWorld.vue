@@ -64,13 +64,20 @@ export default {
       this.scene = new THREE.Scene()
       this.scene.add(new THREE.AmbientLight(0x999999))// 环境光
       this.light = new THREE.DirectionalLight(0xdfebff, 0.45)// 从正上方（不是位置）照射过来的平行光，0.45的强度
-      this.light.position.set(50, 200, 100)
+      this.light.position.set(150, 250, 200)
       this.light.position.multiplyScalar(0.3)
       this.scene.add(this.light)
-      // 初始化相机
-      this.camera = new THREE.PerspectiveCamera(this.fov, window.innerWidth / window.innerHeight, 0.1, 1000)
+      // 初始化相机 
+      // 构造函数格式
+      // OrthographicCamera( left, right, top, bottom, near, far )  正投影
+      // this.camera = new THREE.PerspectiveCamera(this.fov, window.innerWidth / window.innerHeight, 0.1, 1000)
+      let width = window.innerWidth; //窗口宽度
+      let height = window.innerHeight; //窗口高度
+      let k = width / height; //窗口宽高比
+      let s = 150; //三维场景显示范围控制系数，系数越大，显示的范围越大
+      //创建相机对象
+      this.camera = new THREE.OrthographicCamera(-s * k, s * k, s, -s, 0.1, 1000);
       this.camera.position.set(90, 90, 120)
-      // this.camera.position.z = 5;
       this.camera.lookAt(this.scene.position)
 
       this.group = new THREE.Group();
@@ -132,9 +139,10 @@ export default {
       // mtlLoade.setPath('/static/dz-model/modelFirst/').load('scene.mtl', materials => {
       //   materials.preload()
       //   objLoader.setMaterials(materials).setPath('/static/dz-model/modelFirst/').load('scene.obj', obj => {
+      //     // obj.scale.set(0.004, 0.004, 0.004)
       //     obj.scale.set(0.004, 0.004, 0.004)
       //     obj.position.set(-2000, -150, 0)
-      // this.oldChildren = this.dealMeshMaterial(obj.children)
+      //     this.oldChildren = this.dealMeshMaterial(obj.children)
       //     this.scene.add(obj)
       //   })
       // })
@@ -161,10 +169,25 @@ export default {
         materials.preload()
         objLoader.setMaterials(materials).setPath('/static/dz-model/modelFirst/').load('light.obj', obj => {
           obj.scale.set(0.025, 0.025, 0.025)
-          obj.position.set(10, -45, -12)
+          obj.position.set(30, -40, -2)
           obj.name = 'light2'
           obj.children.map(item => {
             item.name = 'light2'
+          })
+          this.dealMeshMaterial(obj.children)
+          this.scene.add(obj)
+          this.group.add(obj)
+        })
+      })
+      // 路灯3
+      mtlLoade.setPath('/static/dz-model/modelFirst/').load('light.mtl', materials => {
+        materials.preload()
+        objLoader.setMaterials(materials).setPath('/static/dz-model/modelFirst/').load('light.obj', obj => {
+          obj.scale.set(0.05, 0.05, 0.05)
+          obj.position.set(30, -40, -2)
+          obj.name = 'light3'
+          obj.children.map(item => {
+            item.name = 'light3'
           })
           this.dealMeshMaterial(obj.children)
           this.scene.add(obj)
@@ -175,8 +198,8 @@ export default {
       mtlLoade.setPath('/static/dz-model/modelFirst/').load('zebra1.mtl', materials => {
         materials.preload();
         objLoader.setMaterials(materials).setPath('/static/dz-model/modelFirst/').load('zebra1.obj', obj => {
-          obj.scale.set(0.08, 0.08, 0.04);
-          obj.position.set(-90, -40, 0);
+          obj.scale.set(0.1, 0.1, 0.06);
+          obj.position.set(-96, -46, 0);
           obj.name = 'zebra1'
           obj.children.map(item => {
             item.name = 'zebra1'
@@ -232,20 +255,20 @@ export default {
     },
     onMouseClick (event) {
       event.preventDefault();
-      console.log('event', event)
-      console.log('this.scene', this.scene.children)
-      console.log('this.group', this.group.children)
+      // console.log('event', event)
+      // console.log('this.scene', this.scene.children)
+      // console.log('this.group', this.group.children)
       if (this.selectedObject) {
-        this.selectedObject.material.color.set('#69f');
+        this.selectedObject.material.color.set('#35e9ff');
         this.selectedObject = null;
       }
       // 获取与射线相交的对象数组，其中的元素按照距离排序，越近的越靠前
       let intersects = this.getIntersects(event.clientX, event.clientY);
-      console.log('intersects---选中的模型', intersects)
+      // console.log('intersects---选中的模型', intersects)
       //将所有的相交的模型的颜色设置为红色
       if (intersects.length > 0 && this.selectedObject != intersects[0].object) {
         this.selectedObject = intersects[0].object
-        console.log('this.selectObject000', this.selectedObject)
+        // console.log('this.selectObject000', this.selectedObject)
         this.showObject(this.selectedObject, event);
       } else {
         this.showDetailBox = false
@@ -266,8 +289,8 @@ export default {
     },
     showObject (obj, event) {
       let key = obj.name
-      console.log('key', key)
-      console.log('this.oldChildren', this.oldChildren)
+      // console.log('key', key)
+      // console.log('this.oldChildren', this.oldChildren)
       // 显示内容，高亮
       // let oldOneMaterial = this.oldChildren.filter(item => item.name === key)[0]
       // let nameNode = this.scene.getObjectByName(this.selectedObject.name);

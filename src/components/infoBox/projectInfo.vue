@@ -44,7 +44,9 @@ export default {
       this.$emit('closeInfoWindow')
     },
     showDetail () {
-      this.$router.push('/sceneIndex')
+      // this.$store.dispatch('getProjectsum', 1)
+      // this.$router.push('/sceneIndex')
+      this.$router.push({ path: '/sceneIndex', query: { id: 1 } });
     }
   },
   mounted () {

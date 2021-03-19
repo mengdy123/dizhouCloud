@@ -9,19 +9,13 @@ import * as echarts from 'echarts';
 import { mapActions, mapMutations } from 'vuex'
 export default {
   props: {
-    xAxisData: {
+    value: {
       type: Array,
       default: function () {
         return []
       }
     },
-    yAxisData: {
-      type: Array,
-      default: function () {
-        return []
-      }
-    },
-    title: {
+    valuePer: {
       type: Array,
       default: function () {
         return []
@@ -54,14 +48,22 @@ export default {
           text: '',
           subtext: ''
         },
+        color: ['#3CA272', '#999999', '#EE6666', '#FAC858', '#9A60B4', '#5470C6'],
         tooltip: {
-          tooltip: {
-            trigger: 'item',
-            formatter: '{a} <br/>{b}: {c} ({d}%)'
+          trigger: 'item',
+          formatter: function (value) {
+            let tootipData = null
+            if (value.data.type === '1') {
+              tootipData = `车位总数: ${value.data.sum}<br/>已用/空余: ${value.data.use}/${value.data.unoccupied}<br/>使用率：${value.data.value}%`
+            } else {
+              tootipData = `已用/空余: ${value.data.use}/${value.data.unoccupied}<br/> 使用率：${value.data.sumZb}%`
+            }
+            return tootipData
           },
           backgroundColor: 'rgba(0,0,0,0.9)',//背景颜色（此时为默认色）
           borderColor: 'rgba(0,0,0,0.9)'
         },
+
         legend: {
           show: false,
         },
@@ -75,18 +77,15 @@ export default {
               position: 'inner',
               show: true,
               formatter: function (params) {
-                return params.value
+                return params.value + '%'
               },
               fontSize: 10,
             },
             labelLine: {
               show: false
             },
-            data: [
-              { value: 1548, name: '搜索引擎' },
-              { value: 775, name: '直达' },
-              { value: 679, name: '营销广告', selected: true }
-            ]
+            // selected: true
+            data: _this.valuePer
           },
           {
             name: '',
@@ -98,22 +97,22 @@ export default {
             label: {
               position: 'outer',
               alignTo: 'labelLine',
-              formatter: '{b|{b}}{per|({d}%)}',
+              formatter: function (value) {
+                // console.log('value---', value)
+                return `{a|${value.name}}{b|(${value.percent}%)}`
+              },
               rich: {
-                b: {
+                a: {
                   color: '#BACCFD',
                   fontSize: 10,
                 },
-                per: {
+                b: {
                   color: '#BACCFD',
+                  fontSize: 10,
                 }
               }
             },
-            data: [
-              { value: 310, name: '出租车' },
-              { value: 251, name: '收费' },
-              { value: 234, name: '临停' },
-            ]
+            data: _this.value
           }
         ]
 

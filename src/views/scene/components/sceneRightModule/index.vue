@@ -9,25 +9,33 @@
         <div class="weather-content-div">
           <ul class="weather-content-div-temperature">
             <li>
-              <img src="../../../../assets/weather.png"
+              <!-- <img src="../../../../assets/weather.png"
+                   alt=""> -->
+              <img :src="`/static/image/weather-icon-S2/64/${weatherInfo.icon}.png`"
                    alt="">
             </li>
             <li>
               <span>天气</span>
-              <span>小雨</span>
+              <span>{{weatherInfo.text}}</span>
             </li>
             <li>
               <span>温度</span>
-              <span>15℃</span>
+              <span>{{weatherInfo.temp}}℃</span>
             </li>
             <li>
               <span>能见度</span>
-              <span class="green-font">良好</span>
+              <span class="green-font">{{weatherInfo.vis}}Km</span>
             </li>
           </ul>
-          <div class="weather-content-div-warning">
+          <div class="weather-content-div-warning"
+               v-if="warningInfo.length > 0">
             <span>预警</span>
-            <span>预计未来6小时降水量增大，需预警路面湿滑。</span>
+            <span>{{warningInfo[0].title}}</span>
+          </div>
+          <div class="weather-content-div-warning"
+               v-else>
+            <span>提示</span>
+            <span>近期没有灾害预警，请放心出行</span>
           </div>
         </div>
 
@@ -39,27 +47,27 @@
             </li>
             <li>
               <span>空气质量</span>
-              <span class="green-font">良</span>
+              <span class="green-font">{{airInfo.category}}</span>
             </li>
             <li>
               <span>PM2.5</span>
-              <span>32</span>
+              <span>{{airInfo.pm2p5}}</span>
             </li>
             <li>
               <span>PM10</span>
-              <span>72</span>
+              <span>{{airInfo.pm10}}</span>
             </li>
             <li>
               <span>CO</span>
-              <span>0.63</span>
+              <span>{{airInfo.co}}</span>
             </li>
             <li>
               <span>SO2</span>
-              <span>5</span>
+              <span>{{airInfo.so2}}</span>
             </li>
             <li>
               <span>NO2</span>
-              <span>43</span>
+              <span>{{airInfo.no2}}</span>
             </li>
           </ul>
         </div>
@@ -70,7 +78,7 @@
           <ul>
             <li>
               <span>合计</span>
-              <span>11253</span>
+              <span>{{energyTotal}}</span>
               <i></i>
             </li>
           </ul>
@@ -94,7 +102,7 @@
             <span v-for="(item, index) in timeList"
                   :key="index"
                   :class="[{'span-selected': timeSelectIndex === index}]"
-                  @click="changeTime(item.name,index)">{{item.name}}</span>
+                  @click="changeTime(item.title,index)">{{item.name}}</span>
           </div>
         </div>
         <div class="change-chart-type">
@@ -116,6 +124,7 @@
                     :yAxisData='parkYAxis'
                     :title="parkTitle"
                     :color='lineColors'
+                    ref="trafficChart"
                     :type='"personnel"'></lineChart2>
       </div>
     </div>
@@ -157,6 +166,7 @@ import titleDiv from "@/components/titleModule";
 import changeTitleDiv from "@/components/titleModule/changeTitle.vue";
 import randarChart from "@/components/charts/randar.vue";
 import lineChart2 from '@/components/charts/lineChart2.vue'
+import sourceMirror from '@/resource/sourceMirror'
 import { mapState, mapActions } from 'vuex'
 export default {
   components: { titleDiv, changeTitleDiv, randarChart, lineChart2 },
@@ -176,16 +186,20 @@ export default {
       energySelected: 0,
       timeList: [
         {
-          name: '天'
+          name: '天',
+          title: 'days'
         },
         {
-          name: '周'
+          name: '周',
+          title: 'week'
         },
         {
-          name: '月'
+          name: '月',
+          title: 'months'
         },
         {
-          name: '年'
+          name: '年',
+          title: 'years'
         },
       ],
       timeSelectIndex: 0,
@@ -213,7 +227,6 @@ export default {
       ],
       roleLiIndex: 0,
       randar: [],
-      randarTotal: 0,
       colors: '#35E9FF',
       parkXAxis: ['00:00', '02:00', '04:00', '06:00', '08:00', '12:00'],
       parkYAxis: [
@@ -234,146 +247,133 @@ export default {
       energyTypeList: [
         {
           name: '太阳能路灯',
-          value: 4458
+          value: 0,
+          type: 'sunLamp'
         },
         {
           name: '舞台',
-          value: 4458
+          value: 0,
+          type: 'stage'
         },
         {
           name: '太阳能座椅',
-          value: 4458
+          value: 0,
+          type: 'sunChair'
         },
         {
           name: '斑马线',
-          value: 4458
+          value: 0,
+          type: 'zebraLine'
         },
         {
           name: '舞台',
-          value: 4458
+          value: 0,
+          type: 'stage'
         },
         {
           name: '井盖',
-          value: 4458
+          value: 0,
+          type: 'manholeCver'
         },
-      ]
+      ],
+      energyTotal: 0
     }
   },
   computed: {
     ...mapState({
-      homeIndexInfo: state => state.home.homeIndexInfo,
+      sceneInfo: state => state.home.sceneInfo,
+      deviceType: state => state.common.deviceType,
+      systemType: state => state.common.systemType,
+      weatherInfo: state => state.weather.weatherInfo,
+      airInfo: state => state.weather.airInfo,
+      warningInfo: state => state.weather.warningInfo,
+      warningType: state => state.common.warningType,
     })
   },
   watch: {
-    homeIndexInfo: {
+    sceneInfo: {
       deep: true,
       handler (newVal, oldVal) {
-        // console.log('homeIndexInfo---newVal', newVal)
+        // intelligenceWireList
+        // console.log('sceneInfo---newVal', newVal)
         if (newVal) {
           this.resetLeftModuleData(newVal)
           this.bugList = newVal.warningList || []
           this.solve = newVal.warSolveList[0].solveNumber || 0
           this.solved = newVal.warSolveList[1].solveNumber || 0
           this.bugList.forEach(item => {
-            if (item.deviceType && item.deviceType === '1') {
-              item.deviceType = '发光标线'
-            } else if (item.deviceType && item.deviceType === '2') {
-              item.deviceType = '智慧路灯'
-            } else if (item.deviceType && item.deviceType === '3') {
-              item.deviceType = '井盖'
-            } else if (item.deviceType && item.deviceType === '4') {
-              item.deviceType = '智慧砖'
-            } else if (item.deviceType && item.deviceType === '5') {
-              item.deviceType = '合杆'
-            } else if (item.deviceType && item.deviceType === '6') {
-              item.deviceType = '井盖系统'
-            } else if (item.deviceType && item.deviceType === '7') {
-              item.deviceType = '过街立柱'
-            } else if (item.deviceType && item.deviceType === '8') {
-              item.deviceType = '停车立柱'
-            }
+            this.deviceType.forEach(it => {
+              if (item.deviceType && item.deviceType === it.id) {
+                item.deviceType = it.name
+              }
+            })
           })
-          setTimeout(() => {
-            this.$refs.pieChartProject.initChart()
-            this.$refs.pieChartSystem.initChart()
-            this.$refs.pieChartEquipment.initChart()
-          }, 500)
+          this.resetPartData(newVal.intelligenceWireList)
+          // setTimeout(() => {
+          this.$refs.pieChartProject.initChart()
+          this.$refs.pieChartSystem.initChart()
+          this.$refs.pieChartEquipment.initChart()
+          this.$refs.trafficChart.initChart()
+          // }, 200)
         }
       }
     }
   },
   mounted () {
-    console.log('homeIndexInfo----homeBottomModule', this.homeIndexInfo.warGroupList)
-    if (JSON.stringify(this.homeIndexInfo) != '{}') {
-      this.resetLeftModuleData(this.homeIndexInfo)
-      this.solve = this.homeIndexInfo.warSolveList[0].solveNumber || 0
-      this.solved = this.homeIndexInfo.warSolveList[1].solveNumber || 0
-      if (this.spanIndex === '0') {
-        this.bugList = this.homeIndexInfo.warningList
-        this.bugList.forEach(item => {
-          if (item.deviceType && item.deviceType === '1') {
-            item.deviceType = '发光标线'
-          } else if (item.deviceType && item.deviceType === '2') {
-            item.deviceType = '智慧路灯'
-          } else if (item.deviceType && item.deviceType === '3') {
-            item.deviceType = '井盖'
-          } else if (item.deviceType && item.deviceType === '4') {
-            item.deviceType = '智慧砖'
-          } else if (item.deviceType && item.deviceType === '5') {
-            item.deviceType = '合杆'
-          } else if (item.deviceType && item.deviceType === '6') {
-            item.deviceType = '井盖系统'
-          } else if (item.deviceType && item.deviceType === '7') {
-            item.deviceType = '过街立柱'
-          } else if (item.deviceType && item.deviceType === '8') {
-            item.deviceType = '停车立柱'
-          }
-        })
-      } else {
-        this.bugList = this.homeIndexInfo.warningListByReso
-        this.bugList.forEach(item => {
-          if (item.deviceType && item.deviceType === '1') {
-            item.deviceType = '发光标线'
-          } else if (item.deviceType && item.deviceType === '2') {
-            item.deviceType = '智慧路灯'
-          } else if (item.deviceType && item.deviceType === '3') {
-            item.deviceType = '井盖'
-          } else if (item.deviceType && item.deviceType === '4') {
-            item.deviceType = '智慧砖'
-          } else if (item.deviceType && item.deviceType === '5') {
-            item.deviceType = '合杆'
-          } else if (item.deviceType && item.deviceType === '6') {
-            item.deviceType = '井盖系统'
-          } else if (item.deviceType && item.deviceType === '7') {
-            item.deviceType = '过街立柱'
-          } else if (item.deviceType && item.deviceType === '8') {
-            item.deviceType = '停车立柱'
-          }
-        })
-      }
-    }
+    this.getCleanEnergy()
+    this.resetLeftModuleData(this.sceneInfo)
+    this.solve = this.sceneInfo.warSolveList[0].solveNumber || 0
+    this.solved = this.sceneInfo.warSolveList[1].solveNumber || 0
+    this.bugList = this.sceneInfo.warningList || []
+    this.bugList.forEach(item => {
+      this.deviceType.forEach(it => {
+        if (item.deviceType && item.deviceType === it.id) {
+          item.deviceType = it.name
+        }
+      })
+    })
+    this.resetPartData(this.sceneInfo.intelligenceWireList)
+    // setTimeout(() => {
+    this.$refs.pieChartProject.initChart()
+    this.$refs.pieChartSystem.initChart()
+    this.$refs.pieChartEquipment.initChart()
+    // this.$refs.trafficChart.initChart()
+    // }, 200)
+    console.log('sceneInfo----homeBottomModule', this.sceneInfo)
   },
 
   methods: {
+    ...mapActions(['saveBoxTypeTitle']),
     changeEnergy (data) {
       this.energySelected = data
     },
     changeTime (type, index) {
       this.timeSelectIndex = index
+      this.getWarGroup(type)
     },
     selectRole (data, index) {
       this.roleLiIndex = index
     },
-    ...mapActions(['saveBoxTypeTitle']),
-    getAllPoint (type) {
-      this.saveBoxTypeTitle(type)
-      if (this.clickType === type) {
-        eventBus.$emit('changeProjectLayerStatus', false)
-        this.clickType = ''
-      } else {
-        eventBus.$emit('changeProjectLayerStatus', true)
-        this.clickType = type
-      }
+    resetPartData (list) {
+      // console.log('%c 交通安全1', 'color: green', list)
+      this.parkXAxis = []
+      this.parkYAxis[0] = []
+      this.parkYAxis[1] = []
+      this.parkYAxis[2] = []
+      this.parkYAxis[3] = []
+      this.parkYAxis[4] = []
+      this.parkYAxis[5] = []
+      list.forEach(item => {
+        this.parkXAxis.push(item.time)
+        this.parkYAxis[0].push(item.jtsg)
+        this.parkYAxis[1].push(item.rydd)
+        this.parkYAxis[2].push(item.szrk)
+        this.parkYAxis[3].push(item.xrwz)
+        this.parkYAxis[4].push(item.xzwf)
+        this.parkYAxis[5].push(item.zdry)
+      })
+      // console.log('%c 交通安全2', 'color: green', this.parkYAxis)
+      // console.log('%c 交通安全3', 'color: green', this.parkXAxis)
     },
     changeArrayFun (arr, type) {
       let newArr = []
@@ -382,35 +382,11 @@ export default {
       if (arr.length > 0) {
         oldArr = JSON.parse(JSON.stringify(arr))
         oldArr.forEach((item, index) => {
-          if (item.systemType && item.systemType === '1') {
-            name = '过街系统'
-          } else if (item.systemType && item.systemType === '2') {
-            name = '出租车临停系统'
-          } else if (item.systemType && item.systemType === '3') {
-            name = '临停系统'
-          } else if (item.systemType && item.systemType === '4') {
-            name = '停车系统'
-          } else if (item.systemType && item.systemType === '5') {
-            name = '公交系统'
-          } else if (item.systemType && item.systemType === '6') {
-            name = '井盖系统'
-          } else if (item.systemType && item.systemType === '7') {
-            name = '座椅系统'
-          } else if (item.systemType && item.systemType === '8') {
-            name = '路灯系统'
-          } else if (item.systemType && item.systemType === '9') {
-            name = '景观灯系统'
-          } else if (item.systemType && item.systemType === '10') {
-            name = '智慧砖舞台系统'
-          } else if (item.systemType && item.systemType === '11') {
-            name = '灯控过街系统'
-          } else if (item.systemType && item.systemType === '12') {
-            name = '护树系统'
-          } else if (item.systemType && item.systemType === '13') {
-            name = '幕墙系统'
-          } else {
-            name = '其他'
-          }
+          this.warningType.forEach(it => {
+            if (item.warningType && item.warningType === it.id) {
+              name = it.name
+            }
+          })
           newArr.push({
             name: name,
             value: item.typeNumber || 0,
@@ -419,67 +395,60 @@ export default {
           })
         })
       }
+      // console.log('newArr------', newArr)
       return newArr
     },
     clickSpan (num) {
       this.spanIndex = num
       if (num === '0') {
-        this.bugList = this.homeIndexInfo.warningList
+        this.bugList = this.sceneInfo.warningList
         this.bugList.forEach(item => {
-          if (item.deviceType && item.deviceType === '1') {
-            item.deviceType = '发光标线'
-          } else if (item.deviceType && item.deviceType === '2') {
-            item.deviceType = '智慧路灯'
-          } else if (item.deviceType && item.deviceType === '3') {
-            item.deviceType = '井盖'
-          } else if (item.deviceType && item.deviceType === '4') {
-            item.deviceType = '智慧砖'
-          } else if (item.deviceType && item.deviceType === '5') {
-            item.deviceType = '合杆'
-          } else if (item.deviceType && item.deviceType === '6') {
-            item.deviceType = '井盖系统'
-          } else if (item.deviceType && item.deviceType === '7') {
-            item.deviceType = '过街立柱'
-          } else if (item.deviceType && item.deviceType === '8') {
-            item.deviceType = '停车立柱'
-          }
+          this.deviceType.forEach(it => {
+            if (item.deviceType && item.deviceType === it.id) {
+              item.deviceType = it.name
+            }
+          })
         })
       } else {
-        this.bugList = this.homeIndexInfo.warningListByReso
+        this.bugList = this.sceneInfo.warningListByReso
         this.bugList.forEach(item => {
-          if (item.deviceType && item.deviceType === '1') {
-            item.deviceType = '发光标线'
-          } else if (item.deviceType && item.deviceType === '2') {
-            item.deviceType = '智慧路灯'
-          } else if (item.deviceType && item.deviceType === '3') {
-            item.deviceType = '井盖'
-          } else if (item.deviceType && item.deviceType === '4') {
-            item.deviceType = '智慧砖'
-          } else if (item.deviceType && item.deviceType === '5') {
-            item.deviceType = '合杆'
-          } else if (item.deviceType && item.deviceType === '6') {
-            item.deviceType = '井盖系统'
-          } else if (item.deviceType && item.deviceType === '7') {
-            item.deviceType = '过街立柱'
-          } else if (item.deviceType && item.deviceType === '8') {
-            item.deviceType = '停车立柱'
-          }
+          this.deviceType.forEach(it => {
+            if (item.deviceType && item.deviceType === it.id) {
+              item.deviceType = it.name
+            }
+          })
         })
       }
-    },
-    summationFun (arr) {
-      let total = 0
-      if (arr.length > 0) {
-        let oldArr = JSON.parse(JSON.stringify(arr))
-        oldArr.forEach((item, index) => {
-          total += item.typeNumber
-        })
-      }
-      return total
     },
     resetLeftModuleData (data) {
-      this.randar = this.changeArrayFun(data.deGroupList, 'regulations')
-      this.randarTotal = this.summationFun(data.deGroupList)
+      this.randar = this.changeArrayFun(data.warGroupList, 'regulations')
+    },
+    getCleanEnergy () {
+      sourceMirror.getCleanEnergy().then(res => {
+        // console.log('result---res', res)
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.energyTotal = result.sum
+          this.energyTypeList.forEach(item => {
+            item.value = result[item.type]
+
+          })
+        }
+      })
+    },
+    getWarGroup (date) {
+      sourceMirror.getWarGroup(date).then(res => {
+        console.log('result---res', res)
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.resetPartData(result.intelligenceWireList)
+          this.randar = this.changeArrayFun(result.warGroupList, 'regulations')
+          setTimeout(() => {
+            this.$refs.pieChartEquipment.initChart()
+            this.$refs.trafficChart.initChart()
+          }, 200)
+        }
+      })
     },
 
   },
@@ -499,7 +468,7 @@ export default {
   color: #3ca272 !important;
 }
 .flow-chart-div {
-  height: 70%;
+  height: 150px;
   min-height: 150px;
 }
 .regulations-chart-div {

@@ -62,6 +62,7 @@ export default {
   computed: {
     ...mapState({
       homeIndexInfo: state => state.home.homeIndexInfo,
+      deviceType: state => state.common.deviceType,
     })
   },
   watch: {
@@ -76,23 +77,11 @@ export default {
           this.solve = newVal.warSolveList[0].solveNumber || 0
           this.solved = newVal.warSolveList[1].solveNumber || 0
           this.bugList.forEach(item => {
-            if (item.deviceType && item.deviceType === '1') {
-              item.deviceType = '发光标线'
-            } else if (item.deviceType && item.deviceType === '2') {
-              item.deviceType = '智慧路灯'
-            } else if (item.deviceType && item.deviceType === '3') {
-              item.deviceType = '井盖'
-            } else if (item.deviceType && item.deviceType === '4') {
-              item.deviceType = '智慧砖'
-            } else if (item.deviceType && item.deviceType === '5') {
-              item.deviceType = '合杆'
-            } else if (item.deviceType && item.deviceType === '6') {
-              item.deviceType = '井盖系统'
-            } else if (item.deviceType && item.deviceType === '7') {
-              item.deviceType = '过街立柱'
-            } else if (item.deviceType && item.deviceType === '8') {
-              item.deviceType = '停车立柱'
-            }
+            this.deviceType.forEach(it => {
+              if (item.deviceType === it.id) {
+                item.deviceType = it.name
+              }
+            })
           })
         }
       }
@@ -129,44 +118,20 @@ export default {
       if (num === '0') {
         this.bugList = this.homeIndexInfo.warningList
         this.bugList.forEach(item => {
-          if (item.deviceType && item.deviceType === '1') {
-            item.deviceType = '发光标线'
-          } else if (item.deviceType && item.deviceType === '2') {
-            item.deviceType = '智慧路灯'
-          } else if (item.deviceType && item.deviceType === '3') {
-            item.deviceType = '井盖'
-          } else if (item.deviceType && item.deviceType === '4') {
-            item.deviceType = '智慧砖'
-          } else if (item.deviceType && item.deviceType === '5') {
-            item.deviceType = '合杆'
-          } else if (item.deviceType && item.deviceType === '6') {
-            item.deviceType = '井盖系统'
-          } else if (item.deviceType && item.deviceType === '7') {
-            item.deviceType = '过街立柱'
-          } else if (item.deviceType && item.deviceType === '8') {
-            item.deviceType = '停车立柱'
-          }
+          this.deviceType.forEach(it => {
+            if (item.deviceType === it.id) {
+              item.deviceType = it.name
+            }
+          })
         })
       } else {
         this.bugList = this.homeIndexInfo.warningListByReso
         this.bugList.forEach(item => {
-          if (item.deviceType && item.deviceType === '1') {
-            item.deviceType = '发光标线'
-          } else if (item.deviceType && item.deviceType === '2') {
-            item.deviceType = '智慧路灯'
-          } else if (item.deviceType && item.deviceType === '3') {
-            item.deviceType = '井盖'
-          } else if (item.deviceType && item.deviceType === '4') {
-            item.deviceType = '智慧砖'
-          } else if (item.deviceType && item.deviceType === '5') {
-            item.deviceType = '合杆'
-          } else if (item.deviceType && item.deviceType === '6') {
-            item.deviceType = '井盖系统'
-          } else if (item.deviceType && item.deviceType === '7') {
-            item.deviceType = '过街立柱'
-          } else if (item.deviceType && item.deviceType === '8') {
-            item.deviceType = '停车立柱'
-          }
+          this.deviceType.forEach(it => {
+            if (item.deviceType === it.id) {
+              item.deviceType = it.name
+            }
+          })
         })
       }
     },
@@ -218,44 +183,20 @@ export default {
       if (this.spanIndex === '0') {
         this.bugList = this.homeIndexInfo.warningList
         this.bugList.forEach(item => {
-          if (item.deviceType && item.deviceType === '1') {
-            item.deviceType = '发光标线'
-          } else if (item.deviceType && item.deviceType === '2') {
-            item.deviceType = '智慧路灯'
-          } else if (item.deviceType && item.deviceType === '3') {
-            item.deviceType = '井盖'
-          } else if (item.deviceType && item.deviceType === '4') {
-            item.deviceType = '智慧砖'
-          } else if (item.deviceType && item.deviceType === '5') {
-            item.deviceType = '合杆'
-          } else if (item.deviceType && item.deviceType === '6') {
-            item.deviceType = '井盖系统'
-          } else if (item.deviceType && item.deviceType === '7') {
-            item.deviceType = '过街立柱'
-          } else if (item.deviceType && item.deviceType === '8') {
-            item.deviceType = '停车立柱'
-          }
+          this.deviceType.forEach(it => {
+            if (item.deviceType === it.id) {
+              item.deviceType = it.name
+            }
+          })
         })
       } else {
         this.bugList = this.homeIndexInfo.warningListByReso
         this.bugList.forEach(item => {
-          if (item.deviceType && item.deviceType === '1') {
-            item.deviceType = '发光标线'
-          } else if (item.deviceType && item.deviceType === '2') {
-            item.deviceType = '智慧路灯'
-          } else if (item.deviceType && item.deviceType === '3') {
-            item.deviceType = '井盖'
-          } else if (item.deviceType && item.deviceType === '4') {
-            item.deviceType = '智慧砖'
-          } else if (item.deviceType && item.deviceType === '5') {
-            item.deviceType = '合杆'
-          } else if (item.deviceType && item.deviceType === '6') {
-            item.deviceType = '井盖系统'
-          } else if (item.deviceType && item.deviceType === '7') {
-            item.deviceType = '过街立柱'
-          } else if (item.deviceType && item.deviceType === '8') {
-            item.deviceType = '停车立柱'
-          }
+          this.deviceType.forEach(it => {
+            if (item.deviceType === it.id) {
+              item.deviceType = it.name
+            }
+          })
         })
       }
     }

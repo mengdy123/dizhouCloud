@@ -110,6 +110,7 @@ export default {
   computed: {
     ...mapState({
       homeIndexInfo: state => state.home.homeIndexInfo,
+      warningType: state => state.common.warningType,
     })
   },
   watch: {
@@ -154,19 +155,11 @@ export default {
       let name = ''
       data.forEach(item => {
         this.valueBar.push(item.typeNumber || 0)
-        if (item.warningType === '1') {
-          name = '设备故障'
-        } else if (item.warningType === '2') {
-          name = '行人违章'
-        } else if (item.warningType === '3') {
-          name = '交通事故'
-        } else if (item.warningType === '4') {
-          name = '刑侦案件'
-        } else if (item.warningType === '5') {
-          name = '行政事件'
-        } else {
-          name = '其他'
-        }
+        this.warningType.forEach(it => {
+          if (item.warningType && item.warningType === it.id) {
+            name = it.name
+          }
+        })
         this.xAxisData.push(name)
       })
       console.log('this.xAxisData', this.xAxisData)

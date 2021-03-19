@@ -13,7 +13,7 @@ import './style/reset.less'
 import * as THREE from "three";
 import store from './store'
 import IconSvg from '@/components/Icon'
-
+import './style/common.less'
 Vue.prototype.$eventBus = new Vue()
 Vue.component('icon-svg', IconSvg)
 Vue.use(THREE)

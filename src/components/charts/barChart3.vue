@@ -64,6 +64,7 @@ export default {
         },
         tooltip: {
           trigger: 'item',
+          formatter: '{b}  {c}W',
           backgroundColor: 'rgba(0,0,0,0.9)',//背景颜色（此时为默认色）
           borderColor: 'rgba(0,0,0,0.9)'
         },
@@ -112,6 +113,7 @@ export default {
           z: 10
         },
         yAxis: {
+          name: 'W',
           axisLine: {
             show: true
           },
@@ -126,8 +128,9 @@ export default {
             show: false
           },
           axisLabel: {
+            formatter: '{value}w',
             textStyle: {
-              color: '#BACCFD'
+              color: '#BACCFD',
             }
           }
         },

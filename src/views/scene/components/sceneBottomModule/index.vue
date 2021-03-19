@@ -24,15 +24,19 @@
         <div class="table-content-revenue">
           <ul>
             <li>营收总额（元）</li>
-            <li>2125000</li>
-            <li>年环比<i class="el-icon-top"></i><span>5%</span></li>
+            <li>{{costStatsData.money}}</li>
+            <li>年环比<i v-if="costStatsData.huaibi > 0"
+                 class="el-icon-top"></i><i v-else
+                 class="el-icon-bottom"></i><span>{{Math.abs(costStatsData.huaibi)}}%</span></li>
           </ul>
         </div>
         <div class="table-content-pie">
-          <pieChart6></pieChart6>
+          <pieChart6 :value='valuePie'
+                     ref="valueChart"></pieChart6>
         </div>
         <div class="table-content-bar">
           <barChart3 class="bar-chart-div"
+                     ref="barChart"
                      :xAxisData='flowXAxis'
                      :yAxisData='flowYAxis'
                      :title="flowTitle">
@@ -90,21 +94,33 @@ export default {
       flowYAxis:
         [76, 86, 96, 104, 110, 112, 120, 130, 140, 146, 150, 170, 200],
       flowTitle: [],
+      costStatsData: {},
+      valuePie: [
+        [],
+        [],
+        []
+      ]
     }
   },
   computed: {
     ...mapState({
-      homeIndexInfo: state => state.home.homeIndexInfo,
+      sceneInfo: state => state.home.sceneInfo,
     })
   },
   watch: {
-    // homeIndexInfo: {
-    //   deep: true,
-    //   handler (newVal, oldVal) {
-    //     console.log('homeIndexInfo---homeBottomModule', newVal)
-
-    //   }
-    // }
+    sceneInfo: {
+      deep: true,
+      handler (newVal, oldVal) {
+        console.log('sceneInfo---homeBottomModule', newVal)
+        if (newVal) {
+          this.resetCostStatsData(newVal.costStats)
+          setTimeout(() => {
+            this.$refs.valueChart.initChart()
+            this.$refs.barChart.initChart()
+          }, 200)
+        }
+      }
+    }
   },
   methods: {
     ...mapActions(['changeProjectData']),
@@ -113,12 +129,51 @@ export default {
     },
     selectPark (data, index) {
       this.parkLiIndex = index
+      this.resetCostStatsData(this.sceneInfo.costStats)
+      setTimeout(() => {
+        this.$refs.valueChart.initChart()
+        this.$refs.barChart.initChart()
+      }, 200)
     },
+    resetCostStatsData (data) {
+      if (data && data.chargeInfo) {
+        data.chargeInfo.forEach(item => {
+          if (item.type === '1') {
+            this.costStatsData = item
+          } else if (item.type === '2') {
+            this.valuePie[0] = [item.name, item.money, item.zb]
+          } else if (item.type === '3') {
+            this.valuePie[1] = [item.name, item.money, item.zb]
+          } else if (item.type === '4') {
+            this.valuePie[2] = [item.name, item.money, item.zb]
+          }
+        });
+      }
+      this.flowXAxis = []
+      this.flowYAxis = []
+      if (data && data.chargeIndex) {
+        data.chargeIndex.forEach(item => {
+          this.flowXAxis.push(item.date)
+          if (this.parkLiIndex === 0) {
+            this.flowYAxis.push(item.sumMoney / 10000)
+          } else if (this.parkLiIndex === 1) {
+            this.flowYAxis.push(item.sxgy / 10000)
+          } else if (this.parkLiIndex === 2) {
+            this.flowYAxis.push(item.smgy / 10000)
+          } else if (this.parkLiIndex === 3) {
+            this.flowYAxis.push(item.dtgc / 10000)
+          }
+
+        });
+      }
+      console.log('this.flowXAxis = []', this.flowXAxis)
+      console.log('this.flowYAxis = []', this.flowYAxis)
+    }
+
 
   },
   mounted () {
-
-
+    this.resetCostStatsData(this.sceneInfo.costStats)
   }
 }
 </script>

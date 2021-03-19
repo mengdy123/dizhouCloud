@@ -37,7 +37,6 @@ export default {
   },
   mounted () {
     this.$nextTick(() => {
-      console.log('title', this.title)
       this.initChart()
     })
   },
@@ -50,6 +49,9 @@ export default {
           canvasChart.resize()
         })()
       }
+      let xAxisData = _this.xAxisData.map(item => {
+        return item.slice(11, 16)
+      })
       const option = {
         title: {
           text: '',
@@ -108,7 +110,7 @@ export default {
         xAxis: {
           type: 'category',
           boundaryGap: false,
-          data: _this.xAxisData,
+          data: xAxisData,
           axisLabel: {
             textStyle: {
               color: '#BACCFD'

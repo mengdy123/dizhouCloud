@@ -42,7 +42,6 @@ export default {
   },
   mounted () {
     this.$nextTick(() => {
-      console.log('value', this.value)
       this.initChart()
     })
   },
@@ -62,35 +61,35 @@ export default {
         },
         color: ['#EE6666', '#FAC858', '#5470C6', '#3CA272', '#91CB74', '#F264DB', '#73C0DE'],
         tooltip: {
-          tooltip: {
-            trigger: 'item',
-            formatter: '{a} <br/>{b}: {c} ({d}%)'
-          },
+          trigger: 'item',
+          formatter: '{c}%',
+          // formatter: function (value) {
+          //   console.log('value', value)
+          //   let tootipData = null
+          //   // if (value.data.type === '1') {
+          //   //   tootipData = `车位总数: ${value.data.sum}<br/>已用/空余: ${value.data.use}/${value.data.unoccupied}<br/>使用率：${value.data.value}%`
+          //   // } else {
+          //   //   tootipData = `已用/空余: ${value.data.use}/${value.data.unoccupied}<br/> 使用率：${value.data.sumZb}%`
+          //   // }
+          //   return tootipData
+          // },
           backgroundColor: 'rgba(0,0,0,0.9)',//背景颜色（此时为默认色）
           borderColor: 'rgba(0,0,0,0.9)'
+
         },
         dataset: {
-          source: [
-            ['product', '2012'],
-            ['思贤公园', 8895210],
-            ['市民公园', 2600000],
-            ['地铁广场', 6589000],
-          ]
+          source: _this.value
         },
         series: [{
           type: 'pie',
           radius: '78%',
-          center: ['50%', '44%'],
-          encode: {
-            itemName: 'product',
-            value: '2012'
-          },
+          center: ['50%', '52%'],
           label: {
             position: 'outer',
             alignTo: 'labelLine',
             // formatter: '{b|{b}}\n{num|{d}}',
             formatter: function (p) {
-              return `{n|${p.data[0]}}\n{num|${p.data[1]}}`;
+              return `{n|${p.data[0]}}\n{num|${p.data[1]}}\n{per|${p.data[2]}%}`;
             },
             rich: {
               n: {
@@ -101,6 +100,10 @@ export default {
                 color: '#E1E6FA',
                 fontSize: 12,
                 fontWeight: 600
+              },
+              per: {
+                color: '#E1E6FA',
+                fontSize: 12,
               }
             }
           },

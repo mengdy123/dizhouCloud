@@ -63,6 +63,9 @@ export default {
   computed: {
     ...mapState({
       homeIndexInfo: state => state.home.homeIndexInfo,
+      deviceType: state => state.common.deviceType,
+      projectType: state => state.common.projectType,
+      systemType: state => state.common.systemType,
     })
   },
   watch: {
@@ -106,65 +109,21 @@ export default {
       if (arr.length > 0) {
         oldArr = JSON.parse(JSON.stringify(arr))
         oldArr.forEach((item, index) => {
-          if (item.projectType && item.projectType === '1') {
-            name = '交通'
-          } else if (item.projectType && item.projectType === '2') {
-            name = '工地'
-          } else if (item.projectType && item.projectType === '3') {
-            name = '市政'
-          } else if (item.projectType && item.projectType === '4') {
-            name = '园区'
-          } else if (item.projectType && item.projectType === '5') {
-            name = '园林'
-          } else if (item.projectType && item.projectType === '6') {
-            name = '景区'
-          } else if (item.projectType && item.projectType === '7') {
-            name = '企业'
-          } else if (item.deviceType && item.deviceType === '1') {
-            name = '发光标线'
-          } else if (item.deviceType && item.deviceType === '2') {
-            name = '智慧路灯'
-          } else if (item.deviceType && item.deviceType === '3') {
-            name = '井盖'
-          } else if (item.deviceType && item.deviceType === '4') {
-            name = '智慧砖'
-          } else if (item.deviceType && item.deviceType === '5') {
-            name = '合杆'
-          } else if (item.deviceType && item.deviceType === '6') {
-            name = '井盖系统'
-          } else if (item.deviceType && item.deviceType === '7') {
-            name = '过街立柱'
-          } else if (item.deviceType && item.deviceType === '8') {
-            name = '停车立柱'
-          } else if (item.systemType && item.systemType === '1') {
-            name = '过街系统'
-          } else if (item.systemType && item.systemType === '2') {
-            name = '出租车临停系统'
-          } else if (item.systemType && item.systemType === '3') {
-            name = '临停系统'
-          } else if (item.systemType && item.systemType === '4') {
-            name = '停车系统'
-          } else if (item.systemType && item.systemType === '5') {
-            name = '公交系统'
-          } else if (item.systemType && item.systemType === '6') {
-            name = '井盖系统'
-          } else if (item.systemType && item.systemType === '7') {
-            name = '座椅系统'
-          } else if (item.systemType && item.systemType === '8') {
-            name = '路灯系统'
-          } else if (item.systemType && item.systemType === '9') {
-            name = '景观灯系统'
-          } else if (item.systemType && item.systemType === '10') {
-            name = '智慧砖舞台系统'
-          } else if (item.systemType && item.systemType === '11') {
-            name = '灯控过街系统'
-          } else if (item.systemType && item.systemType === '12') {
-            name = '护树系统'
-          } else if (item.systemType && item.systemType === '13') {
-            name = '幕墙系统'
-          } else {
-            name = '其他'
-          }
+          this.projectType.forEach(it => {
+            if (item.projectType && item.projectType === it.id) {
+              name = it.name
+            }
+          })
+          this.deviceType.forEach(it => {
+            if (item.deviceType && item.deviceType === it.id) {
+              name = it.name
+            }
+          })
+          this.systemType.forEach(it => {
+            if (item.systemType && item.systemType === it.id) {
+              name = it.name
+            }
+          })
           newArr.push({
             name: name,
             value: item.typeNumber || 0,

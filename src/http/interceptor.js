@@ -4,7 +4,7 @@ import Interceptor, {
 } from '@/http/axiosApi'
 import Cookies from 'js-cookie'
 axios.defaults.timeout = 180000
-console.log('-----DUTY_URL', DUTY_URL)
+// console.log('-----DUTY_URL', DUTY_URL)
 // http request 请求拦截器
 const token = Cookies.get('token')
 const resources = {
@@ -13,7 +13,7 @@ const resources = {
     baseURL: GIS_URL,
     headers: {
       'Content-Type': 'application/json; charset=UTF-8',
-      'Authorization': token
+      // 'Authorization': token
     }
   }),
   // 微服务
@@ -21,7 +21,7 @@ const resources = {
     baseURL: DUTY_URL,
     headers: {
       'Content-Type': 'application/json; charset=UTF-8',
-      'Authorization': token
+      // 'Authorization': token
     }
   }),
 
@@ -30,7 +30,7 @@ const resources = {
     baseURL: FILE_URL,
     headers: {
       // 'Content-Type': 'application/json; charset=UTF-8',
-      'Authorization': token
+      // 'Authorization': token
     }
   }),
 }
@@ -38,7 +38,6 @@ const resources = {
 resources.GisMirror.interceptors.response.use(response, error)
 resources.DutyMirror.interceptors.response.use(response, error)
 resources.FileMirror.interceptors.response.use(response, error)
-
 function response (response) {
   return response
 }
