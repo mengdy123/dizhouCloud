@@ -42,7 +42,9 @@ body,ul, li {
 .amap-scale-line {
   display: none;
 }
- .el-dropdown-menu {
+ 
+.dz-scene, .dz-main {
+  .el-dropdown-menu {
   padding: 0px 0;
   background-color: #262626 !important;
   border: 1px solid #262626 !important;
@@ -54,7 +56,7 @@ body,ul, li {
   color: #fff;
   font-size: 12px;
 }
-.el-popper[x-placement^=bottom] .popper__arrow {
+  .el-popper[x-placement^=bottom] .popper__arrow {
     top: -6px;
     left: 50%;
     margin-right: 3px;
@@ -72,3 +74,50 @@ body,ul, li {
     color: #35e9ff;
 }
 
+}
+.el-form-item__error {
+  color: #F56C6C;
+  font-size: 12px;
+  line-height: 1;
+  padding-top: 0px;
+  position: absolute;
+  top: 46px;
+  left: 0;
+}
+.form-module {
+  .el-form-item {
+    margin-bottom: 10px;
+  }
+  .el-form-item__content {
+    width: 70%;
+  }
+  .el-select {
+    width: 100%;
+  }
+}
+.el-dialog__title {
+  font-size: 14px;
+  color: #333333;
+  font-weight: 600;
+}
+.el-dialog__header {
+    padding: 20px 20px 10px;
+    border-bottom: 1px solid #eeeeee;
+}
+.el-dialog__footer {
+  border-top: 1px solid #eeeeee;
+  display: flex;
+  justify-content: center;
+}
+.el-dialog__body {
+  padding: 20px 20px 0 20px;
+}
+.input-item-text, input[type=text], input[type=date], select {
+  padding: 5px 10px;
+  height: 40px;
+  line-height: 40px;
+  border-radius: 3px;
+}
+.el-input.is-disabled .el-input__inner {
+    background-color: #ffffff
+}

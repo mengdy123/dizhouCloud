@@ -7,7 +7,7 @@
           <span v-for="(item, index) in timeList2"
                 :key="index"
                 :class="[{'span-selected': timeSelectIndex2 === index}]"
-                @click="changeTime2(item.name,index)">{{item.name}}</span>
+                @click="changeTime2(item.title,index)">{{item.name}}</span>
         </div>
       </div>
     </div>
@@ -51,6 +51,7 @@ import titleDiv from "@/components/titleModule";
 import pieChart6 from '@/components/charts/pieChart6.vue'
 import barChart3 from '@/components/charts/barChart3.vue'
 import eventBus from '@/utils/bus'
+import sourceMirror from '@/resource/sourceMirror'
 import { mapState, mapActions } from 'vuex'
 export default {
   components: { titleDiv, pieChart6, barChart3 },
@@ -58,16 +59,20 @@ export default {
     return {
       timeList2: [
         {
-          name: '天'
+          name: '天',
+          title: 'day'
         },
         {
-          name: '周'
+          name: '周',
+          title: 'week'
         },
         {
-          name: '月'
+          name: '月',
+          title: 'month'
         },
         {
-          name: '年'
+          name: '年',
+          title: 'year'
         },
       ],
       timeSelectIndex2: 3,
@@ -111,7 +116,7 @@ export default {
     sceneInfo: {
       deep: true,
       handler (newVal, oldVal) {
-        console.log('sceneInfo---homeBottomModule', newVal)
+        // console.log('sceneInfo---homeBottomModule', newVal)
         if (newVal) {
           this.resetCostStatsData(newVal.costStats)
           setTimeout(() => {
@@ -126,14 +131,13 @@ export default {
     ...mapActions(['changeProjectData']),
     changeTime2 (type, index) {
       this.timeSelectIndex2 = index
+      this.getCostStatsByTime(type)
     },
     selectPark (data, index) {
       this.parkLiIndex = index
       this.resetCostStatsData(this.sceneInfo.costStats)
-      setTimeout(() => {
-        this.$refs.valueChart.initChart()
-        this.$refs.barChart.initChart()
-      }, 200)
+      this.$refs.valueChart.initChart()
+      this.$refs.barChart.initChart()
     },
     resetCostStatsData (data) {
       if (data && data.chargeInfo) {
@@ -166,9 +170,16 @@ export default {
 
         });
       }
-      console.log('this.flowXAxis = []', this.flowXAxis)
-      console.log('this.flowYAxis = []', this.flowYAxis)
-    }
+      // this.$refs.barChart.initChart()
+    },
+    getCostStatsByTime (params) {
+      sourceMirror.getCostStatsByTime(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.resetCostStatsData(result)
+        }
+      })
+    },
 
 
   },

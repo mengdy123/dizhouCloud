@@ -4,16 +4,16 @@
        :class="[{'project-div':projectInfoData.type === 'project' },{'bug-div':projectInfoData.type === 'bug' }]">
     <div class="project-box-info">
       <ul v-if="projectInfoData.type === 'project'">
-        <li><span>项目名称：</span>{{projectInfoData.row[0] || '暂无数据'}}</li>
-        <li><span>项目位置：</span>{{projectInfoData.row[1] || '暂无数据'}}广陵区金地广场120号</li>
-        <li><span>项目状态：</span>{{projectInfoData.row[2] || '暂无数据'}}</li>
+        <li><span>项目名称：</span>{{projectInfoData.projectName || '暂无数据'}}</li>
+        <li><span>项目位置：</span>{{projectInfoData.province + projectInfoData.city + projectInfoData.county   || '暂无数据'}}</li>
+        <li><span>项目状态：</span>{{projectInfoData.states || '暂无数据'}}</li>
       </ul>
       <ul v-if="projectInfoData.type === 'bug'">
-        <li><span>异常预判：</span>{{projectInfoData.row.name || '暂无数据'}}</li>
-        <li><span>设备类型：</span>{{projectInfoData.row.type || '暂无数据'}}广陵区金地广场120号</li>
-        <li><span>设备编号：</span>{{projectInfoData.row.num || '暂无数据'}}</li>
-        <li><span>设备地址：</span>{{projectInfoData.row.address || '暂无数据'}}</li>
-        <li><span>维修进度：</span>{{projectInfoData.row.plan || '暂无数据'}}</li>
+        <li><span>异常预判：</span>{{projectInfoData.row.prediction || '暂无数据'}}</li>
+        <li><span>设备类型：</span>{{projectInfoData.row.deviceType || '暂无数据'}}</li>
+        <li><span>设备编号：</span>{{projectInfoData.row.deviceCode || '暂无数据'}}</li>
+        <li><span>设备地址：</span>{{projectInfoData.row.deivceSite || '暂无数据'}}</li>
+        <li><span>维修进度：</span>{{projectInfoData.row.plan || '进行中'}}</li>
       </ul>
       <div class="project-box-info-close"
            @click="closeInfoBox">

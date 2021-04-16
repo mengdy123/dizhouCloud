@@ -12,6 +12,14 @@
     <!-- <div class="dz-content-button">
       <controlDiv></controlDiv>
     </div> -->
+    <!-- <Dialog dialogTitle="过去24小时AQI指数"
+            popupWidth='40%'
+            :visible.sync="dialogVisible"
+            @updateVisible="updateVisible"
+            @resetPopupData="resetPopupData"
+            @submitPopupData="submitPopupData"
+            @handleClose="handleClose">
+    </Dialog> -->
   </div>
 </template>
 <script>
@@ -22,12 +30,14 @@ import controlDiv from './components/sceneControl'
 import { getCookie } from "@/utils/cookie";
 import eventBus from '@/utils/bus'
 import { mapActions, mapState } from 'vuex'
+import Dialog from '@/components/Dialog'
 export default {
-  components: { leftDiv, rightDiv, bottomDiv, controlDiv },
+  components: { leftDiv, rightDiv, bottomDiv, controlDiv, Dialog },
   data () {
     return {
       provinceShow: false,
-      cityShow: false
+      cityShow: false,
+      dialogVisible: true,
     }
   },
   computed: {
@@ -64,8 +74,25 @@ export default {
   },
   methods: {
     ...mapActions(['getWeatherInfo', 'getAirInfo', 'getWarningInfo']),
+    // 修改是否让页面显示与隐藏的事件
+    updateVisible (val) {
+      this.dialogVisible = val
+    },
+    // 点击取消的事件
+    resetPopupData () {
+      //  这里可重置数据
+      this.dialogVisible = false
+    },
+    // 点击确定的按钮
+    async submitPopupData () {
+      this.dialogVisible = false
+    },
+    // 关闭弹框（头部的X）
+    handleClose () {
+      this.dialogVisible = false
+    }
   },
-  mounted () {
+  created () {
     this.getWeatherInfo()
     this.getAirInfo()
     this.getWarningInfo()

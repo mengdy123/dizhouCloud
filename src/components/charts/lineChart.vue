@@ -122,9 +122,7 @@ export default {
           axisTick: {
             show: false
           },
-          lineStyle: {
-            color: '#7A7D9B'
-          },
+
           axisLine: {
             show: true
           },
@@ -133,9 +131,7 @@ export default {
           axisLine: {
             show: true
           },
-          lineStyle: {
-            color: '#7A7D9B'
-          },
+
           splitLine: {
             show: false
           },
@@ -156,6 +152,12 @@ export default {
             showSymbol: false,
             itemStyle: {
               color: '#FAC858',
+              normal: {
+                lineStyle: {
+                  color: '#FAC858',
+                  width: 1// 0.1的线条是非常细的了
+                }
+              }
             },
             areaStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
@@ -173,7 +175,12 @@ export default {
             type: 'line',
             showSymbol: false,
             itemStyle: {
-              color: '#BACCFD'
+              color: '#BACCFD',
+              normal: {
+                lineStyle: {
+                  width: 1// 0.1的线条是非常细的了
+                }
+              }
             },
           }
 

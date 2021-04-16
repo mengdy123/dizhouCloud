@@ -49,9 +49,10 @@ export default {
           canvasChart.resize()
         })()
       }
-      let xAxisData = _this.xAxisData.map(item => {
-        return item.slice(11, 16)
-      })
+      // let xAxisData = _this.xAxisData.map(item => {
+      //   return item.slice(11, 16)
+      // })
+      let xAxisData = _this.xAxisData
       const option = {
         title: {
           text: '',

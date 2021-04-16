@@ -1,5 +1,5 @@
 import axios from 'axios'
-const weatherInfo = {
+const weatherModule = {
   state: {
     weatherInfo: null,
     airInfo: null,
@@ -10,7 +10,6 @@ const weatherInfo = {
       axios.get('https://devapi.qweather.com/v7/weather/now?location=101020100&key=abb3c35aa85741999654c517c7d4d4e3')
         .then(res => {
           commit("GET_WEATHER_INFO", res.data.now);
-          // console.log('%c getWeatherInfo', 'color:red', res)
         })
         .catch((error) => {
           console.log(error)
@@ -20,7 +19,6 @@ const weatherInfo = {
       axios.get('https://devapi.qweather.com/v7/air/now?location=101020100&key=abb3c35aa85741999654c517c7d4d4e3')
         .then(res => {
           commit("GET_AIR_INFO", res.data.now);
-          // console.log('%c getAirInfo', 'color:red', res)
         })
         .catch((error) => {
           console.log(error)
@@ -30,7 +28,6 @@ const weatherInfo = {
       axios.get('https://devapi.qweather.com/v7/warning/now?location=101020100&key=abb3c35aa85741999654c517c7d4d4e3')
         .then(res => {
           commit("GET_WARNING_INFO", res.data.warning);
-          // console.log('%c getWarningInfo', 'color:red', res)
         })
         .catch((error) => {
           console.log(error)
@@ -50,4 +47,4 @@ const weatherInfo = {
   }
 }
 
-export default weatherInfo
+export default weatherModule

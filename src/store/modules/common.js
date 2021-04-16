@@ -9,35 +9,43 @@ const common = {
     deviceType: [
       {
         name: '发光标线',
-        id: '1'
+        id: '1',
+        type: 'zebra'
       },
       {
         name: '智慧路灯',
-        id: '2'
+        id: '2',
+        type: 'smartLight'
       },
       {
         name: '井盖',
-        id: '3'
+        id: '3',
+        type: 'well'
       },
       {
         name: '智慧砖',
-        id: '4'
+        id: '4',
+        type: 'smartBrick'
       },
       {
         name: '合杆',
-        id: '5'
+        id: '5',
+        type: 'alloyRod'
       },
       {
         name: '井盖系统',
-        id: '6'
+        id: '6',
+        type: 'wellSystem'
       },
       {
         name: '过街立柱',
-        id: '7'
+        id: '7',
+        type: 'redBar'
       },
       {
         name: '停车立柱',
-        id: '8'
+        id: '8',
+        type: 'stopBar'
       },
     ],
     projectType: [
@@ -175,6 +183,42 @@ const common = {
         type: '7',
         name: '燃气'
       }
+    ],
+    parkTypeList: [
+      {
+        name: '全部',
+        type: '1'
+      },
+      {
+        name: '出租车',
+        type: '2'
+      },
+      {
+        name: '临停',
+        type: '3'
+      },
+      {
+        name: '收费',
+        type: '4'
+      }
+    ],
+    projectStatus: [
+      {
+        name: '在建',
+        id: '1'
+      },
+      {
+        name: '维修',
+        id: '2'
+      },
+      {
+        name: '正常',
+        id: '3'
+      },
+      {
+        name: '关闭',
+        id: '4'
+      },
     ]
   },
   actions: {

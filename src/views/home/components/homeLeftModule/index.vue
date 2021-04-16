@@ -106,6 +106,7 @@ export default {
       let newArr = []
       let oldArr = []
       let name = ''
+      console.log(22)
       if (arr.length > 0) {
         oldArr = JSON.parse(JSON.stringify(arr))
         oldArr.forEach((item, index) => {
@@ -127,6 +128,7 @@ export default {
           newArr.push({
             name: name,
             value: item.typeNumber || 0,
+            max: item.typeNumber + 10 || 0,
             id: type + (index + 1),
             type: type
           })
@@ -146,6 +148,47 @@ export default {
     },
     resetLeftModuleData (data) {
       this.projectPlan = data.companyGroupList
+      console.log('data.deGroupList--------', data.deGroupList)
+      if (data.deGroupList.length == 0) {
+        data.deGroupList = [
+          {
+            deviceType: "1",
+            typeNumber: 0
+          },
+          {
+            deviceType: "2",
+            typeNumber: 0
+          },
+          {
+            deviceType: "3",
+            typeNumber: 0
+          },
+          {
+            deviceType: "4",
+            typeNumber: 0
+          },
+          {
+            deviceType: "5",
+            typeNumber: 0
+          },
+          {
+            deviceType: "6",
+            typeNumber: 0
+          },
+          {
+            deviceType: "7",
+            typeNumber: 0
+          },
+          {
+            deviceType: "8",
+            typeNumber: 0
+          },
+          {
+            deviceType: "9",
+            typeNumber: 0
+          }
+        ]
+      }
       this.valuePie2 = this.changeArrayFun(data.typeGroupList, 'project')
       this.valuePie3 = this.changeArrayFun(data.sysGroupList, 'system')
       this.randar = this.changeArrayFun(data.deGroupList, 'equipment')

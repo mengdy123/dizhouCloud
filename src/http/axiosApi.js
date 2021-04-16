@@ -48,7 +48,7 @@ class Interceptor {
           afterResponse[0](response)
         } else {
           if (response.data.code !== 200) {
-            const error = response.data.message
+            const error = response.data.message || response.data.serviceMessage
             Vue.prototype.$message({
               type: 'error',
               message: error

@@ -23,13 +23,13 @@ export default {
   },
   data () {
     return {
-
     }
   },
   mounted () {
     this.$nextTick(() => {
-      console.log('252525', this.xAxisData)
-      this.initChart()
+      setTimeout(() => {
+        this.initChart()
+      }, 200)
     })
   },
   methods: {

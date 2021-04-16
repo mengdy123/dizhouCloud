@@ -2,8 +2,9 @@
   <div class="dz-content-bottom-module">
     <div class="dz-content-bottom-table">
       <titleDiv title='项目信息'></titleDiv>
-      <scrollTable :config='config'
-                   @getTableRow='getTableRow'></scrollTable>
+      <scrollTable @getTableRow='getTableRow'
+                   :tableConfigArr='tableConfigArr'
+                   :tabData='tabData'></scrollTable>
     </div>
     <div class="dz-content-bottom-detail">
       <div class="detail-type">
@@ -45,18 +46,50 @@ export default {
   components: { scrollTable, titleDiv },
   data () {
     return {
-      config: {
-        headerBGC: '',
-        oddRowBGC: '',
-        evenRowBGC: '',
-        hoverPause: true,
-        header: ['名称', '位置', '状态', '类型', '系统数量', '设备数量'],
-        data: []
-      },
       bugList: [],
       spanIndex: '0',
       solve: 0,
-      solved: 0
+      solved: 0,
+      tabData: [],
+      tableConfigArr: [
+        {
+          fixed: false,
+          prop: 'projectName',
+          label: '名称',
+          width: '180px',
+          tooltip: true,
+        },
+        {
+          fixed: false,
+          prop: 'province',
+          label: '位置',
+          tooltip: true,
+        },
+        {
+          fixed: false,
+          prop: 'states',
+          label: '状态',
+          tooltip: false,
+        },
+        {
+          fixed: false,
+          prop: 'projectType',
+          label: '类型',
+          tooltip: false,
+        },
+        {
+          fixed: false,
+          prop: 'systemNumber',
+          label: '系统数量',
+          tooltip: false,
+        },
+        {
+          fixed: false,
+          prop: 'deviceNumber',
+          label: '设备数量',
+          tooltip: false,
+        },
+      ]
     }
   },
   computed: {
@@ -90,6 +123,7 @@ export default {
   methods: {
     ...mapActions(['changeProjectData']),
     getTableRow (row) {
+      console.log('row', row)
       const jwList = [
         [121.231733, 31.032311],
         [121.231733, 31.032311],
@@ -108,7 +142,7 @@ export default {
       let data = {
         ...row,
         type: 'project',
-        jw: jwList[row.rowIndex]
+        jw: jwList[0]
       }
       // console.log('所在行数据', data)
       eventBus.$emit('addMarkerOnly', data)
@@ -139,44 +173,30 @@ export default {
       let data = {
         type: 'bug',
         row: item,
-        jw: item.jw
+        jw: [121.231733, 31.032311],
       }
-      // console.log('查看BUG详情', data)
+      console.log('查看BUG详情', data)
       eventBus.$emit('addMarkerOnly', data)
     },
     resetTableList (data) {
-      this.config.data = []
-      let arrData = []
-      let arr = []
-      let val = null
-      if (data.length > 0) {
-        data.forEach(item => {
-          arr = []
-          if (item.states === '1') {
-            item.states = '正常'
-          } else {
-            item.states = '正常'
-          }
-          if (item.projectType === '1') {
-            item.projectType = '交通'
-          } else {
-            item.projectType = '其他'
-          }
-          for (val of Object.values(item)) {
-            arr.push(val)
-          }
-          arrData.push(arr)
-          this.config.data.push(arr)
-        });
-      }
+      this.tabData = data
+      this.tabData.forEach(item => {
+        if (item.states === '1') {
+          item.states = '正常'
+        } else {
+          item.states = '正常'
+        }
+        if (item.projectType === '1') {
+          item.projectType = '交通'
+        } else {
+          item.projectType = '其他'
+        }
+      });
 
     },
   },
   mounted () {
-    // console.log('homeIndexInfo----homeBottomModule', this.homeIndexInfo.warningList)
-    if (this.homeIndexInfo && this.homeIndexInfo.projectInfoList) {
-      this.resetTableList(this.homeIndexInfo.projectInfoList)
-    }
+    this.resetTableList(this.homeIndexInfo.projectInfoList)
     if (this.homeIndexInfo && this.homeIndexInfo.warningList) {
       this.solve = this.homeIndexInfo.warSolveList[0].solveNumber || 0
       this.solved = this.homeIndexInfo.warSolveList[1].solveNumber || 0

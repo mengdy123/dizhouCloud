@@ -1,5 +1,8 @@
 <template>
-  <div class="dz-left-module">
+  <div class="dz-left-module"
+       :data-warningInfo="warningInfo"
+       :data-airInfo="airInfo"
+       :data-weatherInfo="weatherInfo">
     <div class="dz-left-module-row energy-div">
       <changeTitleDiv :title="energyType"
                       :titleEd='energySelected'
@@ -9,28 +12,28 @@
         <div class="weather-content-div">
           <ul class="weather-content-div-temperature">
             <li>
-              <!-- <img src="../../../../assets/weather.png"
-                   alt=""> -->
-              <img :src="`/static/image/weather-icon-S2/64/${weatherInfo.icon}.png`"
+
+              <img v-if="weatherInfo && weatherInfo.icon"
+                   :src="`/static/image/weather-icon-S2/64/${weatherInfo.icon}.png`"
                    alt="">
             </li>
-            <li>
+            <li v-if="weatherInfo && weatherInfo.text">
               <span>天气</span>
               <span>{{weatherInfo.text}}</span>
             </li>
-            <li>
+            <li v-if="weatherInfo && weatherInfo.temp">
               <span>温度</span>
               <span>{{weatherInfo.temp}}℃</span>
             </li>
-            <li>
+            <li v-if="weatherInfo && weatherInfo.vis">
               <span>能见度</span>
               <span class="green-font">{{weatherInfo.vis}}Km</span>
             </li>
           </ul>
           <div class="weather-content-div-warning"
-               v-if="warningInfo.length > 0">
+               v-if="warningInfo && warningInfo.length > 0">
             <span>预警</span>
-            <span>{{warningInfo[0].title}}</span>
+            <span v-if="warningInfo && warningInfo[0]">{{warningInfo[0].title}}</span>
           </div>
           <div class="weather-content-div-warning"
                v-else>
@@ -40,32 +43,33 @@
         </div>
 
         <div class="weather-content-history">
-          <div class="weather-content-history-title">过去24小时AQI指数></div>
+          <div class="weather-content-history-title"
+               @click="showHistoryAQI">过去24小时AQI指数></div>
           <ul class="weather-content-history-list">
             <li>
               <i>AQI</i>
             </li>
-            <li>
+            <li v-if="airInfo && airInfo.category">
               <span>空气质量</span>
-              <span class="green-font">{{airInfo.category}}</span>
+              <span class="green-font">{{airInfo.category || '优'}}</span>
             </li>
-            <li>
+            <li v-if="airInfo && airInfo.pm2p5">
               <span>PM2.5</span>
               <span>{{airInfo.pm2p5}}</span>
             </li>
-            <li>
+            <li v-if="airInfo && airInfo.pm10">
               <span>PM10</span>
               <span>{{airInfo.pm10}}</span>
             </li>
-            <li>
+            <li v-if="airInfo && airInfo.co">
               <span>CO</span>
               <span>{{airInfo.co}}</span>
             </li>
-            <li>
+            <li v-if="airInfo && airInfo.so2">
               <span>SO2</span>
               <span>{{airInfo.so2}}</span>
             </li>
-            <li>
+            <li v-if="airInfo && airInfo.no2">
               <span>NO2</span>
               <span>{{airInfo.no2}}</span>
             </li>
@@ -138,11 +142,14 @@
                 @click="clickSpan('1')">已解决（{{solved}}）</span>
         </div>
         <div class="detail-list">
-          <el-carousel trigger="click"
+          <scrollTable @getTableRow='getTableRow'
+                       :tableConfigArr='tableConfigArr'
+                       :tabData='tabData'></scrollTable>
+          <!-- @click="showBugDetail(item)" -->
+          <!-- <el-carousel trigger="click"
                        height="180px">
             <el-carousel-item v-for="(item, index) in bugList"
                               :key="index">
-              <!-- @click="showBugDetail(item)" -->
               <div class="detail-list-carousel">
                 <ul>
                   <li>异常预判：{{item.prediction || '暂无数据'}}</li>
@@ -151,11 +158,10 @@
                   <li>设备地址：{{item.deivceSite || '暂无数据'}}</li>
                   <li>维修进度：进行中</li>
                   <li>工单指派：000</li>
-                  <!-- {{item.schedule || '暂无数据'}} -->
                 </ul>
               </div>
             </el-carousel-item>
-          </el-carousel>
+          </el-carousel> -->
         </div>
       </div>
     </div>
@@ -168,8 +174,9 @@ import randarChart from "@/components/charts/randar.vue";
 import lineChart2 from '@/components/charts/lineChart2.vue'
 import sourceMirror from '@/resource/sourceMirror'
 import { mapState, mapActions } from 'vuex'
+import scrollTable from '@/components/Table/scrollTable.vue'
 export default {
-  components: { titleDiv, changeTitleDiv, randarChart, lineChart2 },
+  components: { titleDiv, changeTitleDiv, randarChart, lineChart2, scrollTable },
   data () {
     return {
       xAxisData: [],
@@ -187,7 +194,7 @@ export default {
       timeList: [
         {
           name: '天',
-          title: 'days'
+          title: 'day'
         },
         {
           name: '周',
@@ -195,34 +202,34 @@ export default {
         },
         {
           name: '月',
-          title: 'months'
+          title: 'month'
         },
         {
           name: '年',
-          title: 'years'
+          title: 'year'
         },
       ],
       timeSelectIndex: 0,
       roleList: [
         {
           name: '全部',
-          id: 'all'
+          id: '0'
         },
         {
-          name: '设防点A',
-          id: 'roleA'
+          name: '嘉松南路',
+          id: '1'
         },
         {
-          name: '设防点B',
-          id: 'roleB'
+          name: '绿城路',
+          id: '2'
         },
         {
-          name: '设防点C',
-          id: 'roleC'
+          name: '通跃路',
+          id: '3'
         },
         {
-          name: '设防点D',
-          id: 'roleD'
+          name: '思贤路',
+          id: '4'
         }
       ],
       roleLiIndex: 0,
@@ -276,7 +283,47 @@ export default {
           type: 'manholeCver'
         },
       ],
-      energyTotal: 0
+      energyTotal: 0,
+      tabData: [],
+      tableConfigArr: [
+        {
+          fixed: false,
+          prop: 'prediction',
+          label: '异常预判',
+          tooltip: true,
+        },
+        {
+          fixed: false,
+          prop: 'deviceType',
+          label: '设备类型',
+          tooltip: true,
+        },
+        {
+          fixed: false,
+          prop: 'deviceCode',
+          label: '设备编号',
+          tooltip: true,
+        },
+        {
+          fixed: false,
+          prop: 'deivceSite',
+          label: '设备地址',
+          tooltip: true,
+        },
+        // {
+        //   fixed: false,
+        //   prop: 'schedule',
+        //   label: '维修进度',
+        //   tooltip: false,
+        // },
+        // {
+        //   fixed: false,
+        //   prop: 'deviceNumber',
+        //   label: '工单指派',
+        //   tooltip: false,
+        // },
+      ],
+      flowTimeType: 'day'
     }
   },
   computed: {
@@ -294,14 +341,13 @@ export default {
     sceneInfo: {
       deep: true,
       handler (newVal, oldVal) {
-        // intelligenceWireList
-        // console.log('sceneInfo---newVal', newVal)
+        // console.log('sceneInfo---sceneRightModule1111', newVal)
         if (newVal) {
           this.resetLeftModuleData(newVal)
-          this.bugList = newVal.warningList || []
+          this.tabData = newVal.warningList || []
           this.solve = newVal.warSolveList[0].solveNumber || 0
           this.solved = newVal.warSolveList[1].solveNumber || 0
-          this.bugList.forEach(item => {
+          this.tabData.forEach(item => {
             this.deviceType.forEach(it => {
               if (item.deviceType && item.deviceType === it.id) {
                 item.deviceType = it.name
@@ -309,12 +355,6 @@ export default {
             })
           })
           this.resetPartData(newVal.intelligenceWireList)
-          // setTimeout(() => {
-          this.$refs.pieChartProject.initChart()
-          this.$refs.pieChartSystem.initChart()
-          this.$refs.pieChartEquipment.initChart()
-          this.$refs.trafficChart.initChart()
-          // }, 200)
         }
       }
     }
@@ -324,8 +364,8 @@ export default {
     this.resetLeftModuleData(this.sceneInfo)
     this.solve = this.sceneInfo.warSolveList[0].solveNumber || 0
     this.solved = this.sceneInfo.warSolveList[1].solveNumber || 0
-    this.bugList = this.sceneInfo.warningList || []
-    this.bugList.forEach(item => {
+    this.tabData = this.sceneInfo.warningList || []
+    this.tabData.forEach(item => {
       this.deviceType.forEach(it => {
         if (item.deviceType && item.deviceType === it.id) {
           item.deviceType = it.name
@@ -333,13 +373,9 @@ export default {
       })
     })
     this.resetPartData(this.sceneInfo.intelligenceWireList)
-    // setTimeout(() => {
-    this.$refs.pieChartProject.initChart()
-    this.$refs.pieChartSystem.initChart()
-    this.$refs.pieChartEquipment.initChart()
-    // this.$refs.trafficChart.initChart()
-    // }, 200)
-    console.log('sceneInfo----homeBottomModule', this.sceneInfo)
+    // this.$refs.pieChartProject.initChart()
+    // this.$refs.pieChartSystem.initChart()
+    console.log('sceneInfo----sceneRightModule2222', this.sceneInfo)
   },
 
   methods: {
@@ -349,13 +385,34 @@ export default {
     },
     changeTime (type, index) {
       this.timeSelectIndex = index
-      this.getWarGroup(type)
+      let id = this.$route.query.id || 1
+      this.flowTimeType = type
+      let road = ''
+      if (this.roleLiIndex) {
+        road = String(this.roleLiIndex)
+      }
+      let params = {
+        projectId: id,
+        time: type,
+        road: road
+      }
+      this.getWarGroup(params)
     },
     selectRole (data, index) {
       this.roleLiIndex = index
+      let id = this.$route.query.id || 1
+      let road = ''
+      if (this.roleLiIndex) {
+        road = String(this.roleLiIndex)
+      }
+      let params = {
+        projectId: id,
+        time: this.flowTimeType,
+        road: road
+      }
+      this.getWarGroup(params)
     },
     resetPartData (list) {
-      // console.log('%c 交通安全1', 'color: green', list)
       this.parkXAxis = []
       this.parkYAxis[0] = []
       this.parkYAxis[1] = []
@@ -372,8 +429,6 @@ export default {
         this.parkYAxis[4].push(item.xzwf)
         this.parkYAxis[5].push(item.zdry)
       })
-      // console.log('%c 交通安全2', 'color: green', this.parkYAxis)
-      // console.log('%c 交通安全3', 'color: green', this.parkXAxis)
     },
     changeArrayFun (arr, type) {
       let newArr = []
@@ -389,6 +444,7 @@ export default {
           })
           newArr.push({
             name: name,
+            max: item.typeNumber + 10 || 0,
             value: item.typeNumber || 0,
             id: type + (index + 1),
             type: type
@@ -401,8 +457,8 @@ export default {
     clickSpan (num) {
       this.spanIndex = num
       if (num === '0') {
-        this.bugList = this.sceneInfo.warningList
-        this.bugList.forEach(item => {
+        this.tabData = this.sceneInfo.warningList
+        this.tabData.forEach(item => {
           this.deviceType.forEach(it => {
             if (item.deviceType && item.deviceType === it.id) {
               item.deviceType = it.name
@@ -410,8 +466,8 @@ export default {
           })
         })
       } else {
-        this.bugList = this.sceneInfo.warningListByReso
-        this.bugList.forEach(item => {
+        this.tabData = this.sceneInfo.warningListByReso
+        this.tabData.forEach(item => {
           this.deviceType.forEach(it => {
             if (item.deviceType && item.deviceType === it.id) {
               item.deviceType = it.name
@@ -421,7 +477,9 @@ export default {
       }
     },
     resetLeftModuleData (data) {
-      this.randar = this.changeArrayFun(data.warGroupList, 'regulations')
+      if (data && data.warGroupList) {
+        this.randar = this.changeArrayFun(data.warGroupList, 'regulations')
+      }
     },
     getCleanEnergy () {
       sourceMirror.getCleanEnergy().then(res => {
@@ -436,19 +494,30 @@ export default {
         }
       })
     },
-    getWarGroup (date) {
-      sourceMirror.getWarGroup(date).then(res => {
-        console.log('result---res', res)
+    getWarGroup (params) {
+      sourceMirror.getWarGroup(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
           this.resetPartData(result.intelligenceWireList)
           this.randar = this.changeArrayFun(result.warGroupList, 'regulations')
-          setTimeout(() => {
-            this.$refs.pieChartEquipment.initChart()
-            this.$refs.trafficChart.initChart()
-          }, 200)
+          this.$refs.pieChartEquipment.initChart()
+          this.$refs.trafficChart.initChart()
         }
       })
+    },
+    getTableRow (row) {
+      console.log('row', row)
+      let data = {
+        type: 'bug',
+        row: row,
+        jw: [121.231733, 31.032311],
+      }
+      console.log('查看BUG详情', data)
+      eventBus.$emit('addMarkerOnly', data)
+    },
+    //过去24小时AQI指数
+    showHistoryAQI () {
+
     },
 
   },

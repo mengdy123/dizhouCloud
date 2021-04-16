@@ -42,7 +42,8 @@
 
     <div class="dz-left-module-row system-div">
       <titleDiv title='告警信息'></titleDiv>
-      <barChart :xAxisData='xAxisData'
+      <barChart ref="barChart"
+                :xAxisData='xAxisData'
                 :value='valueBar'></barChart>
     </div>
     <div class="dz-left-module-row system-div">
@@ -126,11 +127,10 @@ export default {
     }
   },
   mounted () {
-    console.log('homeIndexInfo----homeBottomModule', this.homeIndexInfo.warGroupList)
-    if (JSON.stringify(this.homeIndexInfo) != '{}') {
-      this.resetEnergyData(this.homeIndexInfo.energy)
-      this.resetWarningList(this.homeIndexInfo.warGroupList)
-    }
+    // if (JSON.stringify(this.homeIndexInfo) != '{}') {
+    this.resetEnergyData(this.homeIndexInfo.energy || [])
+    this.resetWarningList(this.homeIndexInfo.warGroupList || [])
+    // }
   },
 
   methods: {

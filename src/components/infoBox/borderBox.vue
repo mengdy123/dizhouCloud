@@ -18,19 +18,20 @@
                       @click.stop="selectSpan(item,index)">{{item.name}}</span>
               </div>
               <div v-if="spanType === 'table'">
-                <el-table :data="tableData"
+                <el-table :data="infoData.table"
+                          :header-cell-style="{color: 'cccccc',fontWeight: '500',height: '48px'}"
                           style="width: 100%; height: 100%">
                   <el-table-column prop="time"
                                    label="时间"
                                    width="100">
                   </el-table-column>
                   <el-table-column prop="type"
-                                   label="姓名">
+                                   label="类型">
                   </el-table-column>
-                  <el-table-column prop="detail"
+                  <el-table-column prop="details"
                                    label="详情">
                   </el-table-column>
-                  <el-table-column prop="status"
+                  <el-table-column prop="state"
                                    label="状态">
                   </el-table-column>
                 </el-table>
@@ -38,15 +39,14 @@
               <ul v-else>
                 <li v-for="(item, index) in list"
                     :key='index'>
-                  <img v-if="item.url"
-                       :src="item.url"
+                  <img v-if="item.name || item.label"
+                       src="../../assets/icon/ecs-running.png"
                        alt="">
                   <div>
-                    <span>{{item.label}}</span>
+                    <span>{{item.label || item.name}}</span>
                     <span>{{item.value}}</span>
                   </div>
                 </li>
-
               </ul>
               <barChart1 v-if="list && list.type === 'barChart'"
                          class="flow-chart-div"
@@ -103,7 +103,8 @@ export default {
           detail: '行人违章',
           status: '已警示',
         },
-      ]
+      ],
+      list: []
     }
   },
   watch: {
@@ -112,7 +113,14 @@ export default {
       handler (newValue, oldValue) {
         this.spanType = newValue.secondList[0].type
         this.list = newValue[this.spanType]
-        console.log('this.spanType', this.spanType)
+        this.$nextTick(() => {
+          this.$refs.flowChart.initChart()
+        })
+        // setTimeout(() => {
+        //   if (this.$refs['flowChart']) {
+        //     this.$refs.flowChart.initChart()
+        //   }
+        // }, 200)
       }
     }
   },
@@ -120,19 +128,20 @@ export default {
     this.activeName = this.editableTabs.data[0].name
     this.spanType = this.infoData.secondList[0].type
     this.list = this.infoData[this.spanType]
+    // setTimeout(() => {
+    //   this.$refs.flowChart.initChart()
+    // }, 500)
   },
   methods: {
     selectSpan (item, index) {
       this.spanIndex = index
       this.spanType = item.type
       this.list = this.infoData[this.spanType]
-      console.log('spanType---item', this.spanType)
-      console.log('selectSpan---item', this.infoData[this.spanType])
     },
     handleClick (tab, event) {
       event.stopPropagation();
       // console.log('handleClick', tab);
-      this.$emit('saveTabsTitle', tab.name)
+      this.$emit('saveTabsTitle', Number(tab.name) + 1)
 
       // this.list = this.infoData[this.spanType]
     },
@@ -180,7 +189,6 @@ export default {
 
   &-content {
     width: 100%;
-    height: 100%;
     background: rgba(7, 14, 71, 0.5);
     color: @white;
     padding: 10px 30px;
@@ -257,18 +265,22 @@ export default {
     background-color: rgba(53, 233, 255, 1);
     height: 1px;
   }
-  /deep/ .el-table th,
-  .el-table tr {
-    background-color: rgba(7, 14, 71, 0.5);
+  /deep/.el-table,
+  /deep/.el-table__expanded-cell {
+    background-color: transparent;
   }
-  /deep/.el-table {
-    background-color: rgba(7, 14, 71, 0.5);
-    color: #e1e6fa;
+
+  /deep/.el-table th,
+  /deep/.el-table tr {
+    background-color: transparent;
   }
   /deep/.el-table--enable-row-hover .el-table__body tr:hover > td {
     background-color: rgba(7, 14, 71, 0.5);
+    color: #e1e6fa !important;
   }
-
+  /deep/.el-table__body {
+    color: #e1e6fa !important;
+  }
   /deep/.el-table td,
   /deep/ .el-table th.is-leaf {
     border-bottom: 1px solid rgba(7, 14, 71, 0.5);

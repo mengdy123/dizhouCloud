@@ -60,16 +60,16 @@
                   @click.stop="selectPark(item, index)">{{item.name}}</li>
             </ul>
           </div>
-          <pieChart5 class="flow-chart-div2"
+          <pieChart7 class="flow-chart-div2"
                      ref="parkChart"
                      :value='parkData'
-                     :valuePer='parkDataPer'></pieChart5>
+                     :valuePer='parkDataPer'></pieChart7>
         </div>
       </div>
       <div class="flow-div-content2">
         <div class="retract-content">
           <div class="change-chart-time">
-            <div class="title-span">车位使用率</div>
+            <div class="title-span">{{chartTitle}}</div>
             <div class="time-span">
               <span v-for="(item, index) in timeList"
                     :key="index"
@@ -92,55 +92,43 @@
 import titleDiv from "@/components/titleModule";
 import changeTitleDiv from "@/components/titleModule/changeTitle.vue";
 import barChart1 from '@/components/charts/barChart1.vue'
-import pieChart5 from '@/components/charts/pieChart5.vue'
+import pieChart7 from '@/components/charts/pieChart7.vue'
 import lineChart from '@/components/charts/lineChart.vue'
 import lineChart2 from '@/components/charts/lineChart2.vue'
 import { mapState, mapActions } from 'vuex'
 import sourceMirror from '@/resource/sourceMirror'
 import eventBus from '@/utils/bus'
 export default {
-  components: { titleDiv, barChart1, lineChart, changeTitleDiv, pieChart5, lineChart2 },
+  components: { titleDiv, barChart1, lineChart, changeTitleDiv, pieChart7, lineChart2 },
   data () {
     return {
       roleList: [
         {
           name: '全部',
-          id: 'all'
+          id: '0'
         },
         {
-          name: '道路A',
-          id: 'roleA'
+          name: '嘉松南路',
+          id: '1'
         },
         {
-          name: '道路B',
-          id: 'roleB'
+          name: '绿城路',
+          id: '2'
         },
         {
-          name: '道路C',
-          id: 'roleC'
+          name: '通跃路',
+          id: '3'
         },
         {
-          name: '道路D',
-          id: 'roleD'
+          name: '思贤路',
+          id: '4'
         },
-        {
-          name: '道路E',
-          id: 'roleE'
-        },
-        {
-          name: '道路F',
-          id: 'roleF'
-        },
-        {
-          name: '道路D',
-          id: 'roleD'
-        }
       ],
       roleLiIndex: 0,
       timeList: [
         {
           name: '天',
-          title: 'days'
+          title: 'day'
         },
         {
           name: '周',
@@ -148,11 +136,11 @@ export default {
         },
         {
           name: '月',
-          title: 'months'
+          title: 'month'
         },
         {
           name: '年',
-          title: 'years'
+          title: 'year'
         },
       ],
       timeSelectIndex: 0,
@@ -162,10 +150,10 @@ export default {
         []
       ],
       flowTitle: ['车流量', '人流量'],
-      congestionXAxis: ['00:00', '04:00', '08:00', '12:00', '14:00', '20:00'],
+      congestionXAxis: [],
       congestionYAxis: [
-        [1.06, 1.19, 1.25, 0.76, 0.63, 0.75],
-        [1.16, 1.29, 1.35, 0.86, 0.73, 0.85],
+        [],
+        [],
       ],
       congestionTitle: ['今日指数', '去年本月通勤日均值'],
       resourceType: [
@@ -183,74 +171,55 @@ export default {
       parkList1: [
         {
           name: '全部',
-          type: 'all'
+          type: '1'
         },
         {
           name: '出租车车位',
-          type: 'taxi'
+          type: '2'
         },
         {
           name: '临停车位',
-          type: 'shortPark'
+          type: '3'
         },
         {
           name: '收费车位',
-          type: 'chargePark'
+          type: '4'
         }
       ],
       parkLiIndex: 0,
-      timeList2: [
-        {
-          name: '天',
-          title: 'days'
-        },
-        {
-          name: '周',
-          title: 'week'
-        },
-        {
-          name: '月',
-          title: 'months'
-        },
-        {
-          name: '年',
-          title: 'years'
-        },
-      ],
+      parkType: '1',
       timeSelectIndex2: 0,
-      parkXAxis: ['00:00', '04:00', '08:00', '12:00', '14:00', '20:00'],
+      parkXAxis: [],
       parkYAxis: [
-        [120, 190, 130, 180, 50, 100],
-        [80, 120, 150, 160, 180, 90]
+        [],
+        []
       ],
       parkTitle: ['已用车位', '空闲车位'],
       colors: ['#91CB74', '#7E8490'],
       parkData: [],
-      parkDataPer: []
+      parkDataPer: [],
+      chartTitle: '车位使用率',
+      resourceSelectedTime: 'day',
+      flowTimeType: 'day'
     }
   },
   computed: {
     ...mapState({
       sceneInfo: state => state.home.sceneInfo,
       wellTypeList: state => state.common.wellTypeList,
+      parkTypeList: state => state.common.parkTypeList,
+
     })
   },
   watch: {
     sceneInfo: {
       deep: true,
       handler (newVal, oldVal) {
-        // console.log('sceneInfo---newVal', newVal)
-        // carParkConlList 停车位资源
-        // carUsageRatesList 车位使用率
         if (newVal) {
           this.resetFlowData(newVal.lowStatisticsList)
           this.$refs.flowChart.initChart()
           this.resetCongestionData(newVal.blockIndex)
           this.$refs.congestionChart.initChart()
-          this.resetParkData(newVal.carParkConlList)
-          this.$refs.parkChart.initChart()
-          this.resetPartUserData(newVal.carUsageRatesList)
-          this.$refs.parkPerChart.initChart()
         }
       }
     }
@@ -259,15 +228,12 @@ export default {
     let id = this.$route.query.id || 1
     this.$store.dispatch('getProjectsum', id)
     this.parkList = this.parkList1
+    this.getCarParkInfo('1')
     setTimeout(() => {
       this.resetFlowData(this.sceneInfo.lowStatisticsList)
       this.$refs.flowChart.initChart()
       this.resetCongestionData(this.sceneInfo.blockIndex)
       this.$refs.congestionChart.initChart()
-      this.resetParkData(this.sceneInfo.carParkConlList)
-      this.$refs.parkChart.initChart()
-      this.resetPartUserData(this.sceneInfo.carUsageRatesList)
-      // this.$refs.parkPerChart.initChart()
     }, 200)
   },
   methods: {
@@ -281,12 +247,19 @@ export default {
           if (item.type === '1') {
             this.flowYAxis[0].push(item.count)
           } else {
-            this.flowXAxis.push(item.time)
+            if (this.flowTimeType === 'day') {
+              this.flowXAxis.push(item.time.slice(11, 16))
+            } else if (this.flowTimeType === 'week') {
+              this.flowXAxis.push(item.days)
+            } else if (this.flowTimeType === 'month') {
+              this.flowXAxis.push(item.months)
+            } else if (this.flowTimeType === 'year') {
+              this.flowXAxis.push(item.years)
+            }
+
             this.flowYAxis[1].push(item.count)
           }
         });
-        // console.log(' this.flowXAxis', this.flowXAxis)
-        // console.log(' this.flowYAxis', this.flowYAxis)
       }
     },
     resetCongestionData (list) {
@@ -296,105 +269,202 @@ export default {
       this.congestionYAxis[0] = list.blockIndexHiList
       this.congestionYAxis[1] = list.blockIndexList
     },
+    // 获取停车位资源 
+    // 1 全部
+    // 2 出租车
+    // 3 临停
+    // 4 收费
+    getCarParkInfo (type) {
+      sourceMirror.getCarStallInfo(type).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.resetParkData(result.stallLlist)
+          this.resetPartUserData(result.usageRatesList)
+          setTimeout(() => {
+            this.$refs.parkChart.initChart()
+            this.$refs.parkPerChart.initChart()
+          }, 500)
+        }
+      })
+    },
     resetParkData (list) {
       // console.log('%c 停车位资源', 'color: green', list)
       this.parkDataPer = []
       this.parkData = []
-      list.forEach(item => {
-        if (this.parkLiIndex === 0) {
+      if (this.resourceSelected === 1 && list.length === 1) {
+        list.forEach(item => {
+          let data1 = Object.assign({}, item)
+          data1.sumZb = data1.remainZb
+          this.parkDataPer.push(item)
+          this.parkDataPer.push(data1)
+        })
+      } else {
+        list.forEach(item => {
           if (item.type === '1') {
             let data1 = Object.assign({}, item)
             data1.sumZb = data1.remainZb
             this.parkDataPer.push(item)
             this.parkDataPer.push(data1)
-          } else if (item.type === '2' || item.type === '3' || item.type === '4') {
+          } else {
             this.parkData.push(item)
-          }
-        } else {
-          if (item.type === '1') {
-            let data1 = Object.assign({}, item)
-            data1.sumZb = data1.remainZb
-            this.parkDataPer.push(item)
-            this.parkDataPer.push(data1)
-          } else if (item.type === '5' || item.type === '6' || item.type === '6') {
-            this.parkData.push(item)
-          }
-        }
-      })
-      this.parkDataPer.forEach(it => {
-        it.value = it.sumZb
-        it.name = ''
-      })
-      if (this.resourceSelected == '0') {
-        this.parkData.forEach(it => {
-          it.value = it.sumZb
-          if (it.type === '2' || it.type === '5') {
-            it.name = '出租车'
-          } else if (it.type === '3' || it.type === '6') {
-            it.name = '临停'
-          } else if (it.type === '4' || it.type === '7') {
-            it.name = '收费'
           }
         })
+      }
+      this.parkDataPer.forEach(it => {
+        if (it.roadName) {
+          it.name = it.roadName
+          it.value = it.sumZb
+        } else {
+          it.value = it.sumZb
+          it.name = ''
+        }
+      })
+      if (this.resourceSelected === 1) {
+        if (list.length > 1) {
+          this.parkData.forEach(it => {
+            it.value = it.sumZb
+            if (it.roadName) {
+              it.name = it.roadName
+            } else {
+              this.wellTypeList.forEach(v => {
+                if (it.type === v.type) {
+                  it.name = v.name
+                }
+              })
+            }
+          })
+        } else {
+          this.parkData = []
+        }
       } else {
         this.parkData.forEach(it => {
           it.value = it.sumZb
-
+          if (it.roadName) {
+            it.name = it.roadName
+          } else {
+            this.parkTypeList.forEach(v => {
+              if (it.type === v.type) {
+                it.name = v.name
+              }
+            })
+          }
         })
       }
-
     },
     resetPartUserData (list) {
       // console.log('%c 车位使用率', 'color: green', list)
       this.parkXAxis = []
       this.parkYAxis[0] = []
       this.parkYAxis[1] = []
-      list.forEach(item => {
-        this.parkXAxis.push(item.date)
-        this.parkYAxis[0].push(item.carUsageRates)
-        this.parkYAxis[1].push(item.carUsageRatesHi)
-      })
+      if (this.resourceSelected === 1) {
+        list.forEach(item => {
+          this.parkXAxis.push(item.date)
+          this.parkYAxis[0].push(item.gasIndex)
+        })
+      } else {
+        list.forEach(item => {
+          this.parkXAxis.push(item.date)
+          this.parkYAxis[0].push(item.carUsageRates)
+          this.parkYAxis[1].push(item.carUsageRatesHi)
+        })
+      }
+
     },
     changeTime (type, index) {
       this.timeSelectIndex = index
-      this.getFlowBy(type)
+      let id = this.$route.query.id || 1
+      this.flowTimeType = type
+      let road = ''
+      if (this.roleLiIndex) {
+        road = String(this.roleLiIndex)
+      }
+      let params = {
+        projectId: id,
+        time: type,
+        road: road
+      }
+      this.getFlowBy(params)
     },
     changeTime2 (type, index) {
       this.timeSelectIndex2 = index
-      this.getCarUsageRatesBy(type)
+      this.resourceSelectedTime = type
+      let id = this.$route.query.id || 1
+      if (this.resourceSelected === 1) {
+        let params = {
+          projectId: id,
+          time: this.resourceSelectedTime,
+          type: this.parkType
+        }
+        this.getManholeCover2(params)
+      } else {
+        let params = {
+          projectId: id,
+          time: this.resourceSelectedTime,
+          type: this.parkType
+        }
+        this.getCarUsageRatesBy(params)
+      }
     },
     selectRole (data, index) {
       this.roleLiIndex = index
+      let id = this.$route.query.id || 1
+      let road = ''
+      if (this.roleLiIndex) {
+        road = String(this.roleLiIndex)
+      }
+      let params = {
+        projectId: id,
+        time: this.flowTimeType,
+        road: road
+      }
+      this.getFlowBy(params)
     },
+    // 资源类型
     changeResource (data) {
       let id = this.$route.query.id || 1
       this.resourceSelected = data
+      this.parkLiIndex = 0
+      this.parkType = '1'
       if (data === 1) {
-        this.getManholeCover(id)
+        this.parkDataPer = []
+        this.parkData = []
         this.parkList = this.wellTypeList
+        this.chartTitle = '有毒气体浓度'
+        let params = {
+          projectId: id,
+          time: this.resourceSelectedTime,
+          type: this.parkType
+        }
+        this.getManholeCover(params)
+        this.getManholeCover2(params)
+
       } else {
+        this.chartTitle = '车位使用率'
+        this.parkDataPer = []
+        this.parkData = []
         this.parkList = this.parkList1
-        this.resetParkData(this.sceneInfo.carParkConlList)
-        setTimeout(() => {
-          this.$refs.parkChart.initChart()
-        }, 200)
+        this.getCarParkInfo('1')
       }
     },
+    // 资源分类 type
     selectPark (data, index) {
       let id = this.$route.query.id || 1
       this.parkLiIndex = index
+      this.parkType = data.type
       if (this.resourceSelected === 1) {
-        this.getManholeCover(id)
+        let params = {
+          projectId: id,
+          time: this.resourceSelectedTime,
+          type: this.parkType
+        }
+        this.getManholeCover(params)
       } else {
-        this.resetParkData(this.sceneInfo.carParkConlList)
+        this.getCarParkInfo(data.type)
       }
-
-      setTimeout(() => {
-        this.$refs.parkChart.initChart()
-      }, 200)
     },
-    getFlowBy (date) {
-      sourceMirror.getFlowBy(date).then(res => {
+    // 人、车流量2
+    getFlowBy (params) {
+      sourceMirror.getFlowBy(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
           this.resetFlowData(result)
@@ -404,22 +474,39 @@ export default {
         }
       })
     },
-    getManholeCover (id) {
-      sourceMirror.getManholeCover(id).then(res => {
+    // 井盖资源
+    getManholeCover (params) {
+      sourceMirror.getManholeCover(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
           // console.log('%c result', 'color: blue', result)
-          this.resetParkData(result)
+          // coverIndexList
+          this.resetParkData(result.coverInfoList)
           setTimeout(() => {
             this.$refs.parkChart.initChart()
           }, 200)
         }
       })
     },
-    getCarUsageRatesBy (date) {
-      sourceMirror.getCarUsageRatesBy(date).then(res => {
+    getManholeCover2 (params) {
+      sourceMirror.getManholeCover(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
+          // console.log('%c result', 'color: blue', result)
+          // coverIndexList
+          this.resetPartUserData(result.coverIndexList)
+          setTimeout(() => {
+            this.$refs.parkPerChart.initChart()
+          }, 500)
+        }
+      })
+    },
+    // 获取停车位资源 周，月，年接口
+    getCarUsageRatesBy (params) {
+      sourceMirror.getCarUsageRatesBy(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          // console.log('%c 获取停车位资源', 'color: blue', result)
           this.resetPartUserData(result)
           setTimeout(() => {
             this.$refs.parkPerChart.initChart()

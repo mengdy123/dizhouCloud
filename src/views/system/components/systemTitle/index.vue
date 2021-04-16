@@ -36,9 +36,10 @@ export default {
   display: flex;
   padding: 6px 16px;
   img {
-    width: 40px;
-    height: 40px;
+    width: 53px;
+    height: 24px;
     margin-right: 10px;
+    margin-top: 14px;
     cursor: pointer;
   }
   span {

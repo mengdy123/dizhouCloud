@@ -2,16 +2,12 @@
   <div class="chart-pie">
     <div ref="chartDomPie"
          id="chartDomPie"></div>
-
   </div>
 </template>
 <script>
 import * as echarts from 'echarts';
-import layerData from '../../data/layerProject.json'
 import pointsData from '../../data/clusterPoints.json'
-import pointsData2 from '../../data/clusterPoints2.json'
-import pointsData3 from '../../data/clusterPoints3.json'
-
+import eventBus from '@/utils/bus'
 import { mapActions, mapMutations } from 'vuex'
 export default {
   props: {
@@ -60,22 +56,22 @@ export default {
     }
   },
   watch: {
-    // value: {
-    //   deep: true,
-    //   handler (newVal, oldVal) {
-    //     if (newVal.length > 0) {
-    //       this.initChart()
-    //     }
-    //   }
-    // }
+    value: {
+      deep: true,
+      handler (newVal, oldVal) {
+        if (newVal.length > 0) {
+          this.initChart()
+        }
+      }
+    }
   },
   mounted () {
-    this.$nextTick(() => {
-      // console.log('value---randar', this.value)
-      if (this.value.length > 0) {
-        this.initChart()
-      }
-
+    // this.$nextTick(() => {
+    //   this.initChart()
+    // })
+    const that = this
+    eventBus.$on('initChartRandar', data => {
+      that.initChart(data)
     })
   },
   methods: {
@@ -88,7 +84,8 @@ export default {
           opacity: 0.5
         }
       };
-      const canvasChart = echarts.init(this.$refs.chartDomPie)
+
+      let canvasChart = echarts.init(this.$refs.chartDomPie)
       window.onresize = () => {
         return (() => {
           canvasChart.resize()
@@ -102,14 +99,13 @@ export default {
       }
       const option = {
         title: {
-
         },
         legend: {
           show: false
         },
         radar: {
           shape: 'rect',
-          splitNumber: 8, // 雷达图圈数设置 
+          // splitNumber: 8, // 雷达图圈数设置 
           center: _this.center,
           // 圆中心坐标，数组的第一项是横坐标，第二项是纵坐标。[ default: ['50%', '50%'] ]
           radius: '60%',
@@ -123,12 +119,13 @@ export default {
               // console.log('value', value)
               // console.log('indicator', indicator)
               let titleDiv = null
-              if (_this.type === 'equipment') {
-                titleDiv = `{name|${value}}\n{num|${indicator.value}}`;
-              } else if (_this.type === 'regulations') {
-                titleDiv = `{name|${value}}({n|${indicator.value}})`;
+              if (indicator) {
+                if (_this.type === 'equipment') {
+                  titleDiv = `{name|${value}}\n{num|${indicator.value}}`;
+                } else if (_this.type === 'regulations') {
+                  titleDiv = `{name|${value}}({n|${indicator.value}})`;
+                }
               }
-
               return titleDiv
             },
             rich: {
@@ -170,35 +167,36 @@ export default {
           },
         }
         ,
-        series: [{
-          name: '雷达图', // tooltip中的标题
-          type: 'radar', //表示是雷达图
-          symbol: 'none', // 拐点的样式，还可以取值'rect','angle'等
-          areaStyle: {
-            normal: {
-              width: 0.1,
-              opacity: 0.2,
-            },
-          },
-          symbol: 'circle',
-          symbolSize: 5,
-          data: [
-            {
-              value: areaData,
-              name: '',
-              itemStyle: {
-                normal: {
-                  color: _this.color,
-                  lineStyle: lineStyle,
-                },
+        series: [
+          {
+            name: '雷达图', // tooltip中的标题
+            type: 'radar', //表示是雷达图
+            areaStyle: {
+              normal: {
+                width: 0.1,
+                opacity: 0.2,
               },
-              lineStyle: {
-                width: 1,
-                color: _this.color, // 雷达构成的区域边框
-              }
             },
-          ],
-        }],
+            symbol: 'circle',
+            symbolSize: 5,
+            data: [
+              {
+                value: areaData,
+                name: '',
+                itemStyle: {
+                  normal: {
+                    color: _this.color,
+                    lineStyle: lineStyle,
+                  },
+                },
+                lineStyle: {
+                  width: 1,
+                  color: _this.color, // 雷达构成的区域边框
+                }
+              },
+            ],
+          }
+        ],
       }
       canvasChart.on('click', (e) => {
         console.log('e', e)

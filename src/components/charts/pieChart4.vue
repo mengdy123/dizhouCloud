@@ -125,8 +125,8 @@ export default {
               rich: {
                 name: {
                   fontSize: 10,
-                  color: '#ccc',
-                  opacity: 0.5
+                  color: '#E1E6FA',
+                  opacity: 0.8
                 },
                 num: {
                   fontSize: 14,
@@ -137,9 +137,9 @@ export default {
               lineHeight: 20
             },
             labelLine: {
-              length: 8,
+              length: 5,
               length2: 1,
-              maxSurfaceAngle: 80,
+              // maxSurfaceAngle: 80,
               lineStyle: {
                 type: 'dashed'
               }

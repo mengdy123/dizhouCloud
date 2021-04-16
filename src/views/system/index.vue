@@ -16,7 +16,7 @@
     <div class="dz-system-content"
          :class="[{'small-content': !menuStatus},{'big-content': menuStatus}]">
       <div class="dz-system-content-top">
-        <div>
+        <div @click="goHomeIndex">
           <i class="el-icon-picture-outline-round"></i>
           <span>智慧看板</span>
         </div>
@@ -44,6 +44,7 @@
 import menuBox from './components/menuModule'
 import systemTitle from './components/systemTitle'
 import { mapState, mapActions } from 'vuex'
+import systemMirror from '@/resource/systemMirror'
 export default {
   components: { menuBox, systemTitle },
   data () {
@@ -56,6 +57,35 @@ export default {
       menuStatus: state => state.system.menuStatus,
     })
   },
+  mounted () {
+    this.getList()
+  },
+  methods: {
+    ...mapActions(['saveProjectList', 'saveSystemList']),
+    goHomeIndex () {
+      this.$router.push('mainIndex')
+    },
+    getList () {
+      let params = {
+        currentPage: 1,
+        pageSize: 10000,
+      }
+      systemMirror.getProjectList(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.saveProjectList(result.content)
+        }
+
+      })
+      systemMirror.getListBySeek(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.saveSystemList(result.content)
+        }
+
+      })
+    },
+  }
 
 }
 </script>
@@ -109,6 +139,7 @@ export default {
   }
   .small-menu {
     width: 240px;
+    overflow-y: scroll;
   }
   .big-menu {
     width: 64px;

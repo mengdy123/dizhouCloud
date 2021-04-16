@@ -17,6 +17,8 @@ import * as THREE from 'three'
 import { OBJLoader, MTLLoader } from 'three-obj-mtl-loader'
 import { CSS2DRenderer, CSS2DObject } from 'three-css2drender'
 import borderBox from '@/components/infoBox/borderBox.vue'
+import sourceMirror from '@/resource/sourceMirror'
+import { mapState, mapActions } from 'vuex'
 // 声明 raycaster 和 mouse 变量
 let raycaster = new THREE.Raycaster(); //射线
 let mouse = new THREE.Vector2()//鼠标位置
@@ -51,38 +53,7 @@ export default {
       oldChildren: [],
       infoData: {},
       infoData2: {
-        operation: [
-          {
-            label: '编号',
-            value: '544893',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-          {
-            label: '类型',
-            value: '交通',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-          {
-            label: '名称',
-            value: '立柱3号',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-          {
-            label: '型号LZ7889',
-            value: '低',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-          {
-            label: '安装位置',
-            value: '姚北路延展路交叉口东500米',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-          {
-            label: '现场图片',
-            value: '1215.jpg',
-            url: require('../../assets/icon/ecs-running.png')
-          }
-        ],
+        operation: [],
         secondList: [
           {
             name: '基本数据',
@@ -97,38 +68,7 @@ export default {
             type: 'animate'
           }
         ],
-        equipment: [
-          {
-            label: '工作电压',
-            value: '15V',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-          {
-            label: '工作功率',
-            value: '120W',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-          {
-            label: '防水防尘等级',
-            value: '5',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-          {
-            label: '工作温度范围',
-            value: '-20~40℃',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-          {
-            label: '外观',
-            value: '白色',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-          {
-            label: '尺寸',
-            value: '45cm*45cm',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-        ],
+        equipment: [],
         animate: []
       },
       infoData3: {
@@ -138,38 +78,7 @@ export default {
             type: 'table'
           }
         ],
-        table: [
-          {
-            label: '编号',
-            value: '544893',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-          {
-            label: '类型',
-            value: '交通',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-          {
-            label: '名称',
-            value: '立柱3号',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-          {
-            label: '型号LZ7889',
-            value: '低',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-          {
-            label: '安装位置',
-            value: '姚北路延展路交叉口东500米',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-          {
-            label: '现场图片',
-            value: '1215.jpg',
-            url: require('../../assets/icon/ecs-running.png')
-          }
-        ],
+        table: [],
       },
       infoData4: {
         operation: [
@@ -287,23 +196,20 @@ export default {
             type: 'sensor'
           }
         ],
-        sensor: [
-
-        ],
         flow: {
           type: 'barChart',
           title: ['人流量', '车流量'],
-          xAxisData: ['07:00', '07:15', , '07:30', '07:45', '08:00', '08:15', '08:30', '08:45', '09:00', '09:15'],
+          xAxisData: [],
           yAxisData: [
-            [180, 170, 160, 150, 140, 130, 120, 110, 100, 90],
-            [90, 80, 76, 70, 66, 60, 55, 50, 40, 30]
+            [],
+            []
           ]
         },
         video: [''],
         screen: [
           {
             label: '屏幕提示语',
-            value: '您已闯红灯，请退回安全线内等候',
+            value: '',
             url: require('../../assets/icon/ecs-running.png')
           },
           {
@@ -311,45 +217,9 @@ export default {
             url: require('../../assets/icon/ecs-running.png')
           }
         ],
-        sensor: [
-          {
-            label: '温/湿度',
-            value: '20℃/30%',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-          {
-            label: '噪音',
-            value: '45db',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-          {
-            label: 'PM2.5',
-            value: '12',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-          {
-            label: 'PM10',
-            value: '0.2',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-          {
-            label: 'SO2',
-            value: '12',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-          {
-            label: 'NOx',
-            value: '1',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-          {
-            label: 'O3',
-            value: '0.3',
-            url: require('../../assets/icon/ecs-running.png')
-          },
-        ],
+        sensor: [],
       },
-      tabsTitle: null,
+      tabsTitle: 1,
       editableTabs: {
         showTabs: true,
         showParameterSetButton: true,
@@ -373,6 +243,11 @@ export default {
       },
     }
   },
+  computed: {
+    ...mapState({
+      deviceType: state => state.common.deviceType,
+    })
+  },
   mounted () {
     this.init()
     this.addObj()
@@ -385,18 +260,70 @@ export default {
   methods: {
     changeBorderBoxStatus (val) {
       this.showDetailBox = val
+      if (!this.showDetailBox) {
+        this.tabsTitle = 1
+      }
     },
-    saveTabsTitle (name) {
-      this.tabsTitle = name
+    saveTabsTitle (num) {
+      this.tabsTitle = num
       // this.infoData = this.infoData
       console.log('this.tabsTitle', this.tabsTitle)
-      if (this.tabsTitle == '0') {
+      if (this.tabsTitle == 1) {
         this.infoData = this.infoData1
-      } else if (this.tabsTitle == '1') {
+      } else if (this.tabsTitle == 2) {
         this.infoData = this.infoData2
-      } else if (this.tabsTitle == '2') {
+      } else if (this.tabsTitle == 3) {
         this.infoData = this.infoData3
       }
+      let name = this.selectedObject.name.split('_')[0]
+      let id = this.selectedObject.name.split('_')[1]
+      let deviceType = ''
+      // console.log('name000', name)
+      this.deviceType.forEach(item => {
+        if (item.type === name) {
+          deviceType = item.id
+        }
+      });
+      console.log('this.tabsTitle', this.tabsTitle)
+      let parmas = {
+        deviceType: deviceType,
+        dataType: this.tabsTitle,
+        deviceId: 1
+      }
+      this.getDeviceData(parmas)
+    },
+    getDeviceData (params) {
+      sourceMirror.getDeviceData(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        console.log('getDeviceData', result)
+        if (this.tabsTitle == 1) {
+          this.infoData1.flow.xAxisData = []
+          this.infoData1.flow.yAxisData[0] = []
+          this.infoData1.flow.yAxisData[1] = []
+          if (result.lowStatisticsList) {
+            result.lowStatisticsList.forEach(item => {
+              if (item.type === '1') {
+                this.infoData1.flow.xAxisData.push(item.time)
+                this.infoData1.flow.yAxisData[0].push(item.count)
+              } else {
+                this.infoData1.flow.yAxisData[1].push(item.count)
+              }
+            })
+          }
+          this.infoData1.sensor = result.columnOperList
+          this.infoData1.screen[0].value = result.screenPrompt
+
+          // for(let key in )
+
+        } else if (this.tabsTitle == 2) {
+          this.infoData2.operation = result.basicList
+          this.infoData2.equipment = result.deviceParamList
+          // this.infoData = this.infoData2
+        } else if (this.tabsTitle == 3) {
+          // this.infoData = this.infoData3
+          this.infoData3.table = result
+        }
+      })
     },
     empty (elem) {
       while (elem.lastChild) {
@@ -484,7 +411,7 @@ export default {
     },
     cloneModel (obj, x, y, z, s1, s2, s3, name) { //params: 模型， 坐标xyz，自定义数据
       const cloneObj = obj.clone();
-      if (name != 'light1') {
+      if (name != 'light_1') {
         cloneObj.children.map((v, i) => { //克隆材质
           if (v.material) {
             v.material = obj.children[i].material.clone();
@@ -548,7 +475,7 @@ export default {
           //   item.name = 'light3'
           // })
 
-          this.cloneModel(obj, 140, -20, 0, 0.15, 0.2, 0.15, 'light1')
+          this.cloneModel(obj, 140, -20, 0, 0.15, 0.2, 0.15, 'light_1')
 
           // this.dealMeshMaterial(obj.children)
           // this.scene.add(obj)
@@ -559,16 +486,16 @@ export default {
       mtlLoade.setPath('/static/dz-model/modelFirst/').load('zebra6.mtl', materials => {
         materials.preload();
         objLoader.setMaterials(materials).setPath('/static/dz-model/modelFirst/').load('zebra6.obj', obj => {
-          this.cloneModel(obj, -120, -20, 0, 0.05, 0.05, 0.05, 'zebra1')
-          this.cloneModel(obj, -120, -20, -260, 0.05, 0.05, 0.05, 'zebra2')
+          this.cloneModel(obj, -120, -20, 0, 0.05, 0.05, 0.05, 'zebra_1')
+          this.cloneModel(obj, -120, -20, -260, 0.05, 0.05, 0.05, 'zebra_2')
         })
       });
       // 斑马线
       mtlLoade.setPath('/static/dz-model/modelFirst/').load('zebra3.mtl', materials => {
         materials.preload();
         objLoader.setMaterials(materials).setPath('/static/dz-model/modelFirst/').load('zebra3.obj', obj => {
-          this.cloneModel(obj, -160, -20, -60, 0.05, 0.1, 0.12, 'zebra3')
-          this.cloneModel(obj, 80, -26, -60, 0.05, 0.1, 0.12, 'zebra4')
+          this.cloneModel(obj, -160, -20, -60, 0.05, 0.1, 0.12, 'zebra_3')
+          this.cloneModel(obj, 80, -26, -60, 0.05, 0.1, 0.12, 'zebra_4')
         })
       });
     },
@@ -616,19 +543,35 @@ export default {
     onMouseClick (event) {
       event.preventDefault();
       // console.log('event', event)
-      console.log('this.scene1', this.scene)
+      // console.log('this.scene1', this.scene)
       if (this.selectedObject) {
-        console.log('this.selectedObject', this.selectedObject)
+        // console.log('this.selectedObject', this.selectedObject)
         this.selectedObject = null;
         // this.selectedObject.material.color.set('#35e9ff');
       }
       // 获取与射线相交的对象数组，其中的元素按照距离排序，越近的越靠前
       let intersects = this.getIntersects(event.clientX, event.clientY);
-      console.log('intersects---选中的模型', intersects)
+      // console.log('intersects---选中的模型', intersects)
       //将所有的相交的模型的颜色设置为红色
       if (intersects.length > 0 && this.selectedObject != intersects[0].object) {
         this.selectedObject = intersects[0].object
-        // console.log('this.selectObject000', this.selectedObject)
+        console.log('this.selectObject000', this.selectedObject)
+        let name = this.selectedObject.name.split('_')[0]
+        let id = this.selectedObject.name.split('_')[1]
+        let deviceType = ''
+        console.log('name000', name)
+        this.deviceType.forEach(item => {
+          if (item.type === name) {
+            deviceType = item.id
+          }
+        });
+        console.log('this.tabsTitle', this.tabsTitle)
+        let parmas = {
+          deviceType: deviceType,
+          dataType: this.tabsTitle,
+          deviceId: 1
+        }
+        this.getDeviceData(parmas)
         this.showObject(this.selectedObject, event);
       } else {
         this.showDetailBox = false

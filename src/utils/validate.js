@@ -85,3 +85,15 @@ export function isArray (arg) {
   }
   return Array.isArray(arg)
 }
+
+
+/**
+ * @param {Array} phone
+ * @returns {Boolean}
+ */
+export function isPhone (phone) {
+  if (phone && !/^((1[3,5,8,7,9][0-9])|(14[5,7])|(17[0,6,7,8])|(19[1,7]))\d{8}$/.test(phone)) {
+    return false
+  }
+  return true
+}

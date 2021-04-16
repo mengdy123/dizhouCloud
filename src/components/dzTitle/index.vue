@@ -1,10 +1,24 @@
 <template>
   <div class="dz-title">
-    <!-- <span class="dz-title-span">地洲智慧云平台</span> -->
-    <!-- <dv-decoration-11 class="dz-title-span">地洲智慧云平台</dv-decoration-11> -->
-    <dv-border-box-10 class="dz-title-span">地洲智慧云平台</dv-border-box-10>
+    <dv-border-box-10 class="dz-title-span">{{title}}</dv-border-box-10>
   </div>
 </template>
+<script>
+export default {
+  data () {
+    return {
+      title: '地洲智慧云平台'
+    }
+  },
+  mounted () {
+    if (this.$route.path === '/sceneIndex') {
+      this.title = '松江新城地铁站'
+    } else {
+      this.title = '地洲智慧云平台'
+    }
+  }
+}
+</script>
 <style lang="less" scoped>
 @import "../../style/color.less";
 .dz-title {

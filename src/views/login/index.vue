@@ -15,14 +15,15 @@
                  ref="ruleForm"
                  label-width="100px">
           <el-form-item label="账号"
-                        prop="account">
+                        prop="userName">
             <el-input type="input"
-                      v-model="ruleForm.account"></el-input>
+                      v-model="ruleForm.userName"></el-input>
           </el-form-item>
           <el-form-item label="密码"
-                        prop="pass">
+                        prop="userPassword">
             <el-input type="password"
-                      v-model="ruleForm.pass"></el-input>
+                      v-model="ruleForm.userPassword"
+                      @keyup.native.enter="submitForm('ruleForm')"></el-input>
           </el-form-item>
           <el-form-item>
             <el-button type="primary"
@@ -34,7 +35,6 @@
   </div>
 </template>
 <script>
-
 import sourceMirror from '@/resource/sourceMirror'
 export default {
   name: "login",
@@ -56,14 +56,14 @@ export default {
     return {
       labelPosition: 'top',
       ruleForm: {
-        pass: '',
-        account: '',
+        userPassword: '',
+        userName: '',
       },
       rules: {
-        pass: [
+        userPassword: [
           { validator: validatePass, trigger: 'blur' }
         ],
-        account: [
+        userName: [
           { validator: validateAccount, trigger: 'blur' }
         ],
       }
@@ -74,18 +74,26 @@ export default {
   },
   methods: {
     submitForm (formName) {
-      console.log('111', this.$refs)
       this.$refs[formName].validate((valid) => {
-        console.log('222', valid)
         if (valid) {
-          console.log('1212')
-          this.$router.push('mainIndex')
+          let params = this.ruleForm
+          this.login(params)
         } else {
           console.log('error submit!!');
           return false;
         }
       });
     },
+    login (params) {
+      sourceMirror.login(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.$router.push('mainIndex')
+        } else {
+          this.$message.error(serviceMessage)
+        }
+      })
+    }
   }
 }
 </script>

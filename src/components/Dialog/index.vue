@@ -1,0 +1,58 @@
+<template>
+  <div>
+    <el-dialog :title="dialogTitle"
+               :visible.sync="dialogVisible"
+               :modal-append-to-body='true'
+               :close-on-click-modal='false'
+               :width="popupWidth"
+               :before-close="handleClose">
+      <slot>
+        <p>弹框自定义的内容</p>
+      </slot>
+    </el-dialog>
+  </div>
+</template>
+<script>
+export default {
+  props: {
+    dialogTitle: {
+      type: String,
+      default: '标题'
+    },
+    visible: {
+      type: Boolean,
+      default: false
+    },
+    popupWidth: {
+      type: String,
+      default: '500px'
+    }
+  },
+  data () {
+    return {
+    }
+  },
+  computed: {
+    dialogVisible: {
+      get () {
+        return this.visible
+      },
+      set (val) {
+        // 当visible改变的时候，触发父组件的 updateVisible方法，在该方法中更改传入子组件的 centerDialogVisible的值
+        this.$emit('updateVisible', val)
+      }
+    }
+  },
+  methods: {
+    Cancel () {
+      this.$emit('resetPopupData')
+    },
+    Save () {
+      this.$emit('submitPopupData')
+    },
+    handleClose () {
+      this.$emit('handleClose')
+    }
+  }
+}
+</script>

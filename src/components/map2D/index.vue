@@ -424,7 +424,7 @@ export default {
         geocoder.getAddress(lnglat, function (status, result) {
           if (status === 'complete' && result.info === 'OK') {
             // result为对应的地理位置详细信息
-            console.log('逆向地理编码方法-------', result.regeocode)
+            // console.log('逆向地理编码方法-------', result.regeocode)
             _this.mapGeocoderInfo = result.regeocode
 
           }
@@ -649,7 +649,7 @@ export default {
     //切换区域
     switch2AreaNode (adcode, callback) {
       const that = this
-      console.log('切换区域---adcode', adcode)
+      // console.log('切换区域---adcode', adcode)
       if (adcode === 100000) {
         if (that.currentAreaNode && that.currentAreaNode.adcode === 100000) {
           return
@@ -704,6 +704,7 @@ export default {
     },
     //点击项目列表撒点
     addMarkerOnly (data) {
+      console.log('=-----addMarkerOnly', data)
       let city, province, citycode, cityAdcode, provinceAdcode
       if (this.markerOnly) {
         this.map.remove(this.markerOnly)

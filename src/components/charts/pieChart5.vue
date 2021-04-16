@@ -22,17 +22,9 @@ export default {
       }
     },
   },
-  data () {
-    return {
-
-    }
-  },
-  computed: {
-  },
   mounted () {
-    this.$nextTick(() => {
-      this.initChart()
-    })
+
+    this.initChart()
   },
   methods: {
     initChart () {
@@ -48,18 +40,18 @@ export default {
           text: '',
           subtext: ''
         },
-        color: ['#3CA272', '#999999', '#EE6666', '#FAC858', '#9A60B4', '#5470C6'],
+        color: ['#3CA272', '#7E8490', '#EE6666', '#FAC858', '#9A60B4', '#5470C6'],
         tooltip: {
           trigger: 'item',
-          formatter: function (value) {
-            let tootipData = null
-            if (value.data.type === '1') {
-              tootipData = `车位总数: ${value.data.sum}<br/>已用/空余: ${value.data.use}/${value.data.unoccupied}<br/>使用率：${value.data.value}%`
-            } else {
-              tootipData = `已用/空余: ${value.data.use}/${value.data.unoccupied}<br/> 使用率：${value.data.sumZb}%`
-            }
-            return tootipData
-          },
+          // formatter: function (value) {
+          //   let tootipData = null
+          //   if (value.data.type === '1') {
+          //     tootipData = `车位总数: ${value.data.sum || 0}<br/>已用/空余: ${value.data.use || 0}/${value.data.unoccupied || 0}<br/>使用率：${value.data.value || 0}%`
+          //   } else {
+          //     tootipData = `已用/空余: ${value.data.use || 0}/${value.data.unoccupied || 0}<br/> 使用率：${value.data.sumZb || 0}%`
+          //   }
+          //   return tootipData
+          // },
           backgroundColor: 'rgba(0,0,0,0.9)',//背景颜色（此时为默认色）
           borderColor: 'rgba(0,0,0,0.9)'
         },
@@ -97,10 +89,9 @@ export default {
             label: {
               position: 'outer',
               alignTo: 'labelLine',
-              formatter: function (value) {
-                // console.log('value---', value)
-                return `{a|${value.name}}{b|(${value.percent}%)}`
-              },
+              // formatter: function (value) {
+              //   return `{a|${value.name}}{b|(${value.percent}%)}`
+              // },
               rich: {
                 a: {
                   color: '#BACCFD',
@@ -112,7 +103,7 @@ export default {
                 }
               }
             },
-            data: _this.value
+            data: _this.value[0]
           }
         ]
 

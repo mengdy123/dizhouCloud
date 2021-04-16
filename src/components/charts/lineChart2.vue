@@ -43,7 +43,12 @@ export default {
 
     }
   },
-  computed: {
+  watch: {
+    yAxisData (newVal, oldVal) {
+      this.$nextTick(() => {
+        this.initChart()
+      })
+    }
   },
   mounted () {
     this.$nextTick(() => {
@@ -76,6 +81,13 @@ export default {
           symbol: 'none',
           // symbolSize: 5,
           // showSymbol: true,
+          itemStyle: {
+            normal: {
+              lineStyle: {
+                width: 1// 0.1的线条是非常细的了
+              }
+            }
+          },
           data: _this.yAxisData[i]
         });
       }

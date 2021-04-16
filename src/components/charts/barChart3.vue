@@ -38,10 +38,15 @@ export default {
   },
   data () {
     return {
-
     }
   },
   computed: {
+  },
+  watch: {
+    yAxisData (newVal, oldVal) {
+      console.log('yAxisData', this.yAxisData)
+      this.initChart()
+    }
   },
   mounted () {
     this.$nextTick(() => {

@@ -24,30 +24,64 @@
              @open="handleOpen"
              @close="handleClose"
              :collapse="menuStatus">
-      <el-submenu v-for="(item, index) in menuList"
-                  :index="index + 1"
-                  :key="item.name">
-        <template slot="title">
-          <i class="el-icon-location"></i>
+      <!-- 一级菜单 -->
+      <template v-for="(item, index) in menuList">
+        <el-submenu v-if="item.children && item.children.length"
+                    :index="item.index"
+                    :key="item.path">
+          <template slot="title">
+            <img v-if="index === 0"
+                 class="img-icon"
+                 src="../../../../assets/system_icon/01.png"
+                 alt="">
+            <img v-if="index === 2"
+                 class="img-icon"
+                 src="../../../../assets/system_icon/02.png"
+                 alt="">
+            <img v-if="index === 1"
+                 class="img-icon"
+                 src="../../../../assets/system_icon/03.png"
+                 alt="">
+            <img v-if="index === 3"
+                 class="img-icon"
+                 src="../../../../assets/system_icon/04.png"
+                 alt="">
+            <span slot="title">{{item.name}}</span>
+          </template>
+          <!-- 二级菜单 -->
+          <template v-for="itemChild in item.children">
+            <el-submenu v-if="itemChild.children && itemChild.children.length"
+                        :index="itemChild.index"
+                        :key="itemChild.index">
+              <template slot="title">
+                <span>{{itemChild.name}}</span>
+              </template>
+              <!-- 三级菜单 -->
+              <el-menu-item v-for="itemChild_Child in itemChild.children"
+                            :index="itemChild_Child.index"
+                            :key="itemChild_Child.index"
+                            @click="menuClick(itemChild_Child)">
+                <span slot="title">{{itemChild_Child.name}}</span>
+              </el-menu-item>
+            </el-submenu>
+            <el-menu-item v-else
+                          :index="itemChild.index"
+                          :key="itemChild.index"
+                          @click="menuClick(itemChild)">
+              <span slot="title">{{itemChild.name}}</span>
+            </el-menu-item>
+          </template>
+        </el-submenu>
+
+        <el-menu-item v-else
+                      :index="item.index"
+                      :key="item.index"
+                      @click="menuClick(item)">
+          <!-- <i :class="item.icon"></i> -->
           <span slot="title">{{item.name}}</span>
-        </template>
-        <el-menu-item v-for="(it, ind) in item.children"
-                      :key="it.name"
-                      :index="it.name + '-'+ ind+1">{{it.name}}</el-menu-item>
-      </el-submenu>
+        </el-menu-item>
+      </template>
     </el-menu>
-
-    <!-- <el-menu :default-active="$route.path" class="el-menu-vertical-demo" @open="handleopen" @close="handleclose" @select="handleselect"
-					 unique-opened router v-show="!collapsed">
-					<template v-for="(item,index) in $router.options.routes" v-if="!item.hidden">
-						<el-submenu :index="index+''" v-if="!item.leaf">
-							<template slot="title"><i :class="item.iconCls"></i>{{item.name}}</template>
-							<el-menu-item v-for="child in item.children" :index="child.path" :key="child.path" v-if="!child.hidden">{{child.name}}</el-menu-item>
-						</el-submenu>
-						<el-menu-item v-if="item.leaf&&item.children.length>0" :index="item.children[0].path"><i :class="item.iconCls"></i>{{item.children[0].name}}</el-menu-item>
-					</template>
-				</el-menu> -->
-
   </div>
 </template>
 <script>
@@ -66,13 +100,18 @@ export default {
   methods: {
     ...mapActions(['changeMenuStatus']),
     handleOpen (key, keyPath) {
-      console.log(key, keyPath);
+      console.log('key', key);
+      console.log('keyPath', keyPath);
     },
     handleClose (key, keyPath) {
       console.log(key, keyPath);
     },
     changeMenu (type) {
       this.changeMenuStatus(type)
+    },
+    menuClick (item) {
+      console.log('item', item)
+      this.$router.push(item.path)
     }
   }
 }
@@ -100,5 +139,9 @@ export default {
     color: rgba(255, 255, 255, 0.65);
     cursor: pointer;
   }
+}
+.img-icon {
+  width: 14px;
+  height: 14px;
 }
 </style>
