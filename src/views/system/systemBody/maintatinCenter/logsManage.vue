@@ -12,7 +12,9 @@
             <el-input v-model="ruleForm.key"
                       style="width: 320px"
                       placeholder="请输入关键字"
-                      clearable></el-input>
+                      clearable
+                      @clear="submitForm('ruleForm')"
+                      @keyup.enter.native="submitForm('ruleForm')"></el-input>
           </el-form-item>
         </el-form>
         <div class="button-list">

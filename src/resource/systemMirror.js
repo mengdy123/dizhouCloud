@@ -15,7 +15,7 @@ export default {
   //     }
   //   }),
 
-
+  // 项目中心
   // 分页查询项目信息
   getProjectList: params =>
     DutyMirror.get(`/manage/project/getProjectList`, {
@@ -57,6 +57,16 @@ export default {
     DutyMirror.post('manage/company/update', {
       ...params
     }),
+  // 客户管理根据客户id分页查询项目列表
+  getListByCompanyId: params =>
+    DutyMirror.get(`/manage/project/getListByCompanyId`, {
+      params: {
+        ...params
+      }
+    }),
+
+
+
   // 分页查询行业列表信息
   getIndustryList: params =>
     DutyMirror.get(`/manage/indutry/getIndustryList`, {
@@ -77,7 +87,35 @@ export default {
     DutyMirror.post('manage/indutry/addIndustry', {
       ...params
     }),
+  // 行业管理列表的删除
+  deleteIndustryById: params =>
+    DutyMirror.get(`manage/indutry/delete?industryId=${params}`),
 
+
+  // 地域管理
+  // 分页查询地域列表信息
+  getAreaList: params =>
+    DutyMirror.get(`/manage/area/getAreaList`, {
+      params: {
+        ...params
+      }
+    }),
+  // 新增地域
+  addArea: params =>
+    DutyMirror.post('/manage/area/addArea', {
+      ...params
+    }),
+  // 修改地域列表
+  updateArea: params =>
+    DutyMirror.post('/manage/area/update', {
+      ...params
+    }),
+  // 删除地域列表
+  deleteArea: params =>
+    DutyMirror.get(`/manage/area/delete?id=${params}`, {
+    }),
+
+  // 产品中心
   // 分页查询系统列表
   getSystemList: params =>
     DutyMirror.get(`/manage/system/getSystemList`, {
@@ -85,21 +123,31 @@ export default {
         ...params
       }
     }),
-  // 系统详情
+  // 设备系统详情
   getSystemById: params =>
-    DutyMirror.get(`manage/system/getSystemById?systemId=${params}`),
+    DutyMirror.get(`/manage/system/getSystemTypeById?systemTypeId=${params}`),
 
   // 修改 系统
-  updateSystem: params =>
-    DutyMirror.post('manage/system/update', {
+  updateSysType: params =>
+    DutyMirror.post('/manage/system/updateSysType', {
       ...params
     }),
+
+
+
+  // updateSystem: params =>
+  //   DutyMirror.post('/manage/system/update', {
+  //     ...params
+  //   }),
 
   // 新增系统
   addSystem: params =>
-    DutyMirror.post('manage/system/addSystem', {
+    DutyMirror.post('/manage/system/addSystem', {
       ...params
     }),
+
+
+
   // 分页查询 系统设备列表
   getListBySeek: params =>
     DutyMirror.get(`/manage/device/getListBySeek`, {
@@ -114,7 +162,7 @@ export default {
         ...params
       }
     }),
-  // 系统设备详情
+  // 设备详情
   getDeviceById: params =>
     DutyMirror.get(`/manage/device/getDeviceById?deviceId=${params}`),
   // 修改 系统设备
@@ -122,11 +170,14 @@ export default {
     DutyMirror.post('/manage/device/update', {
       ...params
     }),
-  // 新增系统
+  // 新增
   addDevice: params =>
     DutyMirror.post('/manage/device/addDevice', {
       ...params
     }),
+
+
+
 
   // 获取用户列表
   getUserList: params =>
@@ -236,6 +287,8 @@ export default {
     DutyMirror.post('/manage/device/addVersiontype', {
       ...params
     }),
+
+
   /*
     * 根据条件分页查询  智能系统
     */
@@ -251,10 +304,7 @@ export default {
 * 根据设备系列systemTypeId查询智能系统的详情
 */
   getSystemTypeById: params =>
-    DutyMirror.get(`/manage/system/getSystemTypeById?systemTypeId=1`, {
-      params: {
-        ...params
-      }
+    DutyMirror.get(`/manage/system/getSystemTypeById?systemTypeId=${params}`, {
     }),
   /*
   *   新增  系统类型
@@ -263,5 +313,33 @@ export default {
     DutyMirror.post('/manage/system/addSystemType ', {
       ...params
     }),
+
+
+
+  // 运维中心---故障类型管理
+  /*
+    * 根据条件分页查询  故障类型列表
+    */
+  getFailTypeList: params =>
+    DutyMirror.get(`/faulttype/getList`, {
+      params: {
+        ...params
+      }
+    }),
+  /*
+ *  新增故障类型
+ */
+  addFailTypeList: params =>
+    DutyMirror.post(`/faulttype/add`, {
+      ...params
+    }),
+  /*
+   *  新增故障类型
+   */
+  updateFailTypeList: params =>
+    DutyMirror.post(`/faulttype/update`, {
+      ...params
+    }),
+
 
 }

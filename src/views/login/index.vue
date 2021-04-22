@@ -23,7 +23,7 @@
                         prop="userPassword">
             <el-input type="password"
                       v-model="ruleForm.userPassword"
-                      @keyup.native.enter="submitForm('ruleForm')"></el-input>
+                      @keyup.enter.native="submitForm('ruleForm')"></el-input>
           </el-form-item>
           <el-form-item>
             <el-button type="primary"

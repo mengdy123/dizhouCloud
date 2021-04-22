@@ -2,8 +2,8 @@
 import systemLayout from '../../views/system'
 export default [
   {
-    path: '/system',
-    name: 'system',
+    path: '/project',
+    name: 'project',
     component: systemLayout,
     children: [
       /*
@@ -17,6 +17,15 @@ export default [
           require(['../../views/system/systemBody/systemCenter/projecManage.vue'], resolve)
         }
       },
+      {
+        path: '/distribute',
+        name: 'distribute',
+        title: '项目分布',
+        component: resolve => {
+          require(['../../views/system/systemBody/systemCenter/distribute.vue'], resolve)
+        }
+      },
+
       {
         path: '/clientManage',
         name: 'clientManage',
@@ -155,6 +164,22 @@ export default [
         title: '权限管理',
         component: resolve => {
           require(['../../views/system/systemBody/systemManage/powerManage.vue'], resolve)
+        }
+      },
+      {
+        path: '/changePassword',
+        name: 'changePassword',
+        title: '修改密码',
+        component: resolve => {
+          require(['../../views/system/systemBody/changePassword.vue'], resolve)
+        }
+      },
+      {
+        path: '/information',
+        name: 'information',
+        title: '个人中心',
+        component: resolve => {
+          require(['../../views/system/systemBody/information.vue'], resolve)
         }
       },
 

@@ -12,7 +12,9 @@
             <el-input v-model="ruleForm.key"
                       clearable
                       style="width: 320px"
-                      placeholder="请输入关键字"></el-input>
+                      placeholder="请输入关键字"
+                      @clear="submitForm('ruleForm')"
+                      @keyup.enter.native="submitForm('ruleForm')"></el-input>
           </el-form-item>
         </el-form>
         <div class="button-list">
@@ -31,11 +33,14 @@
                :action='actionList'
                :height='heightTable'
                :http='http'
+               :showIndex='true'
                indexAlign='left'
-               :indexWidth='"200%"'
+               :indexWidth='"60px"'
                name='智能设备'
                @getList='getList'
+               @getDetail='getDetail'
                @disebleTable='disebleTable'
+               @changeProjectBox='changeProjectBox'
                :index='true'></myTable>
     </div>
     <div class="dz-system-pagination">
@@ -53,6 +58,7 @@
             title='新增'>
       <slot slot='dialogMain'>
         <addSmartSetForm ref="addForm"
+                         @getList='getList'
                          @changeProjectBox='changeProjectBox'></addSmartSetForm>
       </slot>
     </addBox>
@@ -111,10 +117,10 @@ export default {
           name: '编辑',
           style: 'edit-button'
         },
-        // {
-        //   name: '禁用',
-        //   style: 'disable-button'
-        // },
+        {
+          name: '删除',
+          style: 'disable-button'
+        },
         // {
         //   name: '启用',
         //   style: 'edit-button'
@@ -133,6 +139,7 @@ export default {
     this.getList()
   },
   methods: {
+    ...mapActions(['saveDetailInfo']),
     submitForm (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
@@ -213,6 +220,11 @@ export default {
           this.getList()
         }
       })
+    },
+    // 点击获取的详情
+    getDetail (data) {
+      this.dialogData = Object.assign({}, data)
+      this.saveDetailInfo(this.dialogData)
     },
     handleSizeChange (val) {
       console.log(`每页 ${val} 条`);

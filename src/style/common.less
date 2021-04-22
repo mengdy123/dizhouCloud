@@ -68,8 +68,8 @@
   height:0
 }
 .el-table__footer-wrapper, .el-table__header-wrapper, .el-table__body {
-   border-left:1px solid #efefef;
-  border-right:1px solid #efefef;
+  // border-left:1px solid #efefef;
+  // border-right:1px solid #efefef;
 }
 .view-screen,.edit-button {
   color: #2761FF;
@@ -132,6 +132,8 @@
   }
 }
 .detail-module {
+  height: calc(100vh - 190px);
+  // overflow-y: scroll;
   .el-page-header__left::after {
     width: 0px;
   }
@@ -139,3 +141,10 @@
     color:#666666;
   }
 }
+.form-footer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding-bottom: 20px;
+}
+::-webkit-scrollbar { width: 0 !important }

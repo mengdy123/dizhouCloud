@@ -1,29 +1,7 @@
 <template>
   <div class="dz-system">
     <div class="dz-system-title">权限管理</div>
-    <div class="dz-system-search">
-      <div class="dz-system-search-ruleForm">
-        <el-form :model="ruleForm"
-                 ref="ruleForm"
-                 label-width="100px"
-                 class="demo-ruleForm">
-          <el-form-item>
-            <span class="label-key">关键字</span>
-            <el-input v-model="ruleForm.name"
-                      style="width: 320px"
-                      clearable
-                      placeholder="请输入请输入角色名称"></el-input>
-          </el-form-item>
-        </el-form>
-        <div class="button-list">
-          <el-button type="primary"
-                     @click="submitForm('ruleForm')">搜索</el-button>
-        </div>
-      </div>
-    </div>
-
     <div class="dz-system-table">
-      <div class="dz-system-table-add"><span @click="changeProjectBox(true)">新增</span></div>
       <myTable ref="myTable"
                :tableData="tableDataNew"
                :tableConfigArr='tableConfigArr'
@@ -33,7 +11,8 @@
                :indexWidth='"300%"'
                :action='actionList'
                :index='true'
-               :detail='false'></myTable>
+               :detail='false'
+               @changeProjectBox='changeProjectBox'></myTable>
     </div>
     <div class="dz-system-pagination">
       <el-pagination @size-change="handleSizeChange"
@@ -45,7 +24,7 @@
       </el-pagination>
     </div>
     <addBox v-if="addProjectStatus"
-            name='权限管理'
+            name='权限配置'
             @getList='getList'
             @changeProjectBox='changeProjectBox'
             title='新增'>
@@ -57,8 +36,8 @@
   </div>
 </template>
 <script>
-import addBox from '../../components/dialogModule/addDialogModule'
 import myTable from "@/components/Table";
+import addBox from '../../components/dialogModule/addDialogModule'
 import addPowerForm from '../../components/formModule/addPowerForm'
 export default {
   components: { addBox, myTable, addPowerForm },
@@ -76,36 +55,46 @@ export default {
       },
       tableData: [
         {
-          name: '超级管理员1',
-          power: '全部'
+          name: '超级管理员',
+          modules: '查看与修改',
+          level: '一级'
         },
         {
-          name: '超级管理员2',
-          power: '全部'
+          name: '企业管理员',
+          modules: '查看与部分修改',
+          level: '二级'
         },
         {
-          name: '超级管理员3',
-          power: '全部'
+          name: '管理员',
+          modules: '查看与修改',
+          level: '三级'
         },
         {
-          name: '超级管理员4',
-          power: '全部'
+          name: '主管',
+          modules: '查看与修改',
+          level: '四级'
         },
         {
-          name: '超级管理员5',
-          power: '全部'
+          name: '员工',
+          modules: '仅查看',
+          level: '五级'
         },
       ],
       tableConfigArr: [
         {
           fixed: false,
-          prop: 'name',
-          label: '角色名称',
+          prop: 'level',
+          label: '权限等级',
         },
         {
           fixed: false,
-          prop: 'power',
-          label: '角色权限',
+          prop: 'name',
+          label: '名称',
+        },
+        {
+          fixed: false,
+          prop: 'modules',
+          label: '模块操作权限',
         },
       ],
       tableDataNew: [],
@@ -114,17 +103,18 @@ export default {
       heightTable: 'calc(100vh - 402px)',
       actionList: [
         {
+          name: '详情',
+          style: 'edit-button'
+        },
+        {
           name: '编辑',
           style: 'edit-button'
         },
         {
-          name: '禁用',
-          style: 'disable-button'
-        },
-        {
-          name: '启用',
+          name: '权限配置',
           style: 'edit-button'
-        }
+        },
+
       ]
     };
   },

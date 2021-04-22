@@ -28,7 +28,8 @@
               超级管理员<i class="el-icon-arrow-down el-icon--right"></i>
             </span>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>修改密码</el-dropdown-item>
+              <el-dropdown-item @click.native="toPath('/information')">个人中心</el-dropdown-item>
+              <el-dropdown-item @click.native="toPath('/changePassword')">修改密码</el-dropdown-item>
               <el-dropdown-item>登出</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
@@ -61,7 +62,7 @@ export default {
     this.getList()
   },
   methods: {
-    ...mapActions(['saveProjectList', 'saveSystemList']),
+    ...mapActions(['saveProjectList', 'saveSystemList', 'saveCompanyList']),
     goHomeIndex () {
       this.$router.push('mainIndex')
     },
@@ -82,9 +83,18 @@ export default {
         if (code === 200) {
           this.saveSystemList(result.content)
         }
-
+      })
+      systemMirror.getCompanyList(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.saveCompanyList(result.content)
+        }
       })
     },
+    toPath (path) {
+      console.log('dropdown', path)
+      this.$router.push(path)
+    }
   }
 
 }

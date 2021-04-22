@@ -12,7 +12,9 @@
             <el-input v-model="ruleForm.key"
                       style="width: 320px"
                       placeholder="请输入关键字"
-                      clearable></el-input>
+                      clearable
+                      @clear="submitForm('ruleForm')"
+                      @keyup.enter.native="submitForm('ruleForm')"></el-input>
           </el-form-item>
         </el-form>
         <div class="button-list">
@@ -71,8 +73,11 @@
                :height='heightTable'
                :http='http'
                name='工单管理'
-               @getList='getProgectList'
-               @disebleTable='disebleTable'
+               @getDetail='getDetail'
+               @changeProjectBox='approveStatusBox'
+               @maintainStatusBox='maintainStatusBox'
+               @checkStatusBox='checkStatusBox'
+               @getList='getApproveList'
                :index='true'></myTable>
     </div>
     <div class="dz-system-pagination">
@@ -84,6 +89,36 @@
                      :total="total">
       </el-pagination>
     </div>
+    <addBox v-if="addApproveStatus"
+            name='审批'
+            @getList='getApproveList'
+            @changeProjectBox='approveStatusBox'
+            title='审批'>
+      <slot slot='dialogMain'>
+        <addApproveForm name='审批'
+                        @changeProjectBox='approveStatusBox'></addApproveForm>
+      </slot>
+    </addBox>
+    <addBox v-if="addMaintainStatus"
+            name='维修'
+            @getList='getApproveList'
+            @changeProjectBox='maintainStatusBox'
+            title='维修'>
+      <slot slot='dialogMain'>
+        <addApproveForm name='维修'
+                        @changeProjectBox='maintainStatusBox'></addApproveForm>
+      </slot>
+    </addBox>
+    <addBox v-if="addCheckStatus"
+            name='考评'
+            @getList='getApproveList'
+            @changeProjectBox='checkStatusBox'
+            title='考评'>
+      <slot slot='dialogMain'>
+        <addCheckForm name='考评'
+                      @changeProjectBox='checkStatusBox'></addCheckForm>
+      </slot>
+    </addBox>
   </div>
 </template>
 <script>
@@ -92,8 +127,11 @@ import { mapState, mapActions } from 'vuex'
 import timeReg from '@/utils/timeReg'
 import myTable from "@/components/Table";
 import addBreakdown from '../../components/formModule/addBreakdown'
+import addBox from '../../components/dialogModule/addDialogModule'
+import addApproveForm from '../../components/formModule/addApproveForm'
+import addCheckForm from '../../components/formModule/addCheckForm'
 export default {
-  components: { myTable, addBreakdown },
+  components: { myTable, addBreakdown, addBox, addApproveForm, addCheckForm },
   data () {
     return {
       ruleForm: {},
@@ -180,7 +218,7 @@ export default {
       currentPage: 1,
       pageSize: 10,
       total: 1000,
-      addProjectStatus: false,
+      addApproveStatus: false,
       heightStatus: false,
       heightTable: 'calc(100vh - 402px)',
       http: '/manage/project/getProjectById?projectId=',
@@ -198,7 +236,9 @@ export default {
           style: 'view-screen'
         },
 
-      ]
+      ],
+      addMaintainStatus: false,
+      addCheckStatus: false
     };
   },
   computed: {
@@ -208,26 +248,38 @@ export default {
     })
   },
   mounted () {
-    // this.getProgectList()
+    // this.getApproveList()
   },
   methods: {
+    ...mapActions(['saveDetailInfo']),
     handleClick (row) {
       console.log(row);
     },
     submitForm (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          this.getProgectList()
+          this.getApproveList()
         } else {
           console.log('error submit!!');
           return false;
         }
       });
     },
-    resetForm (formName) {
-      this.$refs[formName].resetFields();
+    // 点击获取设备系列的详情
+    getDetail (data) {
+      this.dialogData = Object.assign({}, data)
+      this.saveDetailInfo(this.dialogData)
     },
-    getProgectList () {
+    approveStatusBox (status) {
+      this.addApproveStatus = status
+    },
+    maintainStatusBox (status) {
+      this.addMaintainStatus = status
+    },
+    checkStatusBox (status) {
+      this.addCheckStatus = status
+    },
+    getApproveList () {
       let startTime, endTime
       if (this.ruleFormHeight.time) {
         startTime = this.ruleFormHeight.time[0]
@@ -266,42 +318,24 @@ export default {
         this.tableDataNew = this.tableData
       })
     },
-    disebleTable (row) {
-      let params = {
-        ...row,
-      }
-      params.updateTime = ''
-      if (params.status === '4') {
-        params.status = '1'
-      } else {
-        params.status = '4'
-      }
-      systemMirror.updateProject(params).then(res => {
-        let { code, result, serviceMessage } = res.data
-        if (code === 200) {
-          this.$message.success(serviceMessage)
-          this.getProgectList()
-        }
-      })
-    },
     handleSizeChange (val) {
       console.log(`每页 ${val} 条`);
     },
     handleCurrentChange (val) {
       console.log(`当前页: ${val}`);
-      this.getProgectList()
+      this.getApproveList()
     },
     heightSearch () {
       if (!this.heightStatus) {
         this.pageSize = 8
-        this.getProgectList()
+        this.getApproveList()
         this.heightTable = 'calc(100vh - 498px)'
       } else {
         this.tableDataNew = this.tableData
         this.ruleFormHeight = {}
         this.currentPage = 1
         this.pageSize = 10
-        this.getProgectList()
+        this.getApproveList()
         this.heightTable = 'calc(100vh - 402px)'
       }
       this.heightStatus = !this.heightStatus

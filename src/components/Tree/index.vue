@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="tree-module">
     <el-tree :data="data"
              node-key="id"
              default-expand-all
@@ -11,17 +11,17 @@
           <el-button type="text"
                      class="edit-button"
                      size="mini"
-                     @click="() => append(data)">新增
+                     @click="() => append(data)"><i class="el-icon-plus"></i>
           </el-button>
           <el-button type="text"
                      class="edit-button"
                      size="mini"
-                     @click="() => edit(node, data)">编辑
+                     @click="() => edit(node, data)"><i class="el-icon-edit-outline"></i>
           </el-button>
           <el-button type="text"
                      class="disable-button"
                      size="mini"
-                     @click="() => remove(node, data)"> 删除
+                     @click="() => remove(node, data)"> <i class="el-icon-close"></i>
           </el-button>
 
         </span>
@@ -133,4 +133,13 @@ export default {
 /deep/ .el-button {
   padding: 0;
 }
+.tree-module {
+  width: 600px;
+}
+// /deep/ .custom-tree-node {
+//   justify-content: left;
+//   span:nth-child(2) {
+//     margin-left: 300px;
+//   }
+// }
 </style>

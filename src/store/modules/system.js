@@ -12,7 +12,7 @@ const system = {
             name: "项目管理",
             index: "project-1",
             icon: "el-icon-menu",
-            path: '/system',
+            path: '/project',
             children: []
           },
           {
@@ -28,7 +28,14 @@ const system = {
             icon: "el-icon-menu",
             path: '/industryManage',
             children: []
-          }
+          },
+          {
+            name: "项目分布",
+            index: "project-4",
+            icon: "el-icon-menu",
+            path: '/distribute',
+            children: []
+          },
         ]
       },
       {
@@ -173,7 +180,11 @@ const system = {
     editStatus: false,
     projectList: [],
     systemList: [],
-    projectAddress: null
+    projectAddress: null,
+    failTypeList: [], //故障类型
+    maintainPersonList: [], // 维修人员
+    approvePersonList: [],  //审批人员
+    companyList: [], // 客户列表
   },
   actions: {
     changeMenuStatus ({ commit, state }, params) {
@@ -193,7 +204,19 @@ const system = {
     },
     saveProjectAddress ({ commit, state }, params) {
       commit('SAVE_PROJECT_ADDRESS', params)
-    }
+    },
+    saveFailTypeList ({ commit, state }, params) {
+      commit('SAVE_FAIL_TYPE_LIST', params)
+    },
+    saveMaintainPersonList ({ commit, state }, params) {
+      commit('SAVE_MAINTAIN_PERSON_LIST', params)
+    },
+    saveApprovePersonList ({ commit, state }, params) {
+      commit('SAVE_APPROVE_PERSON_LIST', params)
+    },
+    saveCompanyList ({ commit, state }, params) {
+      commit('SAVE_COMPANY_LIST', params)
+    },
 
   },
   mutations: {
@@ -214,7 +237,21 @@ const system = {
     },
     SAVE_PROJECT_ADDRESS (state, data) {
       state.projectAddress = data
-    }
+    },
+    SAVE_FAIL_TYPE_LIST (state, data) {
+      state.failTypeList = data
+    },
+    SAVE_MAINTAIN_PERSON_LIST (state, data) {
+      state.maintainPersonList = data
+    },
+    SAVE_APPROVE_PERSON_LIST (state, data) {
+      state.approvePersonList = data
+    },
+    SAVE_COMPANY_LIST (state, data) {
+      state.companyList = data
+    },
+
+
   }
 }
 

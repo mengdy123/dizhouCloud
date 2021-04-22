@@ -12,55 +12,15 @@
             <el-input v-model="ruleForm.key"
                       style="width: 320px"
                       placeholder="请输入关键字"
-                      clearable></el-input>
+                      clearable
+                      @clear="submitForm('ruleForm')"
+                      @keyup.enter.native="submitForm('ruleForm')"></el-input>
           </el-form-item>
         </el-form>
         <div class="button-list">
-          <el-button @click="heightSearch">{{heightStatus ? '关闭高级' : '高级'}}搜索</el-button>
           <el-button type="primary"
                      @click="submitForm('ruleForm')">搜索</el-button>
         </div>
-      </div>
-      <div class="item-content-div"
-           v-if="heightStatus">
-        <el-form :model="ruleFormHeight"
-                 ref="ruleFormHeight"
-                 label-width="100px"
-                 class="demo-ruleForm">
-          <el-form-item label="设备编号"
-                        prop="industry">
-            <el-select v-model="ruleFormHeight.projectType"
-                       placeholder="请选择项目类型"
-                       style="width: 320px"
-                       clearable>
-              <el-option v-for="item in projectType"
-                         :label="item.name"
-                         :key="item.id"
-                         :value="item.id"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="项目状态">
-            <el-select v-model="ruleFormHeight.status"
-                       clearable
-                       placeholder="请选择项目状态"
-                       style="width: 320px">
-              <el-option v-for="item in projectStatus"
-                         :label="item.name"
-                         :key="item.id"
-                         :value="item.id"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="项目运行时间">
-            <el-date-picker v-model="ruleFormHeight.time"
-                            clearable
-                            type="datetimerange"
-                            range-separator="至"
-                            value-format="yyyy-MM-dd HH:mm:ss"
-                            start-placeholder="开始日期"
-                            end-placeholder="结束日期">
-            </el-date-picker>
-          </el-form-item>
-        </el-form>
       </div>
     </div>
     <div class="dz-system-table">
@@ -72,8 +32,10 @@
                :height='heightTable'
                :http='http'
                name='故障类型管理'
+               @changeProjectBox='changeProjectBox'
                @getList='getProgectList'
                @disebleTable='disebleTable'
+               @getDetail='getDetail'
                :index='true'></myTable>
     </div>
     <div class="dz-system-pagination">
@@ -92,7 +54,9 @@
             title='新增'>
       <slot slot='dialogMain'>
         <addBreakdown ref="addForm"
-                      @changeProjectBox='changeProjectBox'></addBreakdown>
+                      @getList='getProgectList'
+                      @changeProjectBox='changeProjectBox'>
+        </addBreakdown>
       </slot>
     </addBox>
   </div>
@@ -114,13 +78,13 @@ export default {
       tableConfigArr: [
         {
           fixed: false,
-          prop: 'deviceNumber',
+          prop: 'faultNumber',
           label: '故障编号',
           tooltip: true,
         },
         {
           fixed: false,
-          prop: 'deviceType',
+          prop: 'faultName',
           label: '故障类型',
           tooltip: true,
         },
@@ -156,6 +120,7 @@ export default {
     this.getProgectList()
   },
   methods: {
+    ...mapActions(['saveDetailInfo']),
     handleClick (row) {
       console.log(row);
     },
@@ -169,44 +134,28 @@ export default {
         }
       });
     },
-    resetForm (formName) {
-      this.$refs[formName].resetFields();
+    getDetail (data) {
+      // console.log('获取详情data', data)
+      this.dialogData = Object.assign({}, data)
+      this.saveDetailInfo(this.dialogData)
+      // systemMirror.getIndustryById().then(res => {
+
+      // })
     },
     getProgectList () {
-      let startTime, endTime
-      if (this.ruleFormHeight.time) {
-        startTime = this.ruleFormHeight.time[0]
-        endTime = this.ruleFormHeight.time[1]
-      }
       let params = {
-        projectName: this.ruleForm.key,
-        projectLeader: this.ruleFormHeight.leader,
-        projectType: this.ruleFormHeight.projectType,
-        projectSite: this.ruleFormHeight.address,
-        status: this.ruleFormHeight.status,
-        startTime: startTime,
-        endTime: endTime,
+        seek: this.ruleForm.key,
         currentPage: this.currentPage,
         pageSize: this.pageSize,
       }
-      systemMirror.getProjectList(params).then(res => {
+      systemMirror.getFailTypeList(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
-          // this.tableData = result.content
+          this.tableData = result.content
           this.total = result.recordTotal
         }
         this.tableData.forEach((item, index) => {
           item.createTime = timeReg.getNowFormatDate(item.createTime)
-          this.projectType.forEach(it => {
-            if (item.projectType && item.projectType === it.id) {
-              item.projectTypeLable = it.name
-            }
-          })
-          this.projectStatus.forEach(it => {
-            if (item.status && item.status === it.id) {
-              item.statusLable = it.name
-            }
-          })
         })
         this.tableDataNew = this.tableData
       })
@@ -237,24 +186,9 @@ export default {
       this.getProgectList()
     },
     changeProjectBox (status) {
+      this.saveDetailInfo({})
       this.addProjectStatus = status
     },
-    heightSearch () {
-      if (!this.heightStatus) {
-        this.pageSize = 8
-        this.getProgectList()
-        this.heightTable = 'calc(100vh - 498px)'
-      } else {
-        this.tableDataNew = this.tableData
-        this.ruleFormHeight = {}
-        this.currentPage = 1
-        this.pageSize = 10
-        this.getProgectList()
-        this.heightTable = 'calc(100vh - 402px)'
-      }
-      this.heightStatus = !this.heightStatus
-    },
-
   },
 }
 </script>

@@ -13,7 +13,9 @@
             <el-input v-model="ruleForm.key"
                       style="width: 320px"
                       clearable
-                      placeholder="请输入关键字进行搜索 "></el-input>
+                      placeholder="请输入关键字进行搜索 "
+                      @clear="submitForm('ruleForm')"
+                      @keyup.enter.native="submitForm('ruleForm')"></el-input>
           </el-form-item>
         </el-form>
         <div class="button-list">
@@ -90,10 +92,10 @@ export default {
         },
         {
           fixed: false,
-          prop: 'statusName',
-          label: '状态',
+          prop: 'companyAbbreviation',
+          label: '客户简称',
           tooltip: true,
-        },
+        }
       ],
       addProjectStatus: false,
       heightTable: 'calc(100vh - 402px)',
@@ -111,13 +113,13 @@ export default {
           style: 'view-screen'
         },
         {
-          name: '禁用',
+          name: '删除',
           style: 'disable-button'
         },
-        {
-          name: '启用',
-          style: 'view-screen'
-        }
+        // {
+        //   name: '启用',
+        //   style: 'view-screen'
+        // }
       ]
     };
   },

@@ -11,6 +11,11 @@
                   placeholder="请输入设备类型"></el-input>
       </el-form-item>
     </el-form>
+    <div class="form-footer">
+      <el-button type="primary"
+                 @click="submitForm">确 定</el-button>
+      <el-button @click="handleClose">取 消</el-button>
+    </div>
   </div>
 </template>
 <script>
@@ -34,9 +39,14 @@ export default {
       projectType: state => state.common.projectType,
       systemList: state => state.system.systemList,
       deviceType: state => state.common.deviceType,
+      detailInfo: state => state.system.detailInfo,
     })
   },
+  mounted () {
+    this.ruleForm = this.detailInfo
+  },
   methods: {
+    ...mapActions(['saveDetailInfo']),
     submitForm () {
       this.$refs['ruleForm'].validate((valid) => {
         if (valid) {
@@ -47,14 +57,20 @@ export default {
         }
       });
     },
+    handleClose () {
+      this.$refs['ruleForm'].resetFields();
+      this.$emit('changeProjectBox', false)
+      this.saveDetailInfo({})
+    },
     addSystem () {
       let params = {
-        ...this.ruleForm,
+        deviceTypeName: this.ruleForm.deviceTypeName
       }
       systemMirror.addDeviceType(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
           this.$emit('changeProjectBox', false)
+          this.$emit('getList')
           this.$message.success(serviceMessage)
         }
       })

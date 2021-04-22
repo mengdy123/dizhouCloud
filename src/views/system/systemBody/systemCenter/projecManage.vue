@@ -12,10 +12,13 @@
             <el-input v-model="ruleForm.key"
                       style="width: 320px"
                       placeholder="请输入关键字"
-                      clearable></el-input>
+                      clearable
+                      @clear="submitForm('ruleForm')"
+                      @keyup.enter.native="submitForm('ruleForm')"></el-input>
           </el-form-item>
         </el-form>
         <div class="button-list">
+          <el-button @click="resetList">重置</el-button>
           <el-button @click="heightSearch">{{heightStatus ? '关闭高级' : '高级'}}搜索</el-button>
           <el-button type="primary"
                      @click="submitForm('ruleForm')">搜索</el-button>
@@ -31,7 +34,7 @@
                         prop="industry">
             <el-select v-model="ruleFormHeight.projectType"
                        placeholder="请选择项目类型"
-                       style="width: 320px"
+                       style="width: 260px"
                        clearable>
               <el-option v-for="item in projectType"
                          :label="item.name"
@@ -43,14 +46,28 @@
             <el-select v-model="ruleFormHeight.status"
                        clearable
                        placeholder="请选择项目状态"
-                       style="width: 320px">
+                       style="width: 260px">
               <el-option v-for="item in projectStatus"
                          :label="item.name"
                          :key="item.id"
                          :value="item.id"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="项目运行时间">
+          <el-form-item label="客户名称">
+            <el-select v-model="ruleFormHeight.companyName"
+                       clearable
+                       placeholder="请选择客户名称"
+                       style="width: 260px">
+              <el-option v-for="item in companyList"
+                         :label="item.companyName"
+                         :key="item.companyId"
+                         :value="item.companyId"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="所属区域">
+            <cascaderAreaItem v-model="ruleFormHeight.projectSite"></cascaderAreaItem>
+          </el-form-item>
+          <el-form-item label="运行时间">
             <el-date-picker v-model="ruleFormHeight.time"
                             clearable
                             type="datetimerange"
@@ -65,7 +82,7 @@
     </div>
     <div class="dz-system-table">
       <div class="dz-system-table-add"><span @click="changeProjectBox(true)">新增</span></div>
-      <myTable :tableData="tableDataNew"
+      <myTable :tableData="tableData"
                :tableConfigArr='tableConfigArr'
                :selection="false"
                :action='actionList'
@@ -104,8 +121,10 @@ import { mapState, mapActions } from 'vuex'
 import timeReg from '@/utils/timeReg'
 import myTable from "@/components/Table";
 import addProjectForm from '../../components/formModule/addProjectForm'
+import cascaderAreaItem from '@/components/Cascader/areaCascader'
+
 export default {
-  components: { addBox, myTable, addProjectForm },
+  components: { addBox, myTable, addProjectForm, cascaderAreaItem },
   data () {
     return {
       ruleForm: {},
@@ -165,7 +184,6 @@ export default {
           tooltip: false,
         },
       ],
-      tableDataNew: [],
       currentPage: 1,
       pageSize: 10,
       total: 1000,
@@ -187,41 +205,30 @@ export default {
           style: 'view-screen'
         },
         {
-          name: '禁用',
+          name: '删除',
           style: 'disable-button'
         },
-        {
-          name: '启用',
-          style: 'view-screen'
-        }
-      ]
+      ],
     };
   },
   computed: {
     ...mapState({
       projectType: state => state.common.projectType,
       projectStatus: state => state.common.projectStatus,
+      companyList: state => state.system.companyList,
     })
   },
   mounted () {
     this.getProgectList()
   },
   methods: {
-    handleClick (row) {
-      console.log(row);
-    },
     submitForm (formName) {
-      this.$refs[formName].validate((valid) => {
-        if (valid) {
-          this.getProgectList()
-        } else {
-          console.log('error submit!!');
-          return false;
-        }
-      });
+      this.getProgectList()
     },
-    resetForm (formName) {
-      this.$refs[formName].resetFields();
+    resetList () {
+      this.ruleForm = {}
+      this.ruleFormHeight = {}
+      this.getProgectList()
     },
     getProgectList () {
       let startTime, endTime
@@ -233,7 +240,7 @@ export default {
         projectName: this.ruleForm.key,
         projectLeader: this.ruleFormHeight.leader,
         projectType: this.ruleFormHeight.projectType,
-        projectSite: this.ruleFormHeight.address,
+        projectSite: this.ruleFormHeight.projectSite,
         status: this.ruleFormHeight.status,
         startTime: startTime,
         endTime: endTime,
@@ -259,7 +266,6 @@ export default {
             }
           })
         })
-        this.tableDataNew = this.tableData
       })
     },
     disebleTable (row) {
@@ -292,15 +298,9 @@ export default {
     },
     heightSearch () {
       if (!this.heightStatus) {
-        this.pageSize = 8
-        this.getProgectList()
-        this.heightTable = 'calc(100vh - 498px)'
+        this.heightTable = 'calc(100vh - 548px)'
       } else {
-        this.tableDataNew = this.tableData
         this.ruleFormHeight = {}
-        this.currentPage = 1
-        this.pageSize = 10
-        this.getProgectList()
         this.heightTable = 'calc(100vh - 402px)'
       }
       this.heightStatus = !this.heightStatus
@@ -322,7 +322,7 @@ export default {
   /deep/ .el-form {
     width: 100%;
     flex-wrap: wrap;
-    justify-content: space-around;
+    justify-content: left;
   }
 }
 .item-content-div:before {
@@ -336,5 +336,8 @@ export default {
   position: absolute;
   right: 160px;
   top: -10px;
+}
+/deep/ label {
+  margin-bottom: 0;
 }
 </style>

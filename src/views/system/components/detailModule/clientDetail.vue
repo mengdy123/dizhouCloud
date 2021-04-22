@@ -13,16 +13,21 @@
                       disabled></el-input>
           </el-form-item>
           <el-form-item label="客户名称">
-            <el-input v-model="form.companyName"></el-input>
+            <el-input v-model="form.companyName"
+                      :disabled="isDisabled"></el-input>
+          </el-form-item>
+          <el-form-item label="客户简称">
+            <el-input v-model="form.companyAbbreviation"
+                      :disabled="isDisabled"></el-input>
           </el-form-item>
         </el-form>
       </div>
     </div>
     <div class="detail-module-row">
       <titleDiv2 title='项目信息'></titleDiv2>
-      <div class="add-project-button"><span @click="changeProjectBox(true)">新增</span></div>
+      <!-- <div class="add-project-button"><span @click="changeProjectBox(true)">新增</span></div> -->
       <div class="detail-form history-table">
-        <myTable :tableData="tableDataNew"
+        <myTable :tableData="tableData"
                  :tableConfigArr='tableConfigArr'
                  :selection="false"
                  :action='actionList'
@@ -37,6 +42,10 @@
         <el-button type="primary"
                    @click="updateDetail">保 存</el-button>
         <el-button @click="goBack">取 消</el-button>
+      </div>
+      <div class="button-list"
+           v-else>
+        <el-button @click="editDetail">编辑</el-button>
       </div>
       <addBox v-if="addProjectStatus"
               name='项目管理'
@@ -67,7 +76,7 @@ export default {
       tableConfigArr: [
         {
           fixed: false,
-          prop: 'projectCode',
+          prop: 'projectNumber',
           label: '项目编号',
           width: '100px',
           tooltip: true,
@@ -75,18 +84,14 @@ export default {
         {
           fixed: false,
           prop: 'projectName',
+          width: '200px',
           label: '项目名称',
           tooltip: true,
         },
         {
           fixed: false,
-          prop: 'projectAbbreviation',
-          label: '项目简称',
-          tooltip: false,
-        },
-        {
-          fixed: false,
           prop: 'projectSite',
+          width: '200px',
           label: '项目地址',
           tooltip: true,
         },
@@ -111,27 +116,35 @@ export default {
         {
           fixed: false,
           prop: 'statesLable',
-          label: '项目状态',
+          label: '状态',
           tooltip: false,
         },
         {
           fixed: false,
           prop: 'createTime',
-          label: '客户名称',
-          tooltip: true,
+          label: '运行时间',
+          tooltip: false,
         },
       ],
-      tableDataNew: [],
+      isDisabled: true,
+      tableData: [],
       heightTable: 'calc(100vh - 450px)',
       addProjectStatus: false,
       currentPage: 1,
       pageSize: 10000,
       actionList: [
-        {
-          name: '详情',
-          style: 'view-screen'
-        },
+        // {
+        //   name: '详情',
+        //   style: 'view-screen'
+        // },
       ]
+    }
+  },
+  watch: {
+    editStatus (newVal, oldVal) {
+      if (newVal) {
+        this.isDisabled = false
+      }
     }
   },
   computed: {
@@ -148,13 +161,17 @@ export default {
     this.getProgectList()
   },
   mounted () {
+    this.isDisabled = !this.editStatus
     this.form = this.detailInfo
     this.form.createTime = timeReg.getNowFormatDate(this.form.createTime)
   },
   methods: {
-    ...mapActions(['saveDetailInfo']),
+    ...mapActions(['saveDetailInfo', 'changeEditStatus']),
     goBack () {
       this.$router.push('/clientManage')
+    },
+    editDetail () {
+      this.changeEditStatus(true)
     },
     getCompanyById (id) {
       systemMirror.getCompanyById(id).then(res => {
@@ -181,29 +198,33 @@ export default {
       })
     },
     getProgectList () {
+      let id = this.$route.query.id
       let params = {
-        currentPage: this.currentPage,
-        pageSize: this.pageSize,
+        companyId: id,
+        currentPage: '1',
+        pageSize: '10000',
       }
-      systemMirror.getProjectList(params).then(res => {
+      systemMirror.getListByCompanyId(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
-          this.tableDataNew = result.content
+          this.tableData = result.content
           this.total = result.recordTotal
+          this.tableData.forEach((item, index) => {
+            item.createTime = timeReg.getNowFormatDate(item.createTime)
+            this.projectType.forEach(it => {
+              if (item.projectType && item.projectType === it.id) {
+                item.projectTypeLable = it.name
+              }
+            })
+            this.projectStatus.forEach(it => {
+              if (item.status && item.status === it.id) {
+                item.statesLable = it.name
+              }
+            })
+            console.log('this.tableData', this.tableData)
+          })
         }
-        this.tableDataNew.forEach((item, index) => {
-          item.createTime = timeReg.getNowFormatDate(item.createTime)
-          this.projectType.forEach(it => {
-            if (item.projectType && item.projectType === it.id) {
-              item.projectTypeLable = it.name
-            }
-          })
-          this.projectStatus.forEach(it => {
-            if (item.states && item.states === it.id) {
-              item.statesLable = it.name
-            }
-          })
-        })
+
       })
     },
     disebleTable (row) {

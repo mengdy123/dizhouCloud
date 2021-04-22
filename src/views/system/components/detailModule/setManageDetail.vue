@@ -3,57 +3,107 @@
     <el-page-header @back="goBack">
     </el-page-header>
     <div class="detail-module-row">
-      <titleDiv2 title='系统信息'></titleDiv2>
+      <titleDiv2 title='基本信息'></titleDiv2>
       <div class="detail-form">
         <el-form ref="form"
                  :model="form"
                  label-width="100px">
-          <el-form-item label="系统编号">
-            <el-input v-model="form.systemTypeNumber"
-                      disabled></el-input>
-          </el-form-item>
-          <el-form-item label="系统类型">
-            <el-input v-model="form.systemTypeName"
-                      :disabled="isDisabled"></el-input>
-          </el-form-item>
-          <el-form-item label="系统数量">
+          <el-form-item label="设备编号">
             <el-input v-model="form.systemNumber"
                       disabled></el-input>
+          </el-form-item>
+          <el-form-item label="设备型号">
+            <el-input v-model="form.systemName"></el-input>
+          </el-form-item>
+          <el-form-item label="设备系列">
+            <el-select v-model="form.systemType"
+                       placeholder="请选择设备系列">
+              <el-option v-for="item in systemType"
+                         :label="item.name"
+                         :key="item.id"
+                         :value="item.id"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="系列编号">
+            <el-input v-model="form.systemName"></el-input>
+          </el-form-item>
+          <el-form-item label="设备类型">
+            <el-select v-model="form.projectType"
+                       placeholder="请选择设备类型">
+              <el-option v-for="item in projectType"
+                         :label="item.name"
+                         :key="item.id"
+                         :value="item.id"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="设备类型编号">
+            <el-input v-model="form.systemName"></el-input>
+          </el-form-item>
+          <el-form-item label="系统名称">
+            <el-select v-model="form.systemName"
+                       placeholder="请选择系统名称">
+              <el-option v-for="item in projectList"
+                         :label="item.projectName"
+                         :key="item.projectId"
+                         :value="item.projectId"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="系统编号">
+            <el-select v-model="form.systemName"
+                       placeholder="请选择系统编号">
+              <el-option v-for="item in projectList"
+                         :label="item.projectName"
+                         :key="item.projectId"
+                         :value="item.projectId"></el-option>
+            </el-select>
           </el-form-item>
         </el-form>
       </div>
     </div>
     <div class="detail-module-row">
-      <titleDiv2 title='设备列表'></titleDiv2>
+      <titleDiv2 title='项目信息'></titleDiv2>
+      <div class="detail-form">
+        <el-form ref="form"
+                 :model="form"
+                 label-width="100px">
+          <el-form-item label="项目名称">
+            <el-input v-model="form.projectName"></el-input>
+          </el-form-item>
+          <el-form-item label="项目编号">
+            <el-input v-model="form.projectNumber"></el-input>
+          </el-form-item>
+          <el-form-item label="安装区域">
+            <el-input v-model="form.projectArea"></el-input>
+          </el-form-item>
+          <el-form-item label="安装位置">
+            <el-input v-model="form.projectSit"></el-input>
+          </el-form-item>
+        </el-form>
+      </div>
+    </div>
+    <div class="detail-module-row">
+      <titleDiv2 title='维修日志'></titleDiv2>
       <div class="detail-form history-table">
-        <myTable :tableData="tableData"
-                 :tableConfigArr='tableConfigArr'
-                 :action='actionList'
-                 :selection="false"
-                 :height='"295"'
-                 :index='true'></myTable>
+        <logsDiv></logsDiv>
       </div>
     </div>
     <div class="button-list"
          v-if="editStatus">
       <el-button type="primary"
                  @click="updateDetail">确 定</el-button>
-      <el-button @click="resetUpdateDetail">取 消</el-button>
-    </div>
-    <div class="button-list"
-         v-else>
-      <el-button @click="editDetail">编辑</el-button>
+      <el-button @click="goBack">取 消</el-button>
     </div>
   </div>
 </template>
 <script>
 import titleDiv2 from "@/components/titleModule/titleSystemDetail.vue";
 import myTable from "@/components/Table";
+import logsDiv from '@/components/Logs'
 import { mapState, mapActions } from 'vuex'
 import systemMirror from '@/resource/systemMirror'
 import timeReg from '@/utils/timeReg'
 export default {
-  components: { titleDiv2, myTable },
+  components: { titleDiv2, myTable, logsDiv },
   data () {
     return {
       form: {},
@@ -146,9 +196,7 @@ export default {
           label: '告警时间',
         },
       ],
-      spanIndex: '1',
-      actionList: [],
-      isDisabled: true,
+      spanIndex: '1'
     }
   },
   computed: {
@@ -163,35 +211,20 @@ export default {
   },
   created () {
     let id = this.$route.query.id
-    this.getSystemTypeById(id)
-  },
-  watch: {
-    editStatus (newVal, oldVal) {
-      if (newVal) {
-        this.isDisabled = false
-      } else {
-        this.isDisabled = true
-      }
-    }
+    this.getSystemById(id)
   },
   mounted () {
-    this.isDisabled = !this.editStatus
+    console.log('projectList', this.projectList)
     this.form = this.detailInfo
     this.form.createTime = timeReg.getNowFormatDate(this.form.createTime)
   },
   methods: {
-    ...mapActions(['saveDetailInfo', 'changeEditStatus']),
+    ...mapActions(['saveDetailInfo']),
     goBack () {
-      this.$router.push('/smartSystem')
+      this.$router.push('/setManage')
     },
-    editDetail () {
-      this.changeEditStatus(true)
-    },
-    resetUpdateDetail () {
-      this.changeEditStatus(false)
-    },
-    getSystemTypeById (id) {
-      systemMirror.getSystemTypeById(id).then(res => {
+    getSystemById (id) {
+      systemMirror.getSystemById(id).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
           this.form = result
@@ -206,11 +239,11 @@ export default {
       }
       params.updateTime = ''
       params.createTime = ''
-      systemMirror.updateSysType(params).then(res => {
+      systemMirror.updateSystem(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
           this.$message.success(serviceMessage)
-          this.resetUpdateDetail()
+          this.goBack()
         }
       })
     }

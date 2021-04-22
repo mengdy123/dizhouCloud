@@ -1,6 +1,6 @@
 <template>
-  <div class="dz-map-box"
-       v-show="dialogVisible">
+  <!-- v-show="dialogVisible" -->
+  <div class="dz-map-box">
     <div class="close-map-box">
       <i class="el-icon-close"
          @click="changeDialogVisible(false)"></i>
@@ -49,7 +49,7 @@ export default {
     this.address = ''
     setTimeout(() => {
       this.init()
-    }, 1000)
+    }, 500)
   },
   methods: {
     ...mapActions(['saveProjectAddress']),

@@ -2,7 +2,7 @@
   <div class="dz-time-div">
     <div class="time">{{nowTime}}</div>
     <div class="set"
-         @click="goBackName('/system')">
+         @click="goBackName('/project')">
       <icon-svg icon-class="chilun-o" />后台
       <!-- <router-link :to="{name:'system'}"> 后台</router-link> -->
     </div>

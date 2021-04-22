@@ -91,7 +91,7 @@ let GIS_URL
 let FILE_URL
 switch (process.env.NODE_ENV) {
   case 'production':
-    // 福州项目现场配置
+    // 项目现场配置
     DUTY_URL = 'http://192.168.124.43:8080/'
     GIS_URL = '' // 四维
     FILE_URL = ''
@@ -99,7 +99,7 @@ switch (process.env.NODE_ENV) {
     break
   case 'selfTest':
     // 公司测试配置
-    DUTY_URL = 'http://192.168.124.43:8080/'
+    DUTY_URL = 'http://106.15.77.69:8080/'
     GIS_URL = '' // 四维
     FILE_URL = ''
     break

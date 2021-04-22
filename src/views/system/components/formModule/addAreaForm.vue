@@ -13,10 +13,10 @@
              ref="ruleForm"
              label-width="100px"
              class="demo-ruleForm">
-      <el-form-item label="故障类型"
-                    prop="faultName">
-        <el-input v-model="ruleForm.faultName"
-                  placeholder="请输入故障类型"></el-input>
+      <el-form-item label="地域名称"
+                    prop="areaName">
+        <el-input v-model="ruleForm.areaName"
+                  placeholder="请输入地域名称"></el-input>
       </el-form-item>
     </el-form>
     <div class="form-footer">
@@ -34,10 +34,10 @@ export default {
     return {
       ruleForm: {},
       rules: {
-        faultName: [
-          { required: true, message: '请输入故障类型名称', trigger: 'blur' },
+        areaName: [
+          { required: true, message: '请输入地域名称', trigger: 'blur' },
         ],
-      }
+      },
     };
   },
   computed: {
@@ -51,7 +51,6 @@ export default {
   methods: {
     ...mapActions(['saveDetailInfo']),
     submitForm () {
-      console.log('this.ruleForm.faultId', this.ruleForm)
       this.$refs['ruleForm'].validate((valid) => {
         if (valid) {
           this.addCompany()
@@ -67,38 +66,38 @@ export default {
       this.saveDetailInfo({})
     },
     addCompany () {
-      if (this.ruleForm.faultId) {
-        let params = {
-          ...this.ruleForm,
+      let params
+      if (this.ruleForm.id) {
+        params = {
+          areaName: this.ruleForm.areaName,
+          color: this.ruleForm.color,
+          show: this.ruleForm.show,
+          id: this.ruleForm.id
         }
-        params.createTime = ''
-        params.updateTime = ''
-        systemMirror.updateFailTypeList(params).then(res => {
+        systemMirror.updateArea(params).then(res => {
           let { code, result, serviceMessage } = res.data
           if (code === 200) {
-            this.$emit('getList')
             this.$message.success(serviceMessage)
+            this.$emit('getList')
             this.$emit('changeProjectBox', false)
-            this.$refs['ruleForm'].resetFields();
           }
         })
       } else {
-        let params2 = {
-          ...this.ruleForm,
+        params = {
+          areaName: this.ruleForm.areaName,
+          color: '',
+          show: '0',
         }
-        params2.createTime = ''
-        params2.updateTime = ''
-        systemMirror.addFailTypeList(params2).then(res => {
+        systemMirror.addArea(params).then(res => {
           let { code, result, serviceMessage } = res.data
           if (code === 200) {
-            this.$emit('getList')
-            this.saveDetailInfo({})
             this.$message.success(serviceMessage)
+            this.$emit('getList')
             this.$emit('changeProjectBox', false)
-
           }
         })
       }
+
 
     }
   }

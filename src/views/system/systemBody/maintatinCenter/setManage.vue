@@ -12,7 +12,9 @@
             <el-input v-model="ruleForm.key"
                       style="width: 320px"
                       placeholder="请输入关键字"
-                      clearable></el-input>
+                      clearable
+                      @clear="submitForm('ruleForm')"
+                      @keyup.enter.native="submitForm('ruleForm')"></el-input>
           </el-form-item>
         </el-form>
         <div class="button-list">
@@ -64,7 +66,7 @@
       </div>
     </div>
     <div class="dz-system-table">
-      <div class="dz-system-table-add"><span @click="changeProjectBox(true)">新增</span></div>
+      <!-- <div class="dz-system-table-add"><span @click="changeProjectBox(true)">新增</span></div> -->
       <myTable :tableData="tableDataNew"
                :tableConfigArr='tableConfigArr'
                :selection="false"
@@ -72,8 +74,10 @@
                :height='heightTable'
                :http='http'
                name='设备管理'
+               :detail='true'
                @getList='getProgectList'
                @disebleTable='disebleTable'
+               @changeProjectBox='upFailBox'
                :index='true'></myTable>
     </div>
     <div class="dz-system-pagination">
@@ -85,12 +89,15 @@
                      :total="total">
       </el-pagination>
     </div>
-    <addBox v-if="addProjectStatus"
-            name='设备管理'
+    <addBox v-if="addFailBoxStatus"
+            name='上报'
             @getList='getProgectList'
-            @changeProjectBox='changeProjectBox'
-            title='新增'>
-
+            @changeProjectBox='upFailBox'
+            title='上报'>
+      <slot slot='dialogMain'>
+        <addFailForm ref="addForm"
+                     @changeProjectBox='upFailBox'></addFailForm>
+      </slot>
     </addBox>
   </div>
 </template>
@@ -100,94 +107,14 @@ import systemMirror from '@/resource/systemMirror'
 import { mapState, mapActions } from 'vuex'
 import timeReg from '@/utils/timeReg'
 import myTable from "@/components/Table";
+import addFailForm from '../../components/formModule/addFailForm'
 export default {
-  components: { addBox, myTable },
+  components: { addBox, myTable, addFailForm },
   data () {
     return {
       ruleForm: {},
       ruleFormHeight: {},
-      tableData: [
-        {
-          deviceNumber: '1001',
-          deviceType: '井盖',
-          systemName: '井盖系统',
-          projectName: '智慧松江新城地铁站',
-          address: '上海市松江区松江新城地铁站',
-          statusLable: '正常'
-        },
-        {
-          deviceNumber: '1002',
-          deviceType: '斑马线',
-          systemName: '过街系统',
-          projectName: '泉州市安溪县智慧发光斑',
-          address: '泉州市安溪县',
-          statusLable: '正常'
-        },
-        {
-          deviceNumber: '1003',
-          deviceType: '斑马线',
-          systemName: '过街系统',
-          projectName: '杭州市江干区智慧发光斑马线',
-          address: '杭州市江干区',
-          statusLable: '正常'
-        },
-        {
-          deviceNumber: '1004',
-          deviceType: '斑马线',
-          systemName: '过街系统',
-          projectName: '上海浦东新区智慧发光斑马线',
-          address: '上海浦东新区',
-          statusLable: '正常'
-        },
-        {
-          deviceNumber: '1005',
-          deviceType: '井盖',
-          systemName: '井盖系统',
-          projectName: '嘉兴市太阳能智慧窨井盖项目',
-          address: '嘉兴市',
-          statusLable: '正常'
-        },
-        {
-          deviceNumber: '1006',
-          deviceType: '发光标线',
-          systemName: '步道系统',
-          projectName: '浦东临港彩色步道',
-          address: '浦东临港',
-          statusLable: '正常'
-        },
-        {
-          deviceNumber: '1007',
-          deviceType: '井盖',
-          systemName: '井盖系统',
-          projectName: '嘉定区华亭镇镇政府',
-          address: '嘉定区华亭镇',
-          statusLable: '正常'
-        },
-        {
-          deviceNumber: '1008',
-          deviceType: '井盖',
-          systemName: '井盖系统',
-          projectName: '云南普洱市北部湿地公园',
-          address: '云南普洱市北部湿地公园',
-          statusLable: '正常'
-        },
-        {
-          deviceNumber: '1009',
-          deviceType: '井盖',
-          systemName: '井盖系统',
-          projectName: '泉州市安溪县智慧发光斑',
-          address: '上海市松江区松江新城地铁站',
-          statusLable: '正常'
-        },
-        {
-          deviceNumber: '1010',
-          deviceType: '井盖',
-          systemName: '井盖系统',
-          projectName: '常州高铁太阳能路灯项目',
-          address: '江苏常州',
-          statusLable: '正常'
-        }
-      ],
+      tableData: [],
       tableConfigArr: [
         {
           fixed: false,
@@ -236,10 +163,10 @@ export default {
       currentPage: 1,
       pageSize: 10,
       total: 1000,
-      addProjectStatus: false,
+      addFailBoxStatus: false,
       heightStatus: false,
       heightTable: 'calc(100vh - 402px)',
-      http: '/manage/project/getProjectById?projectId=',
+      http: '/manage/device/getDeviceTypeById?deviceTypeId=',
       actionList: [
         {
           name: '详情',
@@ -303,10 +230,10 @@ export default {
         currentPage: this.currentPage,
         pageSize: this.pageSize,
       }
-      systemMirror.getProjectList(params).then(res => {
+      systemMirror.getListByDevice(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
-          // this.tableData = result.content
+          this.tableData = result.content
           this.total = result.recordTotal
         }
         this.tableData.forEach((item, index) => {
@@ -350,8 +277,8 @@ export default {
       console.log(`当前页: ${val}`);
       this.getProgectList()
     },
-    changeProjectBox (status) {
-      this.addProjectStatus = status
+    upFailBox (status) {
+      this.addFailBoxStatus = status
     },
     heightSearch () {
       if (!this.heightStatus) {
@@ -385,7 +312,7 @@ export default {
   /deep/ .el-form {
     width: 100%;
     flex-wrap: wrap;
-    justify-content: space-around;
+    justify-content: left;
   }
 }
 .item-content-div:before {

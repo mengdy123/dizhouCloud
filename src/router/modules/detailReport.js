@@ -85,5 +85,18 @@ export default [
       }
     }]
   },
+  {
+    path: '/setManageDetail',
+    name: 'setManageDetail',
+    component: systemLayout,
+    children: [{
+      path: '/',
+      title: '设备管理详情',
+      component: resolve => {
+        require(['../../views/system/components/detailModule/setManageDetail.vue'], resolve)
+      }
+    }]
+  },
+
 
 ]

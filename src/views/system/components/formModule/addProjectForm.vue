@@ -69,13 +69,29 @@
                   placeholder="请输入联系方式"></el-input>
       </el-form-item>
     </el-form>
+    <div class="form-footer">
+      <el-button type="primary"
+                 @click="submitForm">确 定</el-button>
+      <el-button @click="handleClose">取 消</el-button>
+    </div>
+    <addBox v-if="addProjectStatus"
+            @changeProjectBox='changeProjectBox'
+            title='新增'>
+      <slot slot='dialogMain'>
+        <addMapForm ref="addForm"
+                    @changeProjectBox='changeProjectBox'></addMapForm>
+      </slot>
+    </addBox>
   </div>
 </template>
 <script>
 import { mapState, mapActions } from 'vuex'
 import systemMirror from '@/resource/systemMirror'
 import { isPhone } from '@/utils/validate'
+import addBox from '../dialogModule/addDialogModule'
+import addMapForm from '../mapBox/index'
 export default {
+  components: { addBox, addMapForm },
   data () {
     return {
       addressInfo: {},
@@ -97,7 +113,8 @@ export default {
           { required: true, message: '请输入客户名称', trigger: 'change' }
         ],
       },
-      companyList: []
+      companyList: [],
+      addProjectStatus: false,
     };
   },
   watch: {
@@ -121,6 +138,10 @@ export default {
     this.getcCompanyList()
   },
   methods: {
+    ...mapActions(['saveDetailInfo']),
+    changeProjectBox (status) {
+      this.addProjectStatus = status
+    },
     getcCompanyList () {
       let params = {
         companyName: '',
@@ -148,8 +169,17 @@ export default {
         }
       });
     },
+    handleClose () {
+      this.$refs['ruleForm'].resetFields();
+      this.$emit('changeProjectBox', false)
+      this.saveDetailInfo({})
+    },
     getProjectSite () {
-      this.$emit('changeInnerVisible', true)
+      // this.$emit('changeInnerVisible', true)
+      this.changeProjectBox(true)
+      this.$nextTick(() => {
+        // this.$refs.addForm.changeDialogVisible(true)
+      })
     },
     addProjectFun () {
       let params = {
@@ -171,6 +201,7 @@ export default {
         if (code === 200) {
           this.$message.success(serviceMessage)
           this.$emit('changeProjectBox', false)
+          this.saveDetailInfo({})
         }
       })
     },

@@ -1,30 +1,9 @@
 <template>
   <div class="dz-system">
-    <div class="dz-system-title">行业列表</div>
-    <div class="dz-system-search">
-      <div class="dz-system-search-ruleForm">
-        <el-form :model="ruleForm"
-                 ref="ruleForm"
-                 label-width="100px"
-                 class="demo-ruleForm">
-          <el-form-item>
-            <span class="label-key">关键字</span>
-            <el-input v-model="ruleForm.key"
-                      style="width: 320px"
-                      clearable
-                      placeholder="请输入关键字进行搜索"></el-input>
-          </el-form-item>
-        </el-form>
-        <div class="button-list">
-          <el-button type="primary"
-                     @click="submitForm('ruleForm')">搜索</el-button>
-        </div>
-      </div>
-    </div>
-
+    <div class="dz-system-title">项目分布</div>
     <div class="dz-system-table">
       <div class="dz-system-table-add"><span @click="changeProjectBox(true)">新增</span></div>
-      <myTable :tableData="tableData"
+      <myTable :tableData="tableDataNew"
                :tableConfigArr='tableConfigArr'
                :selection="false"
                :action='actionList'
@@ -32,17 +11,17 @@
                :detail='false'
                indexAlign='left'
                :indexWidth='"60px"'
-               name='行业管理'
+               name='项目分布'
                :http='http'
                :showIndex='true'
                :showColors='true'
                @getList='getList'
-               @disebleTable='disebleTable'
-               @changeProjectBox='changeProjectBox'
-               @getDetail='getDetail'
                @changeColor='changeColor'
                @selectChangeShow='selectChangeShow'
+               @disebleTable='disebleTable'
                @deletList='deletList'
+               @changeProjectBox='changeProjectBox'
+               @getDetail='getDetail'
                :index='true'></myTable>
     </div>
     <div class="dz-system-pagination">
@@ -55,14 +34,14 @@
       </el-pagination>
     </div>
     <addBox v-if="addProjectStatus"
-            name='行业管理'
+            name='项目分布'
             @getList='getList'
             @changeProjectBox='changeProjectBox'
             title='新增'>
       <slot slot='dialogMain'>
-        <addIndustryForm ref="addForm"
-                         @getList='getList'
-                         @changeProjectBox='changeProjectBox'></addIndustryForm>
+        <addAreaForm ref="addForm"
+                     @getList='getList'
+                     @changeProjectBox='changeProjectBox'></addAreaForm>
       </slot>
     </addBox>
   </div>
@@ -73,13 +52,15 @@ import myTable from "@/components/Table";
 import systemMirror from '@/resource/systemMirror'
 import { mapState, mapActions } from 'vuex'
 import timeReg from '@/utils/timeReg'
-import addIndustryForm from '../../components/formModule/addIndustryForm'
+import addAreaForm from '../../components/formModule/addAreaForm'
 export default {
-  components: { addBox, myTable, addIndustryForm },
+  components: { addBox, myTable, addAreaForm },
   data () {
     return {
       ruleForm: {},
-      tableData: [
+      rules: {},
+      tableData: [],
+      tableDataNew: [
         {
           show: true,
           color: 'rgba(255, 69, 0, 0.68)',
@@ -88,21 +69,27 @@ export default {
       tableConfigArr: [
         {
           fixed: false,
-          prop: 'industryNumber',
-          label: '行业编号',
+          prop: 'areaName',
+          label: '地域名称',
           tooltip: true,
         },
         {
           fixed: false,
-          prop: 'industryName',
-          label: '行业类型',
+          prop: 'projectNumber',
+          label: '项目数量',
           tooltip: true,
-        }
+        },
+        // {
+        //   fixed: false,
+        //   prop: 'projectNumber',
+        //   label: '项目总数',
+        //   tooltip: false,
+        // }
       ],
       http: '/manage/indutry/getIndustryById?industryId=',
       dialogData: {},
       addProjectStatus: false,
-      heightTable: 'calc(100vh - 402px)',
+      heightTable: 'calc(100vh - 290px)',
       currentPage: 1,
       pageSize: 10,
       total: 1000,
@@ -114,7 +101,7 @@ export default {
         {
           name: '删除',
           style: 'disable-button'
-        }
+        },
       ]
     };
   },
@@ -141,27 +128,25 @@ export default {
     },
     getList () {
       let params = {
-        industryName: this.ruleForm.key,
+        areaName: '',
         currentPage: this.currentPage,
         pageSize: this.pageSize,
       }
-      systemMirror.getIndustryList(params).then(res => {
+      systemMirror.getAreaList(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
           this.tableData = result.content
           this.total = result.recordTotal
-          this.tableData.forEach((item, index) => {
-            item.createTime = timeReg.getNowFormatDate(item.createTime)
-            if (item.show === '1') {
-              item.show = true
-            } else {
-              item.show = false
-            }
-          })
-        } else {
-          this.tableData = []
         }
-
+        this.tableData.forEach((item, index) => {
+          item.createTime = timeReg.getNowFormatDate(item.createTime)
+          if (item.show === '1') {
+            item.show = true
+          } else {
+            item.show = false
+          }
+        })
+        this.tableDataNew = this.tableData
       })
     },
     disebleTable (row) {
@@ -183,6 +168,44 @@ export default {
         }
       })
     },
+    getDetail (data) {
+      // console.log('获取详情data', data)
+      this.dialogData = Object.assign({}, data)
+      this.saveDetailInfo(this.dialogData)
+      // systemMirror.getIndustryById().then(res => {
+
+      // })
+    },
+    deletList (id) {
+      systemMirror.deleteArea(id).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.getList()
+        }
+      })
+    },
+    // 修改详情
+    editDetail (row) {
+      let show
+      if (row.show) {
+        show = '1'
+      } else {
+        show = '0'
+      }
+      let params = {
+        areaName: row.areaName,
+        color: row.color,
+        show: show,
+        id: row.id
+      }
+      systemMirror.updateArea(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.$message.success(serviceMessage)
+          this.getList()
+        }
+      })
+    },
     // 是否显示
     selectChangeShow (row) {
       if (!row.color) {
@@ -194,45 +217,8 @@ export default {
     },
     //修改色值
     changeColor (row) {
+      console.log('修改色值', row)
       this.editDetail(row)
-    },
-    // 修改详情
-    editDetail (row) {
-      let show
-      if (row.show) {
-        show = '1'
-      } else {
-        show = '0'
-      }
-      let params = {
-        ...row,
-        show: show
-      }
-      params.createTime = ''
-      params.updateTime = ''
-      systemMirror.updateIndutry(params).then(res => {
-        let { code, result, serviceMessage } = res.data
-        if (code === 200) {
-          this.$message.success(serviceMessage)
-          this.getList()
-        }
-      })
-    },
-    getDetail (data) {
-      // console.log('获取行业详情data', data)
-      this.dialogData = Object.assign({}, data)
-      this.saveDetailInfo(this.dialogData)
-      // systemMirror.getIndustryById().then(res => {
-
-      // })
-    },
-    deletList (id) {
-      systemMirror.deleteIndustryById(id).then(res => {
-        let { code, result, serviceMessage } = res.data
-        if (code === 200) {
-          this.getList()
-        }
-      })
     },
     handleSizeChange (val) {
       console.log(`每页 ${val} 条`);
@@ -242,6 +228,7 @@ export default {
       this.getList()
     },
     changeProjectBox (status) {
+      this.saveDetailInfo({})
       this.addProjectStatus = status
     },
   },

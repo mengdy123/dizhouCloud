@@ -73,17 +73,37 @@ export default {
         {
           fixed: false,
           prop: 'userNumber',
-          label: '用户编号',
-        },
-        {
-          fixed: false,
-          prop: 'roleName',
-          label: '用户角色',
+          label: 'ID号',
         },
         {
           fixed: false,
           prop: 'name',
-          label: '用户姓名',
+          label: '用户名',
+        },
+        {
+          fixed: false,
+          prop: 'phone',
+          label: '联系方式',
+        },
+        {
+          fixed: false,
+          prop: 'depart',
+          label: '部门',
+        },
+        {
+          fixed: false,
+          prop: 'duty',
+          label: '职务',
+        },
+        {
+          fixed: false,
+          prop: 'role',
+          label: '角色',
+        },
+        {
+          fixed: false,
+          prop: 'power',
+          label: '权限',
         },
         {
           fixed: false,
@@ -110,12 +130,8 @@ export default {
           style: 'edit-button'
         },
         {
-          name: '禁用',
+          name: '删除',
           style: 'disable-button'
-        },
-        {
-          name: '启用',
-          style: 'edit-button'
         }
       ]
     };

@@ -4,16 +4,32 @@
               :data="tableData"
               style="width: 100%"
               :height="height"
+              :row-key='getRowKeys'
               :header-cell-style="{background:'#fafafa',fontWeight: '500',height: '54px'}"
               :empty-text="emptyText"
-              @row-click="expandChange">
+              :expand-row-keys="expands"
+              @expand-change="expandChange"
+              @row-click="clickRowHandle">
       <!-- 展开行 -->
       <el-table-column v-if="expand"
                        type="expand">
         <template slot-scope="scope">
-          <main>
-            <slot name='rowMain'></slot>
-          </main>
+          <div class="row-main"
+               :data-rowData="rowData">
+            <ul v-for="(item, index) in rowData"
+                :key="index">
+              <li>
+                <span>设备型号：</span>
+                <span>{{item.versiontypeName}}</span>
+              </li>
+              <li>
+                <span>设备数量：</span>
+                <span>{{item.deviceNumber}}</span>
+              </li>
+            </ul>
+            <div class="dz-system-device-add"
+                 @click="changeModelBox(true)">新增型号</div>
+          </div>
         </template>
       </el-table-column>
       <!-- table的第一列是判断是否为序号（index）或者是选择框(selection) -->
@@ -28,7 +44,31 @@
                        type="index"
                        :align="indexAlign">
       </el-table-column>
-
+      <!-- 显示 -->
+      <el-table-column v-if="showIndex"
+                       width="60"
+                       label="显示"
+                       align="center">
+        <template slot-scope="scope">
+          <el-checkbox v-model="scope.row.show"
+                       @change="selectChangeShow(scope.row)"></el-checkbox>
+        </template>
+      </el-table-column>
+      <!-- 色值 -->
+      <el-table-column v-if="showColors"
+                       width="60"
+                       label="色值"
+                       align="center">
+        <template slot-scope="scope">
+          <el-color-picker v-model="scope.row.color"
+                           :show-alpha='false'
+                           color-format='hex'
+                           size="mini"
+                           @change='changeColor(scope.row)'
+                           :predefine="predefineColors">
+          </el-color-picker>
+        </template>
+      </el-table-column>
       <!-- 表头数据 -->
       <el-table-column v-for="(item,index) in tableConfigArr"
                        :key="index"
@@ -74,6 +114,8 @@
                   @click.stop="maintainRow(scope.row)">{{it.name}}</span>
             <span v-if="it.name === '考评'"
                   @click.stop="checkRow(scope.row)">{{it.name}}</span>
+            <span v-if="it.name === '权限配置'"
+                  @click.stop="setpower(scope.row)">{{it.name}}</span>
 
           </span>
         </template>
@@ -99,12 +141,35 @@ export default {
   data () {
     return {
       // tableHeight: 200, // 自己设置高度
-      expands: []
+      expands: [],
+      predefineColors: [
+        '#518EEA',
+        '#EE6666',
+        '#FC8452',
+        '#FAC858',
+        '#91CB74',
+        '#3CA272',
+        '#73C0DE',
+        '#5470C6',
+        '#9A60B4',
+        '#F264DB',
+        '#35E9FF',
+      ]
     }
   },
   props: {
     // 展开行
     expand: {
+      type: Boolean,
+      default: false
+    },
+    // 是否在首页显示
+    showIndex: {
+      type: Boolean,
+      default: false
+    },
+    // 是否可配置色值
+    showColors: {
       type: Boolean,
       default: false
     },
@@ -154,6 +219,9 @@ export default {
     tableData: {
       type: Array
     },
+    rowData: {
+      type: Array
+    },
     //是否展示操作列
     action: {
       type: Array,
@@ -181,10 +249,9 @@ export default {
   methods: {
     ...mapActions(['saveDetailInfo', 'changeEditStatus']),
     editTable (row) {
-      if (this.name === '行业管理') {
-        this.$emit('changeProjectBox', true)
-        this.$emit('getDetail', row)
-      } else if (this.name === '设备系列') {
+      if (this.name === '行业管理' || this.name === '设备系列' || this.name === '角色管理' || this.name === '项目分布'
+        || this.name == '故障类型管理') {
+        console.log('this.name', this.name)
         this.$emit('changeProjectBox', true)
         this.$emit('getDetail', row)
       } else {
@@ -194,27 +261,127 @@ export default {
     },
     //审批
     approveRow (row) {
-      alert('审批')
+      this.$emit('getDetail', row)
+      this.$emit('changeProjectBox', true)
+
     },
     //维修
     maintainRow (row) {
-      alert('维修')
+      this.$emit('getDetail', row)
+      this.$emit('maintainStatusBox', true)
     },
     //考评
     checkRow (row) {
-      alert('考评')
+      this.$emit('getDetail', row)
+      this.$emit('checkStatusBox', true)
     },
     // 删除
     deleteRow (row) {
-      alert('删除')
+      console.log('this.name---deleteRow', this.name)
+      console.log('row---deleteRow', row)
+      this.$confirm('请确认是否删除？').then(_ => {
+        let id = ''
+        if (this.name === '项目管理' && row.projectId) {
+          id = row.projectId
+        } else if (this.name === '客户管理' && row.companyId) {
+          id = row.companyId
+        } else if (this.name === '智能设备' && row.deviceId) {
+          id = row.deviceId
+        } else if (this.name === '智能系统' && row.systemTypeId) {
+          id = row.systemTypeId
+        } else if (this.name === '' && row.userId) {
+          id = row.userId
+        } else if (this.name === '设备管理' && row.deviceTypeId) {
+          id = row.deviceTypeId
+        } else if (this.name === '行业管理' && row.industryId) {
+          id = row.industryId
+        } else {
+          id = row.id
+        }
+        this.$emit('deletList', id)
+
+        done();
+      })
+        .catch(_ => { });
+
     },
-    expandChange (row, index, e) {
-      // console.log('row', row)
+    //配置权限
+    setpower (row) {
+      this.$emit('changeProjectBox', true)
+    },
+    getRowKeys: function (row) {
+      let id = ''
+      if (this.name === '项目管理' && row.projectId) {
+        id = row.projectId
+      } else if (this.name === '客户管理' && row.companyId) {
+        id = row.companyId
+      } else if (this.name === '智能设备' && row.deviceTypeId) {
+        id = row.deviceTypeId
+      } else if (this.name === '智能系统' && row.systemTypeId) {
+        id = row.systemTypeId
+      } else if (this.name === '' && row.userId) {
+        id = row.userId
+      } else if (this.name === '设备管理' && row.deviceTypeId) {
+        id = row.deviceTypeId
+      } else if (this.name === '设备系列' && row.seriesId) {
+        id = row.seriesId
+      } else if (this.name === '行业管理' && row.industryId) {
+        id = row.industryId
+      } else {
+        id = row.id
+      }
+      return id
+    },
+    changeModelBox (status) {
+      this.$emit('changeModelBox', true)
+    },
+    clickRowHandle (row, index, e) {
       // console.log('index', index)
       // console.log('e', e)
       //调用,table的方法,展开/折叠 行
-      this.$refs.refTable.toggleRowExpansion(row)
-      this.$emit('getList', row.seriesId)
+      this.$refs.refTable.setCurrentRow(row)
+
+    },
+    expandChange (row, expandedRows) {
+      const that = this
+      that.$emit('changeSeriesId', row.seriesId)
+      that.$emit('getModelList', row.seriesId)
+      if (expandedRows.length) {
+        that.expands = []
+        if (row) {
+          let id = ''
+          if (this.name === '项目管理' && row.projectId) {
+            id = row.projectId
+          } else if (this.name === '客户管理' && row.companyId) {
+            id = row.companyId
+          } else if (this.name === '智能设备' && row.deviceTypeId) {
+            id = row.deviceTypeId
+          } else if (this.name === '智能系统' && row.systemTypeId) {
+            id = row.systemTypeId
+          } else if (this.name === '' && row.userId) {
+            id = row.userId
+          } else if (this.name === '设备管理' && row.deviceTypeId) {
+            id = row.deviceTypeId
+          } else if (this.name === '设备系列' && row.seriesId) {
+            id = row.seriesId
+          } else if (this.name === '行业管理' && row.industryId) {
+            id = row.industryId
+          } else {
+            id = row.id
+          }
+          that.expands.push(id)
+        }
+      } else {
+        that.expands = []
+      }
+    },
+    //显示
+    selectChangeShow (row) {
+      this.$emit('selectChangeShow', row)
+    },
+    // 修改色值
+    changeColor (row) {
+      this.$emit('changeColor', row)
     },
     viewScreen () {
       this.$router.push('/sceneIndex')
@@ -227,25 +394,29 @@ export default {
       this.$emit('disebleTable', row)
     },
     reportedClick (row) {
-      alert('上报功能')
+      this.$emit('changeProjectBox', true)
     },
     handdle (row) {
       console.log('row', row)
       console.log('this.name', this.name)
       let http = ''
       let id = ''
-      if (this.name === '项目管理' || row.projectId) {
+      if (this.name === '项目管理' && row.projectId) {
         id = row.projectId
-      } else if (this.name === '客户管理' || row.companyId) {
+      } else if (this.name === '客户管理' && row.companyId) {
         id = row.companyId
-      } else if (this.name === '' || row.deviceId) {
-        id = row.deviceId
-      } else if (this.name === '' || row.userId) {
-        id = row.userId
-      } else if (this.name === '' || row.deviceTypeId) {
+      } else if (this.name === '智能设备' && row.deviceTypeId) {
         id = row.deviceTypeId
-      } else if (this.name === '' || row.systemTypeId) {
+      } else if (this.name === '智能系统' && row.systemTypeId) {
         id = row.systemTypeId
+      } else if (this.name === '' && row.userId) {
+        id = row.userId
+      } else if (this.name === '设备管理' && row.deviceTypeId) {
+        id = row.deviceTypeId
+      } else if (this.name === '行业管理' && row.industryId) {
+        id = row.industryId
+      } else {
+        id = row.id
       }
       http = DUTY_URL + this.http + String(id)
       if (this.detail) {
@@ -277,7 +448,41 @@ export default {
 }
 </script>
 <style lang="less" scoped>
-// .dz-table-module {
-//   overflow-y: scroll;
-// }
+.dz-table-module {
+  height: 100%;
+  /deep/ label {
+    margin-bottom: 0;
+  }
+}
+.row-main {
+  min-height: 44px;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  ul {
+    width: 100%;
+    margin: 10px 20px 5px 0;
+    display: flex;
+    li {
+      display: flex;
+      width: 15%;
+      span {
+        display: block;
+        color: #333333;
+      }
+      span:nth-child(odd) {
+        color: #999999;
+      }
+    }
+  }
+  .dz-system-device-add {
+    color: #2761ff;
+    cursor: pointer;
+    text-align: left;
+    height: 44px;
+    line-height: 44px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+}
 </style>

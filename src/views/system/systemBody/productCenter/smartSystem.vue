@@ -13,7 +13,9 @@
             <el-input v-model="ruleForm.key"
                       clearable
                       style="width: 320px"
-                      placeholder="请输入关键字查询"></el-input>
+                      placeholder="请输入关键字查询"
+                      @clear="submitForm('ruleForm')"
+                      @keyup.enter.native="submitForm('ruleForm')"></el-input>
           </el-form-item>
         </el-form>
         <div class="button-list">
@@ -32,8 +34,10 @@
                :height='heightTable'
                :http='http'
                indexAlign='left'
-               :indexWidth='"200%"'
+               :indexWidth='"60px"'
                :detail='true'
+               :showIndex='true'
+               :showColors='true'
                name='智能系统'
                @getList='getList'
                @disebleTable='disebleTable'
@@ -123,12 +127,17 @@ export default {
         {
           fixed: false,
           prop: 'systemNumber',
-          label: '各智能系统数量',
+          label: '系统数量',
           tooltip: false,
         },
       ],
-      http: '/manage/system/getSystemTypeById?systemTypeId=',
-      tableDataNew: [],
+      http: 'manage/system/getSystemTypeById?systemTypeId=',
+      tableDataNew: [
+        {
+          checked: true,
+          color: 'rgba(255, 69, 0, 0.68)',
+        }
+      ],
       currentPage: 1,
       pageSize: 10,
       total: 1000,
@@ -144,13 +153,13 @@ export default {
           style: 'edit-button'
         },
         {
-          name: '禁用',
+          name: '删除',
           style: 'disable-button'
         },
-        {
-          name: '启用',
-          style: 'edit-button'
-        }
+        // {
+        //   name: '启用',
+        //   style: 'edit-button'
+        // }
       ]
     };
   },

@@ -1,170 +1,169 @@
 <template>
   <div class="dz-system">
     <div class="dz-system-title">部门管理</div>
-    <!-- <div class="dz-system-search">
-      <div class="dz-system-search-ruleForm">
-        <el-form :model="ruleForm"
-                 ref="ruleForm"
-                 label-width="100px"
-                 class="demo-ruleForm">
-          <el-form-item>
-            <span class="label-key">关键字</span>
-            <el-input v-model="ruleForm.key"
-                      style="width: 320px"
-                      clearable
-                      placeholder="请输入请输入角色名称"></el-input>
-          </el-form-item>
-        </el-form>
-        <div class="button-list">
-          <el-button type="primary"
-                     @click="submitForm('ruleForm')">搜索</el-button>
+    <div class="dz-system-tree">
+      <div v-if="treeData.length > 0">
+        <div class="tree-list"
+             v-for="(item, index) in treeData"
+             :key="index">
+          <TreeChart :json="item"
+                     :class="{landscape: isVertical}"
+                     :isDetail="isDetail"
+                     @add="addStock"
+                     @delete="deleteStock" />
         </div>
       </div>
-    </div> -->
-    <div class="dz-system-tree">
-      <treeDiv></treeDiv>
+      <div v-else>
+        <el-button type="primary"
+                   @click="addOrganization">新增组织架构</el-button>
+      </div>
     </div>
-    <addBox v-if="addProjectStatus"
+    <!-- 删除提示弹框 -->
+    <!-- <el-dialog title="提示"
+               :visible.sync="dialogVisible2"
+               width="30%">
+      <div class="tips">
+        <p style="text-align: left">确定删除该股东信息?</p>
+      </div>
+      <span slot="footer"
+            class="dialog-footer">
+        <div class="tip-left">
+          <el-button type="info"
+                     @click="dialogVisible2=false">取消</el-button>
+          <el-button type="primary"
+                     @click="confimdelete">确定</el-button>
+        </div>
+      </span>
+    </el-dialog> -->
+    <addBox v-if="dialogVisible"
             name='部门管理'
-            @getList='getList'
-            @changeProjectBox='changeProjectBox'
-            title='新增'>
+            @getList='getDepartmentAll'
+            @changeProjectBox='clearDialog'
+            title='部门管理'>
       <slot slot='dialogMain'>
-        <addUserForm ref="addForm"
-                     @changeProjectBox='changeProjectBox'></addUserForm>
+        <addDepartForm ref="addForm"
+                       @getList='getDepartmentAll'
+                       @changeProjectBox='clearDialog'></addDepartForm>
       </slot>
     </addBox>
   </div>
 </template>
 <script>
 import addBox from '../../components/dialogModule/addDialogModule'
-import systemMirror from '@/resource/systemMirror'
+import systemManageMirror from '@/resource/systemManageMirror'
 import treeDiv from '@/components/Tree'
+import TreeChart from '@/components/Tree/treeData'
 import { mapState, mapActions } from 'vuex'
-import timeReg from '@/utils/timeReg'
-import addUserForm from '../../components/formModule/addUserForm'
+import addDepartForm from '../../components/formModule/addDepartForm'
+
 export default {
-  components: { addBox, addUserForm, treeDiv },
+  components: { addBox, addDepartForm, treeDiv, TreeChart },
   data () {
     return {
-      ruleForm: {},
-      tableData: [],
-      tableConfigArr: [
+      treeData: {},
+      isVertical: false, // 是否是竖方向,只给最外层的添加
+      isDetail: false, // 是否是详情,不可编辑操作
+      dialogVisible: false, // 添加股东弹框
+      ruleForm: {
+        type: 1,
+        name: "",
+      },
+      shareholderTypeOptions: [
         {
-          fixed: false,
-          prop: 'userNumber',
-          label: '用户编号',
+          labelEn: "organization",
+          labelZh: "组织架构",
+          value: 1
         },
         {
-          fixed: false,
-          prop: 'roleName',
-          label: '用户角色',
+          labelEn: "depart",
+          labelZh: "部门",
+          value: 2
         },
         {
-          fixed: false,
-          prop: 'name',
-          label: '用户姓名',
-        },
-        {
-          fixed: false,
-          prop: 'statusName',
-          label: '账号状态',
-        },
-      ],
-      tableDataNew: [],
-      http: '/manage/user/getUserById?userId=',
-      ruleFormHeight: {},
-      currentPage: 1,
-      pageSize: 10,
-      total: 1000,
-      addProjectStatus: false,
-      heightTable: 'calc(100vh - 402px)',
-      heightStatus: false,
-      actionList: [
-        {
-          name: '详情',
-          style: 'edit-button'
-        },
-        {
-          name: '编辑',
-          style: 'edit-button'
-        },
-        {
-          name: '禁用',
-          style: 'disable-button'
-        },
-        {
-          name: '启用',
-          style: 'edit-button'
+          labelEn: "duty",
+          labelZh: "职务",
+          value: 3
         }
-      ]
-    };
+      ], // 股东类型
+      lastId: 11, // 最后一级id
+      currentTreeData: {}
+    }
   },
   mounted () {
-    this.getList()
+    this.getDepartmentAll()
   },
   methods: {
-    submitForm (formName) {
-      this.$refs[formName].validate((valid) => {
-        if (valid) {
-          this.getList()
-        } else {
-          console.log('error submit!!');
-          return false;
-        }
-      });
-    },
-    getList () {
-      let params = {
-        seek: this.ruleForm.key,
-        currentPage: this.currentPage,
-        pageSize: this.pageSize,
-      }
-      systemMirror.getUserList(params).then(res => {
+    ...mapActions(['saveDetailInfo', 'changeEditStatus']),
+    getDepartmentAll () {
+      let params = {}
+      systemManageMirror.getDepartmentAll(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
-          this.tableDataNew = result.content
-          this.total = result.recordTotal
+          this.treeData = result
         }
-        this.tableDataNew.forEach((item, index) => {
-          item.createTime = timeReg.getNowFormatDate(item.createTime)
-          if (item.status === '1') {
-            item.statusName = '正常'
-          } else {
-            item.statusName = '已禁用'
-          }
-        })
       })
     },
-    disebleTable (row) {
-      let params = {
-        ...row,
-      }
-      params.updateTime = ''
-      params.createTime = ''
-      if (params.status === '1') {
-        params.status = '2'
+    changeBoxStatus (status) {
+      this.dialogVisible = status
+    },
+    // 新增编辑,val: 0 新增, 1 编辑
+    addStock (data) {
+      this.dialogData = Object.assign({}, data.data)
+      if (data.val) {
+        // 不使用=赋值,内存相同,改变后,treeData数据也会改变
+        this.saveDetailInfo(this.dialogData)
+        this.changeEditStatus(true)
       } else {
-        params.status = '1'
+        // 使用=赋值,编辑时改变currentTreeData, 源数据treeData也会改变
+        let parmas = this.dialogData
+        parmas.type = 2
+        parmas.name = ''
+        this.saveDetailInfo(parmas)
+        this.changeEditStatus(false)
       }
-      systemMirror.updateUser(params).then(res => {
+      this.changeBoxStatus(true)
+    },
+    addOrganization () {
+      let parmas = {
+        type: 2,
+        name: '',
+        level: "1",
+        seq: 1,
+        remark: "",
+        code: '1'
+      }
+      this.changeBoxStatus(true)
+      this.saveDetailInfo(parmas)
+      this.changeEditStatus(true)
+    },
+    // 删除
+    deleteStock (data) {
+      console.log('deleteStock', data)
+      this.$confirm('确认删除？')
+        .then(_ => {
+          this.confimdelete(data.id)
+        })
+        .catch(_ => { });
+      // this.currentTreeData = data
+    },
+    // 确定删除
+    confimdelete (id) {
+      let params = {
+        id: id
+      }
+      systemManageMirror.deleteDepartment(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
-          this.$message.success(serviceMessage)
-          this.getList()
+          this.getDepartmentAll()
         }
       })
     },
-    handleSizeChange (val) {
-      console.log(`每页 ${val} 条`);
+    clearDialog () {
+      this.dialogVisible = false
     },
-    handleCurrentChange (val) {
-      console.log(`当前页: ${val}`);
-      this.getList()
-    },
-    changeProjectBox (status) {
-      this.addProjectStatus = status
-    },
+
+
+
   },
 }
 </script>
@@ -172,6 +171,8 @@ export default {
 .dz-system {
   &-tree {
     margin: 30px 0;
+    overflow: scroll;
+    height: calc(100% - 60px);
   }
 }
 /deep/ label {

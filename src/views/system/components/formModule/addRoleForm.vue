@@ -13,86 +13,21 @@
              ref="ruleForm"
              label-width="100px"
              class="demo-ruleForm">
-      <el-form-item label="用户名"
+      <el-form-item label="角色名"
                     prop="name">
         <el-input v-model="ruleForm.name"
-                  placeholder="请输入用户名"></el-input>
+                  placeholder="请输入角色名"></el-input>
       </el-form-item>
-      <el-form-item label="联系电话"
-                    prop="phone">
-        <el-input v-model="ruleForm.phone"
-                  placeholder="请输入联系电话"></el-input>
-      </el-form-item>
-      <el-form-item label="密码"
-                    prop="pass">
-        <el-input type="password"
-                  v-model="ruleForm.pass"
-                  autocomplete="off"
-                  placeholder="请输入密码"></el-input>
-      </el-form-item>
-      <el-form-item label="确认密码"
-                    prop="checkPass">
-        <el-input type="password"
-                  v-model="ruleForm.checkPass"
-                  autocomplete="off"
-                  placeholder="请输入确认密码"></el-input>
-      </el-form-item>
-      <el-form-item label="部门"
-                    prop="depart">
-        <el-select v-model="ruleForm.depart"
-                   placeholder="请选择部门">
-          <el-option label="销售部"
-                     value="1"></el-option>
-          <el-option label="研发部"
-                     value="2"></el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="职务"
-                    prop="duty">
-        <el-select v-model="ruleForm.duty"
-                   placeholder="请选择职务">
-          <el-option label="员工"
-                     value="1"></el-option>
-          <el-option label="经理"
-                     value="2"></el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="用户角色"
+
+      <el-form-item label="权限"
                     prop='roleId'>
         <el-select v-model="ruleForm.roleId"
-                   placeholder="请选择用户角色">
-          <el-option label="角色1"
+                   placeholder="请选择权限">
+          <el-option label="权限1"
                      value="1"></el-option>
-          <el-option label="角色2"
-                     value="2"></el-option>
-          <el-option label="角色3"
-                     value="3"></el-option>
-          <el-option label="角色4"
-                     value="4"></el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="账号状态">
-        <el-select v-model="ruleForm.status"
-                   placeholder="请选择账号状态">
-          <el-option label="正常"
-                     value="1"></el-option>
-          <el-option label="异常"
+          <el-option label="权限2"
                      value="2"></el-option>
         </el-select>
-      </el-form-item>
-      <el-form-item label="免冠照片"
-                    prop="photo">
-        <el-upload class="avatar-uploader"
-                   action="https://jsonplaceholder.typicode.com/posts/"
-                   :show-file-list="false"
-                   :on-success="handleAvatarSuccess"
-                   :before-upload="beforeAvatarUpload">
-          <img v-if="ruleForm.imageUrl"
-               :src="ruleForm.imageUrl"
-               class="avatar">
-          <i v-else
-             class="el-icon-plus avatar-uploader-icon"></i>
-        </el-upload>
       </el-form-item>
     </el-form>
     <div class="form-footer">

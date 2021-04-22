@@ -283,7 +283,7 @@ export default {
           setTimeout(() => {
             this.$refs.parkChart.initChart()
             this.$refs.parkPerChart.initChart()
-          }, 500)
+          }, 200)
         }
       })
     },

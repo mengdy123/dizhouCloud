@@ -43,6 +43,11 @@
         </el-select>
       </el-form-item> -->
     </el-form>
+    <div class="form-footer">
+      <el-button type="primary"
+                 @click="submitForm">确 定</el-button>
+      <el-button @click="handleClose">取 消</el-button>
+    </div>
   </div>
 </template>
 <script>
@@ -75,7 +80,11 @@ export default {
       projectList: state => state.system.projectList,
     })
   },
+  mounted () {
+    this.ruleForm = this.detailInfo
+  },
   methods: {
+    ...mapActions(['saveDetailInfo']),
     submitForm () {
       this.$refs['ruleForm'].validate((valid) => {
         if (valid) {
@@ -85,6 +94,11 @@ export default {
           return false
         }
       });
+    },
+    handleClose () {
+      this.$refs['ruleForm'].resetFields();
+      this.$emit('changeProjectBox', false)
+      this.saveDetailInfo({})
     },
     addSystem () {
       let params = {

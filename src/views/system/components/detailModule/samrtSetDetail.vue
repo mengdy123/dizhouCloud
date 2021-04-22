@@ -9,11 +9,12 @@
                  :model="form"
                  label-width="100px">
           <el-form-item label="类型编号">
-            <el-input v-model="form.seriesNumber"
+            <el-input v-model="form.deviceTypeNumber"
                       disabled></el-input>
           </el-form-item>
           <el-form-item label="设备类型">
-            <el-input v-model="form.seriesName"></el-input>
+            <el-input v-model="form.deviceTypeName"
+                      :disabled="isDisabled"></el-input>
           </el-form-item>
           <el-form-item label="设备数量">
             <el-input v-model="form.deviceNumber"
@@ -27,6 +28,7 @@
       <div class="history-table">
         <div class="dz-system-table-add"><span @click="addDeviceSeriesFun">新增</span></div>
         <myTable ref="myTable"
+                 class="my-table"
                  :tableData="tableData"
                  :tableConfigArr='tableConfigArr'
                  :action='actionList'
@@ -36,28 +38,15 @@
                  :editRow='false'
                  :selection="false"
                  :height='tableHeight'
-                 @getList='getModelList'
+                 @getModelList='getModelList'
+                 @getSeriesList='getSeriesList'
                  @disebleTable='disebleTable'
                  @changeProjectBox='changeSeriesBox'
                  @getDetail='getDetail'
+                 @changeModelBox='changeModelBox'
+                 @changeSeriesId='changeSeriesId'
+                 :rowData="rowData"
                  :index='true'>
-          <slot slot='rowMain'>
-            <div class="row-main">
-              <ul v-for="(item, index) in rowData"
-                  :key="index">
-                <li>
-                  <span>设备型号：</span>
-                  <span>{{item.versiontypeName}}</span>
-                </li>
-                <li>
-                  <span>设备数量：</span>
-                  <span>{{item.deviceNumber}}</span>
-                </li>
-              </ul>
-              <div class="dz-system-device-add"
-                   @click="changeModelBox(true)">新增型号</div>
-            </div>
-          </slot>
         </myTable>
       </div>
     </div>
@@ -65,25 +54,39 @@
          v-if="editStatus">
       <el-button type="primary"
                  @click="updateDetail">确 定</el-button>
-      <el-button @click="goBack">取 消</el-button>
+      <el-button @click="resetUpdateDetail">取 消</el-button>
+    </div>
+    <div class="button-list"
+         v-else>
+      <el-button @click="editDetail">编辑</el-button>
     </div>
     <addBox v-if="addDeviceSeries"
             name='设备系列'
-            @getList='getSeriesList'
+            @getSeriesList='getSeriesList'
+            @changeProjectBox='changeSeriesBox'
             title='新增'>
       <slot slot='dialogMain'>
-        <addDeviceSeries v-if="name==='设备系列'"
-                         ref="addForm"
-                         @changeProjectBox='changeSeriesBox'></addDeviceSeries>
+        <addDeviceSeries ref="addForm"
+                         name='设备系列'
+                         @getSeriesList='getSeriesList'
+                         @changeProjectBox='changeSeriesBox'
+                         :seriesId='seriesId'></addDeviceSeries>
       </slot>
     </addBox>
     <addBox v-if="addDeviceModel"
             name='设备型号'
-            @getList='getModelList'
+            @getModelList='getModelList'
+            @getSeriesList='getSeriesList'
+            @changeProjectBox='changeModelBox'
             title='新增'>
-      <addDeviceSeries v-if="name==='设备系列'"
-                       ref="addForm"
-                       @changeProjectBox='changeModelBox'></addDeviceSeries>
+      <slot slot='dialogMain'>
+        <addDeviceModel ref="addForm"
+                        name='设备型号'
+                        @getModelList='getModelList'
+                        @getSeriesList='getSeriesList'
+                        @changeProjectBox='changeModelBox'
+                        :seriesId='seriesId'></addDeviceModel>
+      </slot>
     </addBox>
   </div>
 </template>
@@ -117,7 +120,7 @@ export default {
         {
           fixed: false,
           prop: 'deviceNumber',
-          label: '系列数量',
+          label: '设备型号数量',
         },
       ],
       spanIndex: '1',
@@ -138,7 +141,9 @@ export default {
       rowData: [],
       tableHeight: '100px',
       addDeviceSeries: false,
-      addDeviceModel: false
+      addDeviceModel: false,
+      isDisabled: true,
+      seriesId: ''
     }
   },
   computed: {
@@ -153,13 +158,22 @@ export default {
       systemList: state => state.system.systemList,
     })
   },
+  watch: {
+    editStatus (newVal, oldVal) {
+      if (newVal) {
+        this.isDisabled = false
+      } else {
+        this.isDisabled = true
+      }
+    }
+  },
   created () {
     let id = this.$route.query.id
     this.getDeviceById(id)
   },
   mounted () {
+    this.isDisabled = !this.editStatus
     this.form = this.detailInfo
-    this.form.createTime = timeReg.getNowFormatDate(this.form.createTime)
     this.getSeriesList()
     this.$nextTick(function () {
       this.tableHeight = String(window.innerHeight - this.$refs.myTable.$el.offsetTop - 50) + 'px';
@@ -172,9 +186,21 @@ export default {
     });
   },
   methods: {
-    ...mapActions(['saveDetailInfo']),
+    ...mapActions(['saveDetailInfo', 'changeEditStatus']),
     goBack () {
       this.$router.push('/smartSet')
+    },
+    resetUpdateDetail () {
+      this.changeEditStatus(false)
+    },
+    editDetail () {
+      this.changeEditStatus(true)
+    },
+    changeSeriesId (id) {
+      this.seriesId = id
+    },
+    changeModelBox (status) {
+      this.addDeviceModel = status
     },
     getDeviceById (id) {
       let parmas = {
@@ -199,7 +225,7 @@ export default {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
           this.$message.success(serviceMessage)
-          this.goBack()
+          this.resetUpdateDetail()
         }
       })
     },
@@ -238,9 +264,7 @@ export default {
     changeSeriesBox (status) {
       this.addDeviceSeries = status
     },
-    changeModelBox (status) {
-      this.addDeviceModel = status
-    },
+
     //获取设备系列列表
     getSeriesList () {
       let id = this.$route.query.id
@@ -253,6 +277,13 @@ export default {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
           this.tableData = result.content
+          this.$nextTick(() => {
+            this.tableData.forEach(row => {
+              if (row.checkWeight == 0) {
+                this.$refs.myTable.toggleRowSelection(row, true)
+              }
+            })
+          })
         }
       })
     },
@@ -266,7 +297,16 @@ export default {
       systemMirror.getListByVer(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
-          this.rowData = result.content
+          // this.$nextTick(() => {
+          //   this.rowData = result.content
+          //   console.log('this.rowData', this.rowData)
+          // })
+          setTimeout(() => {
+            this.rowData = result.content
+            this.$forceUpdate()
+          }, 0)
+
+
         }
       })
     }
@@ -274,6 +314,10 @@ export default {
 }
 </script>
 <style lang="less" scoped>
+/deep/ .el-table__body-wrapper {
+  overflow-y: scroll !important;
+  height: calc(100vh - 500px) !important;
+}
 .span-select {
   color: #333333 !important;
   font-weight: 600;
@@ -318,35 +362,6 @@ export default {
     /deep/ .el-button {
       margin-right: 10px;
     }
-  }
-}
-.row-main {
-  display: flex;
-  flex-direction: column;
-  ul {
-    width: 100%;
-    margin: 10px 20px 5px 0;
-    display: flex;
-    li {
-      display: flex;
-      width: 15%;
-      span {
-        display: block;
-        color: #333333;
-      }
-      span:nth-child(odd) {
-        color: #999999;
-      }
-    }
-  }
-  .dz-system-device-add {
-    color: #2761ff;
-    cursor: pointer;
-    text-align: left;
-    height: 44px;
-    line-height: 44px;
-    font-size: 14px;
-    font-weight: 500;
   }
 }
 </style>

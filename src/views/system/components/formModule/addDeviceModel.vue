@@ -14,18 +14,30 @@
              label-width="100px"
              class="demo-ruleForm">
       <el-form-item label="设备型号"
-                    prop="seriesModel">
-        <el-input v-model="ruleForm.seriesModel"
+                    prop="versiontypeName">
+        <el-input v-model="ruleForm.versiontypeName"
                   placeholder="请输入设备型号"></el-input>
 
       </el-form-item>
     </el-form>
+    <div class="form-footer">
+      <el-button type="primary"
+                 @click="submitForm">确 定</el-button>
+      <el-button @click="handleClose">取 消</el-button>
+    </div>
   </div>
 </template>
 <script>
 import { mapState, mapActions } from 'vuex'
 import systemMirror from '@/resource/systemMirror'
+import { number } from 'echarts';
 export default {
+  props: {
+    seriesId: {
+      type: Number,
+      default: 0
+    }
+  },
   data () {
     var checkNum = (rule, value, callback) => {
       if (!value) {
@@ -47,7 +59,7 @@ export default {
     return {
       ruleForm: {},
       rules: {
-        seriesModel: [
+        versiontypeName: [
           { required: true, message: '请输入设备型号', trigger: 'blur' },
         ],
       }
@@ -63,6 +75,7 @@ export default {
     // updateIndutry
   },
   methods: {
+    ...mapActions(['saveDetailInfo']),
     submitForm () {
       this.$refs['ruleForm'].validate((valid) => {
         if (valid) {
@@ -73,10 +86,15 @@ export default {
         }
       });
     },
+    handleClose () {
+      this.$refs['ruleForm'].resetFields();
+      this.$emit('changeProjectBox', false)
+      this.saveDetailInfo({})
+    },
     addCompany () {
       let params = {
         ...this.ruleForm,
-        seriesId: '1'
+        seriesId: this.seriesId
       }
       params.createTime = ''
       params.updateTime = ''
@@ -85,7 +103,10 @@ export default {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
           this.$message.success(serviceMessage)
+          this.$emit('getModelList', this.seriesId)
+          this.$emit('getSeriesList',)
           this.$emit('changeProjectBox', false)
+          this.saveDetailInfo({})
         }
       })
     }

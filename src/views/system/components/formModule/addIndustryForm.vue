@@ -13,17 +13,22 @@
              ref="ruleForm"
              label-width="100px"
              class="demo-ruleForm">
-      <el-form-item label="行业编号"
+      <!-- <el-form-item label="行业编号"
                     prop="industryNumber">
         <el-input v-model.number="ruleForm.industryNumber"
                   placeholder="请输入2位行业编号"></el-input>
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="行业名称"
                     prop="industryName">
         <el-input v-model="ruleForm.industryName"
                   placeholder='请输入行业名称'></el-input>
       </el-form-item>
     </el-form>
+    <div class="form-footer">
+      <el-button type="primary"
+                 @click="submitForm">确 定</el-button>
+      <el-button @click="handleClose">取 消</el-button>
+    </div>
   </div>
 </template>
 <script>
@@ -71,6 +76,7 @@ export default {
     // updateIndutry
   },
   methods: {
+    ...mapActions(['saveDetailInfo']),
     submitForm () {
       this.$refs['ruleForm'].validate((valid) => {
         if (valid) {
@@ -80,6 +86,11 @@ export default {
           return false;
         }
       });
+    },
+    handleClose () {
+      this.$refs['ruleForm'].resetFields();
+      this.$emit('changeProjectBox', false)
+      this.saveDetailInfo({})
     },
     addCompany () {
       let params = {
@@ -92,6 +103,7 @@ export default {
           let { code, result, serviceMessage } = res.data
           if (code === 200) {
             this.$message.success(serviceMessage)
+            this.$emit('getList')
             this.$emit('changeProjectBox', false)
           }
         })
@@ -100,6 +112,7 @@ export default {
           let { code, result, serviceMessage } = res.data
           if (code === 200) {
             this.$message.success(serviceMessage)
+            this.$emit('getList')
             this.$emit('changeProjectBox', false)
           }
         })
