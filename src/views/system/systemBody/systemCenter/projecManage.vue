@@ -42,19 +42,8 @@
                          :value="item.id"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="项目状态">
-            <el-select v-model="ruleFormHeight.status"
-                       clearable
-                       placeholder="请选择项目状态"
-                       style="width: 260px">
-              <el-option v-for="item in projectStatus"
-                         :label="item.name"
-                         :key="item.id"
-                         :value="item.id"></el-option>
-            </el-select>
-          </el-form-item>
           <el-form-item label="客户名称">
-            <el-select v-model="ruleFormHeight.companyName"
+            <el-select v-model="ruleFormHeight.companyId"
                        clearable
                        placeholder="请选择客户名称"
                        style="width: 260px">
@@ -65,7 +54,8 @@
             </el-select>
           </el-form-item>
           <el-form-item label="所属区域">
-            <cascaderAreaItem v-model="ruleFormHeight.projectSite"></cascaderAreaItem>
+            <cascaderAreaItem v-model="ruleFormHeight.projectSite"
+                              @getAddress='getAddress'></cascaderAreaItem>
           </el-form-item>
           <el-form-item label="运行时间">
             <el-date-picker v-model="ruleFormHeight.time"
@@ -81,7 +71,7 @@
       </div>
     </div>
     <div class="dz-system-table">
-      <div class="dz-system-table-add"><span @click="changeProjectBox(true)">新增</span></div>
+      <div class="dz-system-table-add"><span @click="showBox">新增</span></div>
       <myTable :tableData="tableData"
                :tableConfigArr='tableConfigArr'
                :selection="false"
@@ -89,6 +79,7 @@
                :height='heightTable'
                :http='http'
                name='项目管理'
+               @deletList='deletList'
                @getList='getProgectList'
                @disebleTable='disebleTable'
                :index='true'></myTable>
@@ -102,6 +93,13 @@
                      :total="total">
       </el-pagination>
     </div>
+    <addBox v-if="addMapStatus"
+            @changeProjectBox='changeMapBox'
+            title='新增'>
+      <slot slot='dialogMain'>
+        <mapBox @changeProjectBox='changeMapBox'></mapBox>
+      </slot>
+    </addBox>
     <addBox v-if="addProjectStatus"
             name='项目管理'
             @getList='getProgectList'
@@ -109,6 +107,8 @@
             title='新增'>
       <slot slot='dialogMain'>
         <addProjectForm ref="addForm"
+                        @getList='getProgectList'
+                        @changeMapBox='changeMapBox'
                         @changeProjectBox='changeProjectBox'></addProjectForm>
       </slot>
     </addBox>
@@ -122,9 +122,9 @@ import timeReg from '@/utils/timeReg'
 import myTable from "@/components/Table";
 import addProjectForm from '../../components/formModule/addProjectForm'
 import cascaderAreaItem from '@/components/Cascader/areaCascader'
-
+import mapBox from '../../components/mapBox'
 export default {
-  components: { addBox, myTable, addProjectForm, cascaderAreaItem },
+  components: { addBox, myTable, addProjectForm, cascaderAreaItem, mapBox },
   data () {
     return {
       ruleForm: {},
@@ -172,14 +172,7 @@ export default {
         },
         {
           fixed: false,
-          prop: 'statusLable',
-          label: '状态',
-          width: '80px',
-          tooltip: false,
-        },
-        {
-          fixed: false,
-          prop: 'createTime',
+          prop: 'runTime',
           label: '运行时间',
           tooltip: false,
         },
@@ -188,6 +181,7 @@ export default {
       pageSize: 10,
       total: 1000,
       addProjectStatus: false,
+      addMapStatus: false,
       heightStatus: false,
       heightTable: 'calc(100vh - 402px)',
       http: '/manage/project/getProjectById?projectId=',
@@ -209,6 +203,7 @@ export default {
           style: 'disable-button'
         },
       ],
+      address: []
     };
   },
   computed: {
@@ -222,6 +217,7 @@ export default {
     this.getProgectList()
   },
   methods: {
+    ...mapActions(['saveDetailInfo']),
     submitForm (formName) {
       this.getProgectList()
     },
@@ -229,6 +225,9 @@ export default {
       this.ruleForm = {}
       this.ruleFormHeight = {}
       this.getProgectList()
+    },
+    getAddress (data) {
+      this.address = data
     },
     getProgectList () {
       let startTime, endTime
@@ -238,10 +237,11 @@ export default {
       }
       let params = {
         projectName: this.ruleForm.key,
-        projectLeader: this.ruleFormHeight.leader,
         projectType: this.ruleFormHeight.projectType,
-        projectSite: this.ruleFormHeight.projectSite,
-        status: this.ruleFormHeight.status,
+        companyId: this.ruleFormHeight.companyId,
+        province: this.address[0] || '',
+        city: this.address[1] || '',
+        county: this.address[2] || '',
         startTime: startTime,
         endTime: endTime,
         currentPage: this.currentPage,
@@ -250,22 +250,30 @@ export default {
       systemMirror.getProjectList(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
-          this.tableData = result.content
           this.total = result.recordTotal
+          const totalPage = Math.ceil((this.total - 1) / this.pageSize)
+          this.currentPage = this.currentPage > totalPage ? totalPage : this.currentPage
+          this.currentPage = this.currentPage < 1 ? 1 : this.currentPage
+          // console.log('this.currentPage', this.currentPage)
+
+          this.tableData = result.content
         }
         this.tableData.forEach((item, index) => {
           item.createTime = timeReg.getNowFormatDate(item.createTime)
+          item.runTime = timeReg.getNowFormatDate(item.runTime)
           this.projectType.forEach(it => {
             if (item.projectType && item.projectType === it.id) {
               item.projectTypeLable = it.name
             }
           })
           this.projectStatus.forEach(it => {
-            if (item.status && item.status === it.id) {
+            if (item.status == it.id) {
               item.statusLable = it.name
             }
           })
         })
+        console.log('this.tableData111', this.tableData)
+
       })
     },
     disebleTable (row) {
@@ -286,6 +294,15 @@ export default {
         }
       })
     },
+    deletList (id) {
+      systemMirror.deleteProjectById(id).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.$message.success(serviceMessage)
+          this.getProgectList()
+        }
+      })
+    },
     handleSizeChange (val) {
       console.log(`每页 ${val} 条`);
     },
@@ -293,9 +310,17 @@ export default {
       console.log(`当前页: ${val}`);
       this.getProgectList()
     },
+    showBox () {
+      this.saveDetailInfo({})
+      this.changeProjectBox(true)
+    },
     changeProjectBox (status) {
       this.addProjectStatus = status
     },
+    changeMapBox (status) {
+      this.addMapStatus = status
+    },
+
     heightSearch () {
       if (!this.heightStatus) {
         this.heightTable = 'calc(100vh - 548px)'

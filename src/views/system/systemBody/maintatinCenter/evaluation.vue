@@ -1,28 +1,44 @@
 <template>
   <div class="dz-system">
-    <div class="dz-system-title">满意度考评</div>
+    <div class="dz-system-title back-span"
+         v-if="detailStatus"
+         @click="goBack">{{title}}</div>
+    <div class="dz-system-title"
+         v-if="!detailStatus">{{title}}</div>
+    <!-- <el-page-header @back="goBack">
+    </el-page-header> -->
     <div class="dz-system-module">
-      <ul v-for="(item, index) in evaluationType"
+      <ul v-for="(item, index) in evaluationTypeNew"
           :key="index">
         <li>{{item.label}}</li>
         <li>{{item.value}}</li>
       </ul>
     </div>
     <div class="dz-system-type">
-      <ul v-for="(item, index) in chartList"
-          :key="index">
-        <li class="dz-system-type-title">{{item.title}}</li>
+      <ul>
+        <li class="dz-system-type-title">考评级别占比</li>
         <li class="dz-system-type-chart">
           <pieChart8 class="pie-chart"
                      :value='valuePie'
-                     ref="valueChart"
+                     ref="flowChart1"
                      :colors='colors'></pieChart8>
         </li>
       </ul>
-
+      <ul>
+        <li class="dz-system-type-title">考评级别设备占比</li>
+        <li class="dz-system-type-chart">
+          <pieChart8 class="pie-chart"
+                     :value='valuePie'
+                     ref="flowChart2"
+                     :colors='colors'></pieChart8>
+        </li>
+      </ul>
     </div>
-    <div class="dz-system-table">
-      <myTable :tableData="tableDataNew"
+    <div class="dz-system-title"
+         v-if="!detailStatus">团队成员</div>
+    <div class="dz-system-table"
+         v-if="!detailStatus">
+      <myTable :tableData="tableData"
                :tableConfigArr='tableConfigArr'
                :selection="false"
                :action='actionList'
@@ -30,8 +46,24 @@
                :http='http'
                :detail='false'
                name='满意度考评'
+               @updateInfo='updateInfo'
                @getList='getProgectList'
-               @disebleTable='disebleTable'
+               :index='true'></myTable>
+    </div>
+    <div class="dz-system-title"
+         v-if="detailStatus">维修记录</div>
+    <div class="dz-system-table"
+         v-if="detailStatus">
+      <myTable :tableData="tableData2"
+               :tableConfigArr='tableConfigArr2'
+               :selection="false"
+               :action='actionList2'
+               height='250px'
+               http=''
+               :detail='false'
+               name='满意度考评'
+               @updateInfo='updateInfo'
+               @getList='getProgectList'
                :index='true'></myTable>
     </div>
   </div>
@@ -50,69 +82,82 @@ export default {
       tableConfigArr: [
         {
           fixed: false,
-          prop: 'userName',
-          label: '用户姓名',
+          prop: 'maintenanceName',
+          label: '姓名',
           width: '180px',
           tooltip: true,
         },
+        // {
+        //   fixed: false,
+        //   prop: 'userRole',
+        //   width: '180px',
+        //   label: '用户角色 ',
+        //   tooltip: true,
+        // },
         {
           fixed: false,
-          prop: 'userRole',
-          width: '180px',
-          label: '用户角色 ',
-          tooltip: true,
-        },
-        {
-          fixed: false,
-          prop: 'perent',
+          prop: 'avgScore',
           label: '综合服务评分    ',
           tooltip: true,
         },
         {
           fixed: false,
-          prop: 'number',
+          prop: 'deviceAmount',
           label: '维修设备数量',
           tooltip: false,
         },
       ],
-      tableDataNew: [
+      tableConfigArr2: [
         {
-          userName: '张三',
-          userRole: '员工',
-          perent: '80',
-          number: '100'
+          fixed: false,
+          prop: 'id',
+          label: '工单编号',
+          tooltip: true,
         },
         {
-          userName: '张三',
-          userRole: '员工',
-          perent: '80',
-          number: '100'
+          fixed: false,
+          prop: 'deviceType',
+          label: '设备类型 ',
+          tooltip: true,
         },
         {
-          userName: '张三',
-          userRole: '员工',
-          perent: '80',
-          number: '100'
+          fixed: false,
+          prop: 'faulttype',
+          label: '故障类型    ',
+          tooltip: true,
+        },
+        // {
+        //   fixed: false,
+        //   prop: 'deviceAmount',
+        //   label: '维修时长',
+        //   tooltip: false,
+        // },
+        {
+          fixed: false,
+          prop: 'score',
+          label: '评分',
+          tooltip: false,
         },
         {
-          userName: '张三',
-          userRole: '员工',
-          perent: '80',
-          number: '100'
+          fixed: false,
+          prop: 'level',
+          label: '级别',
+          tooltip: false,
         },
         {
-          userName: '张三',
-          userRole: '员工',
-          perent: '80',
-          number: '100'
+          fixed: false,
+          prop: 'remark',
+          label: '评价',
+          tooltip: false,
         },
         {
-          userName: '张三',
-          userRole: '员工',
-          perent: '80',
-          number: '100'
+          fixed: false,
+          prop: 'faultTime',
+          label: '故障时间',
+          tooltip: false,
         },
       ],
+      tableData2: [],
       heightTable: 'calc(100vh - 640px)',
       http: '/manage/project/getProjectById?projectId=',
       actionList: [
@@ -128,21 +173,26 @@ export default {
       evaluationType: [
         {
           label: '维修人员数量（人）',
-          value: '20'
+          value: '0',
+          type: 'personAmount'
         },
         {
           label: '维修设备数量（个）',
-          value: '15968'
+          value: '0',
+          type: 'deviceAmount'
         },
         {
           label: '综合服务评分',
-          value: '80'
+          value: '0',
+          type: 'avgScore'
         },
         {
           label: '综合服务级别',
-          value: '优'
+          value: '0',
+          type: 'level'
         }
       ],
+      evaluationTypeNew: [],
       chartList: [
         {
           title: '考评级别占比'
@@ -151,8 +201,16 @@ export default {
           title: '考评级别设备占比'
         }
       ],
-      valuePie: [],
-      colors: ['#5470C6', '#EE6666', '#FC8452', '#91CC75', '#FFA321']
+      valuePie: [
+        { value: 735, name: '优' },
+        { value: 510, name: '良' },
+        { value: 434, name: '中' },
+        { value: 335, name: '差' }
+      ],
+      colors: ['#5470C6', '#EE6666', '#FC8452', '#91CC75', '#FFA321'],
+      title: '满意度考评',
+      detailStatus: false,
+      actionList2: []
     };
   },
   computed: {
@@ -162,7 +220,10 @@ export default {
     })
   },
   mounted () {
-    // this.getProgectList()
+    this.evaluationTypeNew = this.evaluationType
+    this.getProgectList()
+    this.getAvgInfo('')
+    this.getScoreLevel('')
   },
   methods: {
     handleClick (row) {
@@ -182,69 +243,83 @@ export default {
       this.$refs[formName].resetFields();
     },
     getProgectList () {
-      let startTime, endTime
-      if (this.ruleFormHeight.time) {
-        startTime = this.ruleFormHeight.time[0]
-        endTime = this.ruleFormHeight.time[1]
-      }
       let params = {
-        projectName: this.ruleForm.key,
-        projectLeader: this.ruleFormHeight.leader,
-        projectType: this.ruleFormHeight.projectType,
-        projectSite: this.ruleFormHeight.address,
-        status: this.ruleFormHeight.status,
-        startTime: startTime,
-        endTime: endTime,
         currentPage: 1,
         pageSize: 1000,
       }
-      systemMirror.getProjectList(params).then(res => {
+      systemMirror.getTeamList(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
-          // this.tableData = result.content
-          // this.total = result.recordTotal
-        }
-        this.tableData.forEach((item, index) => {
-          item.createTime = timeReg.getNowFormatDate(item.createTime)
-          this.projectType.forEach(it => {
-            if (item.projectType && item.projectType === it.id) {
-              item.projectTypeLable = it.name
-            }
-          })
-          this.projectStatus.forEach(it => {
-            if (item.status && item.status === it.id) {
-              item.statusLable = it.name
-            }
-          })
-        })
-        this.tableDataNew = this.tableData
-      })
-    },
-    disebleTable (row) {
-      let params = {
-        ...row,
-      }
-      params.updateTime = ''
-      if (params.status === '4') {
-        params.status = '1'
-      } else {
-        params.status = '4'
-      }
-      systemMirror.updateProject(params).then(res => {
-        let { code, result, serviceMessage } = res.data
-        if (code === 200) {
-          this.$message.success(serviceMessage)
-          this.getProgectList()
+          this.tableData = result.content
         }
       })
     },
-    handleSizeChange (val) {
-      console.log(`每页 ${val} 条`);
+    getAvgInfo (id) {
+      systemMirror.getAvgInfo(id).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          let data = result
+          this.evaluationType.forEach(item => {
+            item.value = data[item.type]
+          })
+        }
+      })
     },
-    handleCurrentChange (val) {
-      console.log(`当前页: ${val}`);
-      this.getProgectList()
+    getScoreLevel (id) {
+      let that = this
+      systemMirror.getScoreLevel(id).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          let data = result
+          if (data.length) {
+            this.valuePie = []
+            data.forEach(item => {
+              this.valuePie.push({
+                value: item.counts,
+                name: item.level
+              })
+            })
+            this.$nextTick(() => {
+              this.$refs.flowChart1.initChart()
+              this.$refs.flowChart2.initChart()
+            })
+          }
+        }
+      })
     },
+    getMaintenanceLogsList (parmas) {
+      systemMirror.getListByMin(parmas).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          let data = result
+          this.tableData2 = result.content
+          this.tableData2.forEach((item, index) => {
+            item.faultTime = timeReg.getNowFormatDate(item.faultTime)
+
+          })
+        }
+      })
+    },
+    goBack () {
+      this.detailStatus = false
+      this.title = '满意度考评'
+      this.evaluationTypeNew = this.evaluationType
+      // this.evaluationType = 
+    },
+    updateInfo (data) {
+      console.log('updateInfo', data)
+      let parmas = {
+        maintenance: data.maintenance,
+        currentPage: '1',
+        pageSize: '10000'
+      }
+      this.title = '返回'
+      this.evaluationTypeNew = this.evaluationType.slice(1, 4)
+      this.detailStatus = true
+      this.getAvgInfo(data.maintenance)
+      this.getScoreLevel(data.maintenance)
+      this.getMaintenanceLogsList(parmas)
+    }
   },
 }
 </script>
@@ -257,7 +332,6 @@ export default {
       width: 260px;
       height: 100px;
       border-radius: 4px;
-
       padding: 16px;
       margin-right: 70px;
       li:first-child {
@@ -308,6 +382,9 @@ export default {
         height: 100%;
       }
     }
+  }
+  .back-span {
+    cursor: pointer;
   }
 }
 </style>

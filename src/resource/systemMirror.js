@@ -44,6 +44,10 @@ export default {
       }
     }),
 
+  // 删除项目
+  deleteProjectById: params =>
+    DutyMirror.get(`/manage/project/delete?projectId=${params}`),
+
   // 客户详情
   getCompanyById: params =>
     DutyMirror.get(`/manage/company/getCompanyById?companyId=${params}`),
@@ -318,8 +322,8 @@ export default {
 
   // 运维中心---故障类型管理
   /*
-    * 根据条件分页查询  故障类型列表
-    */
+  * 根据条件分页查询  故障类型列表
+  */
   getFailTypeList: params =>
     DutyMirror.get(`/faulttype/getList`, {
       params: {
@@ -334,12 +338,111 @@ export default {
       ...params
     }),
   /*
-   *  新增故障类型
+   *  修改故障类型
    */
   updateFailTypeList: params =>
     DutyMirror.post(`/faulttype/update`, {
       ...params
     }),
 
+
+  // 运维中心---设备列表
+  /*
+ * 根据条件分页查询  设备列表
+ */
+  getListBySeek: params =>
+    DutyMirror.get(`/manage/device/getListBySeek`, {
+      params: {
+        ...params
+      }
+    }),
+
+  /*
+  *  上报
+  */
+  reported: params =>
+    DutyMirror.post(`/manage/work/reported`, {
+      ...params
+    }),
+  /*
+  *  工单审批/维修/考评
+  */
+  updateWord: params =>
+    DutyMirror.post(`/manage/work/update`, {
+      ...params
+    }),
+
+
+  // 运维中心---工单管理
+  /*
+ * 根据条件分页查询  工单管理
+ */
+  getWorkList: params =>
+    DutyMirror.get(`/manage/work/getList`, {
+      params: {
+        ...params
+      }
+    }),
+  /*
+  *  维修工列表
+  */
+  getMaintenance: params =>
+    DutyMirror.get(`/user/getMaintenance?deviceId=${params}`, {
+    }),
+  /*
+  *  审核人列表
+  */
+  getAuditor: params =>
+    DutyMirror.get(`/user/getAuditor?deviceId=${params}`, {
+    }),
+
+
+
+  // 运维中心---满意度考评
+  /*
+  * 团队成员列表
+  */
+  getTeamList: params =>
+    DutyMirror.get(`/manage/work/getWorkList`, {
+      params: {
+        ...params
+      }
+    }),
+  /*
+  * 统计维修人员数量，总工单数，平均分
+  */
+  getAvgInfo: params =>
+    DutyMirror.get(`/manage/work/getAvg?maintenance=${params}`, {
+      params: {
+        ...params
+      }
+    }),
+  /*
+  * 统计分数区间数量
+  */
+  getScoreLevel: params =>
+    DutyMirror.get(`/manage/work/getScoreLevel?maintenance=${params}`, {
+      params: {
+        ...params
+      }
+    }),
+  // /*
+  //  * 统计分数区间数量
+  //  */
+  // getScoreLevel: params =>
+  //   DutyMirror.get(`/manage/work/getListByMin`, {
+  //     params: {
+  //       ...params
+  //     }
+  //   }),
+  /*
+  * 个人维修记录
+  */
+  getListByMin: params =>
+    DutyMirror.get(`/manage/work/getListByMin`, {
+      params: {
+        ...params
+      }
+    }),
 
 }

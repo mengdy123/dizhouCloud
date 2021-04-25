@@ -66,7 +66,7 @@
       </div>
     </div>
     <div class="dz-system-table">
-      <myTable :tableData="tableDataNew"
+      <myTable :tableData="tableData"
                :tableConfigArr='tableConfigArr'
                :selection="false"
                :action='actionList'
@@ -77,7 +77,7 @@
                @changeProjectBox='approveStatusBox'
                @maintainStatusBox='maintainStatusBox'
                @checkStatusBox='checkStatusBox'
-               @getList='getApproveList'
+               @getList='getDataList'
                :index='true'></myTable>
     </div>
     <div class="dz-system-pagination">
@@ -91,31 +91,34 @@
     </div>
     <addBox v-if="addApproveStatus"
             name='审批'
-            @getList='getApproveList'
+            @getList='getDataList'
             @changeProjectBox='approveStatusBox'
             title='审批'>
       <slot slot='dialogMain'>
         <addApproveForm name='审批'
+                        @getList='getDataList'
                         @changeProjectBox='approveStatusBox'></addApproveForm>
       </slot>
     </addBox>
     <addBox v-if="addMaintainStatus"
             name='维修'
-            @getList='getApproveList'
+            @getList='getDataList'
             @changeProjectBox='maintainStatusBox'
             title='维修'>
       <slot slot='dialogMain'>
         <addApproveForm name='维修'
+                        @getList='getDataList'
                         @changeProjectBox='maintainStatusBox'></addApproveForm>
       </slot>
     </addBox>
     <addBox v-if="addCheckStatus"
             name='考评'
-            @getList='getApproveList'
+            @getList='getDataList'
             @changeProjectBox='checkStatusBox'
             title='考评'>
       <slot slot='dialogMain'>
         <addCheckForm name='考评'
+                      @getList='getDataList'
                       @changeProjectBox='checkStatusBox'></addCheckForm>
       </slot>
     </addBox>
@@ -136,17 +139,16 @@ export default {
     return {
       ruleForm: {},
       ruleFormHeight: {},
-      tableData: [],
       tableConfigArr: [
         {
           fixed: false,
-          prop: 'orderNumber',
+          prop: 'id',
           label: '工单编号',
           tooltip: true,
         },
         {
           fixed: false,
-          prop: 'faultType',
+          prop: 'faultName',
           label: '故障类型',
           tooltip: true,
         },
@@ -158,26 +160,35 @@ export default {
         },
         {
           fixed: false,
-          prop: 'approvePerson',
+          prop: 'auditorName',
           label: '审批人员',
           tooltip: true,
         },
         {
           fixed: false,
-          prop: 'maintainPerson',
+          prop: 'maintenanceName',
           label: '维修人员',
           tooltip: true,
         },
         {
           fixed: false,
           prop: 'faultTime',
+          width: '200px',
           label: '故障时间',
           tooltip: true,
         },
         {
           fixed: false,
-          prop: 'useTime',
-          label: '预计用时',
+          prop: 'predictTime',
+          label: '预计用时(小时)',
+          width: '200px',
+          tooltip: true,
+        },
+        {
+          fixed: false,
+          prop: 'lastTime',
+          label: '截止时间',
+          width: '200px',
           tooltip: true,
         },
         {
@@ -188,33 +199,13 @@ export default {
         },
         {
           fixed: false,
-          prop: 'status',
-          label: '状态',
-          tooltip: true,
-        },
-        {
-          fixed: false,
           prop: 'remark',
           label: '备注',
           tooltip: true,
         },
+
       ],
-      tableDataNew: [
-        {
-          orderNumber: '1001',
-          faultType: '井盖',
-          deviceNumber: '井盖10001',
-          approvePerson: '张三',
-          approvePhone: '15726999999',
-          maintainPerson: '李四',
-          maintainPhone: '15736999999',
-          faultTime: '2021-04-16 12:36',
-          useTime: '0.5',
-          installationArea: '姚北路',
-          status: '待审批',
-          remark: '无'
-        }
-      ],
+      tableData: [],
       currentPage: 1,
       pageSize: 10,
       total: 1000,
@@ -243,33 +234,97 @@ export default {
   },
   computed: {
     ...mapState({
-      projectType: state => state.common.projectType,
-      projectStatus: state => state.common.projectStatus,
+      wordStatusList: state => state.common.wordStatusList,
+      failTypeList: state => state.system.failTypeList,
     })
   },
   mounted () {
-    // this.getApproveList()
+    this.getDataList()
+    this.getMaintenance()
   },
   methods: {
-    ...mapActions(['saveDetailInfo']),
+    ...mapActions(['saveDetailInfo', 'saveMaintainPersonList', 'approvePersonList', 'saveApprovePersonList']),
     handleClick (row) {
       console.log(row);
     },
     submitForm (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          this.getApproveList()
+          this.getDataList()
         } else {
           console.log('error submit!!');
           return false;
         }
       });
     },
+    formatFailKey (arr, key) {
+      let name
+      if (arr.length) {
+        arr.forEach(item => {
+          if (item.faultId == key) {
+            name = item.faultName
+          }
+        })
+      }
+      return name
+    },
+    formatKey (arr, key) {
+      let name
+      if (arr.length) {
+        arr.forEach(item => {
+          if (item.type == key) {
+            name = item.name
+          }
+        })
+      }
+      return name
+    },
+
     // 点击获取设备系列的详情
     getDetail (data) {
       this.dialogData = Object.assign({}, data)
       this.saveDetailInfo(this.dialogData)
+      console.log('this.dialogData', this.dialogData)
+      this.getMaintenance()
+      this.getAuditor()
     },
+    //获取故障类型
+    getFailTypeList () {
+      let params = {
+        currentPage: 1,
+        pageSize: 10000,
+      }
+      systemMirror.getFailTypeList(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          // setTimeout(() => {
+          this.saveFailTypeList(result.content)
+          // }, 500)
+
+        }
+      })
+    },
+    //获取维修工列表
+    getMaintenance () {
+      let id = this.dialogData.deviceId
+      systemMirror.getMaintenance(id).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.saveMaintainPersonList(result)
+        }
+      })
+    },
+    //获取审核人列表
+    getAuditor () {
+      let id = this.dialogData.deviceId
+      systemMirror.getAuditor(id).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.saveApprovePersonList(result)
+        }
+      })
+    },
+
     approveStatusBox (status) {
       this.addApproveStatus = status
     },
@@ -279,43 +334,39 @@ export default {
     checkStatusBox (status) {
       this.addCheckStatus = status
     },
-    getApproveList () {
+    getDataList () {
       let startTime, endTime
       if (this.ruleFormHeight.time) {
         startTime = this.ruleFormHeight.time[0]
         endTime = this.ruleFormHeight.time[1]
       }
       let params = {
-        projectName: this.ruleForm.key,
-        projectLeader: this.ruleFormHeight.leader,
-        projectType: this.ruleFormHeight.projectType,
-        projectSite: this.ruleFormHeight.address,
-        status: this.ruleFormHeight.status,
-        startTime: startTime,
-        endTime: endTime,
+        seek: this.ruleForm.key,
+        // projectName: this.ruleForm.key,
+        // projectLeader: this.ruleFormHeight.leader,
+        // projectType: this.ruleFormHeight.projectType,
+        // projectSite: this.ruleFormHeight.address,
+        // status: this.ruleFormHeight.status,
+        // startTime: startTime,
+        // endTime: endTime,
         currentPage: this.currentPage,
         pageSize: this.pageSize,
       }
-      systemMirror.getProjectList(params).then(res => {
+      systemMirror.getWorkList(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
-          // this.tableData = result.content
+          this.tableData = result.content
           this.total = result.recordTotal
+          const totalPage = Math.ceil((this.total - 1) / this.pageSize)
+          this.currentPage = this.currentPage > totalPage ? totalPage : this.currentPage
+          this.currentPage = this.currentPage < 1 ? 1 : this.currentPage
         }
         this.tableData.forEach((item, index) => {
-          item.createTime = timeReg.getNowFormatDate(item.createTime)
-          this.projectType.forEach(it => {
-            if (item.projectType && item.projectType === it.id) {
-              item.projectTypeLable = it.name
-            }
-          })
-          this.projectStatus.forEach(it => {
-            if (item.status && item.status === it.id) {
-              item.statusLable = it.name
-            }
-          })
+          item.faultTime = timeReg.getNowFormatDate(item.faultTime)
+          item.lastTime = timeReg.getNowFormatDate(item.lastTime)
+          item.faultName = this.formatFailKey(this.failTypeList, item.faulttype)
+          item.statusLable = this.formatKey(this.wordStatusList, item.status)
         })
-        this.tableDataNew = this.tableData
       })
     },
     handleSizeChange (val) {
@@ -323,19 +374,13 @@ export default {
     },
     handleCurrentChange (val) {
       console.log(`当前页: ${val}`);
-      this.getApproveList()
+      this.getDataList()
     },
     heightSearch () {
       if (!this.heightStatus) {
-        this.pageSize = 8
-        this.getApproveList()
         this.heightTable = 'calc(100vh - 498px)'
       } else {
-        this.tableDataNew = this.tableData
         this.ruleFormHeight = {}
-        this.currentPage = 1
-        this.pageSize = 10
-        this.getApproveList()
         this.heightTable = 'calc(100vh - 402px)'
       }
       this.heightStatus = !this.heightStatus

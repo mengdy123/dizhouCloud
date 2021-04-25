@@ -6,7 +6,7 @@
       <titleDiv2 title='项目信息'></titleDiv2>
       <div class="detail-form">
         <el-form ref="form"
-                 :model="form"
+                 v-model="form"
                  label-width="100px">
           <el-form-item label="项目编号">
             <el-input v-model="form.projectNumber"
@@ -22,15 +22,21 @@
           </el-form-item>
           <el-form-item label="所属区域">
             <el-input v-model="form.projectArea"
-                      :disabled="isDisabled"></el-input>
+                      disabled></el-input>
           </el-form-item>
           <el-form-item label="项目地址">
-            <el-input v-model="form.projectSite"
-                      :disabled="isDisabled"></el-input>
+            <el-input placeholder="请输入"
+                      v-model="form.projectSite"
+                      :disabled="isDisabled">
+              <i class="el-icon-edit el-input__icon"
+                 slot="suffix"
+                 @click="getProjectSite">
+              </i>
+            </el-input>
           </el-form-item>
           <el-form-item label="项目经纬度">
             <el-input v-model="form.projectLonlat"
-                      :disabled="isDisabled"></el-input>
+                      disabled></el-input>
           </el-form-item>
           <el-form-item label="项目类型">
             <el-select v-model="form.projectType"
@@ -80,10 +86,6 @@
             <el-input v-model="form.warningNumber"
                       disabled> </el-input>
           </el-form-item>
-          <!-- <el-form-item label="项目数量">
-            <el-input v-model="form.projectTotal"
-                      disabled> </el-input>
-          </el-form-item> -->
         </el-form>
       </div>
     </div>
@@ -150,6 +152,13 @@
                          @changeProjectBox='changeBatchSetBox'></addBatchSetForm>
       </slot>
     </addBox>
+    <addBox v-if="addMapStatus"
+            @changeProjectBox='changeMapBox'
+            title='新增'>
+      <slot slot='dialogMain'>
+        <mapBox @changeProjectBox='changeMapBox'></mapBox>
+      </slot>
+    </addBox>
   </div>
 </template>
 <script>
@@ -161,8 +170,9 @@ import timeReg from '@/utils/timeReg'
 import myTable from "@/components/Table";
 import addOnlySetForm from '../../components/formModule/addOnlySetForm'
 import addBatchSetForm from '../../components/formModule/addBatchSetForm'
+import mapBox from '../mapBox'
 export default {
-  components: { titleDiv2, myTable, addBox, addOnlySetForm, addBatchSetForm },
+  components: { titleDiv2, myTable, addBox, addOnlySetForm, addBatchSetForm, mapBox },
   data () {
     return {
       form: {},
@@ -272,13 +282,6 @@ export default {
         },
         {
           fixed: false,
-          prop: 'statusLable',
-          label: '状态',
-          width: '80px',
-          tooltip: false,
-        },
-        {
-          fixed: false,
           prop: 'createTime',
           label: '运行时间',
           tooltip: false,
@@ -286,7 +289,8 @@ export default {
       ],
       actionList: [],
       onlyUploadStatus: false,
-      batchUploadStatus: false
+      batchUploadStatus: false,
+      addMapStatus: false
     }
   },
   computed: {
@@ -295,12 +299,28 @@ export default {
       projectType: state => state.common.projectType,
       projectStatus: state => state.common.projectStatus,
       editStatus: state => state.system.editStatus,
+      projectAddress: state => state.system.projectAddress
     })
   },
   watch: {
+    projectAddress: {
+      deep: true,
+      handler (newVal, oldVal) {
+        console.log('projectAddress---watch', newVal)
+        this.form.projectArea = newVal.addressComponent.province + '/' + newVal.addressComponent.city + '/' + newVal.addressComponent.district
+        this.form.projectLonlat = newVal.lnglat[1] + ',' + newVal.lnglat[0]
+        this.form.projectSite = newVal.formattedAddress
+        // this.form.projectSite = newVal.name
+        // this.addressInfo = newVal.addressComponent
+        //  this.projectAddress.lnglat[1],
+        // this.projectAddress.lnglat[0],
+      }
+    },
     editStatus (newVal, oldVal) {
       if (newVal) {
         this.isDisabled = false
+      } else {
+        this.isDisabled = true
       }
     }
   },
@@ -310,8 +330,9 @@ export default {
   },
   mounted () {
     this.isDisabled = !this.editStatus
-    this.form = this.detailInfo
+    this.form = Object.assign({}, this.detailInfo)
     this.form.createTime = timeReg.getNowFormatDate(this.form.createTime)
+    this.form.runTime = timeReg.getNowFormatDate(this.form.runTime)
     this.form.projectLonlat = this.form.longitude + ',' + this.form.latitude
   },
   methods: {
@@ -319,8 +340,14 @@ export default {
     goBack () {
       this.$router.push('/project')
     },
+    getProjectSite () {
+      this.changeMapBox(true)
+    },
     changeOnlySetBox (status) {
       this.onlyUploadStatus = status
+    },
+    changeMapBox (status) {
+      this.addMapStatus = status
     },
     changeBatchSetBox (status) {
       this.batchUploadStatus = status
@@ -361,6 +388,10 @@ export default {
         })
       } else {
         this.changeEditStatus(false)
+        this.form = Object.assign({}, this.detailInfo)
+        this.form.createTime = timeReg.getNowFormatDate(this.form.createTime)
+        this.form.runTime = timeReg.getNowFormatDate(this.form.runTime)
+        this.form.projectLonlat = this.form.longitude + ',' + this.form.latitude
       }
     }
   }

@@ -25,7 +25,7 @@
       </div>
     </div>
     <div class="dz-system-table">
-      <div class="dz-system-table-add"><span @click="changeProjectBox(true)">新增</span></div>
+      <div class="dz-system-table-add"><span @click="showBox">新增</span></div>
       <myTable ref="myTable"
                :tableData="tableDataNew"
                :tableConfigArr='tableConfigArr'
@@ -232,6 +232,10 @@ export default {
     handleCurrentChange (val) {
       console.log(`当前页: ${val}`);
       this.getList()
+    },
+    showBox () {
+      this.saveDetailInfo({})
+      this.changeProjectBox(true)
     },
     changeProjectBox (status) {
       this.addProjectStatus = status

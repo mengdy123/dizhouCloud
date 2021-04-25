@@ -3,7 +3,7 @@
   <div class="dz-map-box">
     <div class="close-map-box">
       <i class="el-icon-close"
-         @click="changeDialogVisible(false)"></i>
+         @click="closeMapBpx"></i>
     </div>
     <div id="container">
       <div class="map-input">
@@ -57,11 +57,11 @@ export default {
       this.mapGeocoderInfo.name = this.address
       this.mapGeocoderInfo.lnglat = this.lnglat
       this.saveProjectAddress(this.mapGeocoderInfo)
-      this.changeDialogVisible(false)
+      this.$emit('changeProjectBox', false)
     },
     closeMapBpx () {
       this.saveProjectAddress(null)
-      this.changeDialogVisible(false)
+      this.$emit('changeProjectBox', false)
     },
     init () {
       // 创建地图实例

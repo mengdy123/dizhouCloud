@@ -23,9 +23,9 @@ export default {
     }
   },
   mounted () {
-    setTimeout(() => {
-      this.initChart()
-    }, 500)
+    // setTimeout(() => {
+    //   this.initChart()
+    // }, 200)
   },
   methods: {
     initChart () {
@@ -56,12 +56,7 @@ export default {
             type: 'pie',
             radius: '50%',
             center: ['50%', '50%'],
-            data: [
-              { value: 735, name: '优' },
-              { value: 510, name: '良' },
-              { value: 434, name: '中' },
-              { value: 335, name: '差' }
-            ],
+            data: _this.value,
             label: {
               position: 'outer',
               show: true,

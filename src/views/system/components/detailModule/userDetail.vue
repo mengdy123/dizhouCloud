@@ -8,22 +8,48 @@
         <el-form ref="form"
                  :model="form"
                  label-width="100px">
-          <el-form-item label="用户编号">
-            <el-input v-model="form.userNumber"
-                      disabled></el-input>
+          <el-form-item label="用户编号"
+                        class='user-number'>
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-select v-model="form.companyNumber"
+                           placeholder="请选择客户编号"
+                           @change="changeCompanyInfo"
+                           :disabled="isDisabled">
+                  <el-option v-for="item in companyList"
+                             :label="item.companyNumber +'--'+ item.companyName"
+                             :key="item.companyId"
+                             :value="item.companyNumber"></el-option>
+                </el-select>
+              </el-col>
+              <el-col :span="12">
+                <el-input v-model="form.idNumber"
+                          style="width: '100px"
+                          placeholder="请输入"
+                          disabled></el-input>
+              </el-col>
+            </el-row>
           </el-form-item>
           <el-form-item label="用户姓名">
-            <el-input v-model="form.name"></el-input>
+            <el-input v-model="form.userName"
+                      :disabled="isDisabled"></el-input>
+          </el-form-item>
+          <el-form-item label="真实姓名">
+            <el-input v-model="form.name"
+                      :disabled="isDisabled"></el-input>
           </el-form-item>
           <el-form-item label="用户角色">
-            <el-input v-model="form.roleName"></el-input>
+            <el-input v-model="form.roleName"
+                      :disabled="isDisabled"></el-input>
           </el-form-item>
           <el-form-item label="联系方式">
-            <el-input v-model="form.phone"></el-input>
+            <el-input v-model="form.phone"
+                      :disabled="isDisabled"></el-input>
           </el-form-item>
           <el-form-item label="账号状态">
             <el-select v-model="form.status"
-                       placeholder="请选择设备状态">
+                       placeholder="请选择设备状态"
+                       :disabled="isDisabled">
               <el-option label="正常"
                          value="1"></el-option>
               <el-option label="异常"
@@ -59,7 +85,11 @@
          v-if="editStatus">
       <el-button type="primary"
                  @click="updateDetail">确 定</el-button>
-      <el-button @click="goBack">取 消</el-button>
+      <el-button @click="resetUpdateDetail">取 消</el-button>
+    </div>
+    <div class="button-list"
+         v-else>
+      <el-button @click="editDetail">编辑</el-button>
     </div>
   </div>
 </template>
@@ -67,7 +97,7 @@
 import titleDiv2 from "@/components/titleModule/titleSystemDetail.vue";
 import myTable from "@/components/Table";
 import { mapState, mapActions } from 'vuex'
-import systemMirror from '@/resource/systemMirror'
+import systemManageMirror from '@/resource/systemManageMirror'
 import timeReg from '@/utils/timeReg'
 export default {
   components: { titleDiv2, myTable },
@@ -176,13 +206,24 @@ export default {
           label: '运行时间',
           tooltip: true,
         },
-      ]
+      ],
+      isDisabled: true,
+    }
+  },
+  watch: {
+    editStatus (newVal, oldVal) {
+      if (newVal) {
+        this.isDisabled = false
+      } else {
+        this.isDisabled = true
+      }
     }
   },
   computed: {
     ...mapState({
       detailInfo: state => state.system.detailInfo,
       editStatus: state => state.system.editStatus,
+      companyList: state => state.system.companyList,
     })
   },
   created () {
@@ -190,15 +231,23 @@ export default {
     this.getUserById(id)
   },
   mounted () {
+    this.isDisabled = !this.editStatus
     this.form = this.detailInfo
     this.form.createTime = timeReg.getNowFormatDate(this.form.createTime)
   },
   methods: {
+    ...mapActions(['saveDetailInfo', 'changeEditStatus']),
+    resetUpdateDetail () {
+      this.changeEditStatus(false)
+    },
+    editDetail () {
+      this.changeEditStatus(true)
+    },
     goBack () {
       this.$router.push('/userManage')
     },
     getUserById (id) {
-      systemMirror.getUserById(id).then(res => {
+      systemManageMirror.getUserById(id).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
           this.form = result
@@ -213,11 +262,12 @@ export default {
       }
       params.updateTime = ''
       params.createTime = ''
-      systemMirror.updateUser(params).then(res => {
+      systemManageMirror.update(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
           this.$message.success(serviceMessage)
-          this.goBack()
+          this.changeEditStatus(false)
+          this.$emit('getList')
         }
       })
     }
@@ -259,6 +309,12 @@ export default {
     /deep/ .el-button {
       margin-right: 10px;
     }
+  }
+}
+.user-number {
+  display: flex;
+  /deep/ .el-form-item__content {
+    margin-left: 0 !important;
   }
 }
 </style>

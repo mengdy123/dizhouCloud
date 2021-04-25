@@ -8,7 +8,7 @@
 -->
 <template>
   <div class="form-module">
-    <div class="satisfaction-level">
+    <div class="score-level">
       评级标准：小于60为差, 60-79为中,80-90为良,大于90为优
     </div>
     <el-form :model="ruleForm"
@@ -17,9 +17,9 @@
              label-width="100px"
              class="demo-ruleForm">
       <el-form-item label="评分"
-                    prop="satisfaction">
+                    prop="score">
         <el-input type="input"
-                  v-model="ruleForm.satisfaction"
+                  v-model="ruleForm.score"
                   placeholder="请输入评分">
         </el-input>
       </el-form-item>
@@ -27,7 +27,7 @@
         <el-input type="textarea"
                   :autosize="{ minRows: 2, maxRows: 4}"
                   placeholder="请输入文字评价"
-                  v-model="ruleForm.textarea2">
+                  v-model="ruleForm.remark">
         </el-input>
       </el-form-item>
     </el-form>
@@ -58,7 +58,7 @@ export default {
         handleType: '1'
       },
       rules: {
-        satisfaction: [
+        score: [
           { required: true, message: '请选择故障类型', trigger: 'change' },
         ],
       },
@@ -103,30 +103,21 @@ export default {
     addCompany () {
       let id = this.$route.query.id
       let params = {
-        ...this.ruleForm,
-        deviceTypeId: id
+        id: this.detailInfo.id,
+        status: '4',
+        score: this.ruleForm.score,
+        remark: this.ruleForm.remark
       }
-      params.createTime = ''
-      params.updateTime = ''
-      if (params.seriesId) {
-        systemMirror.updateSeries(params).then(res => {
-          let { code, result, serviceMessage } = res.data
-          if (code === 200) {
-            this.$message.success(serviceMessage)
-            this.$emit('changeProjectBox', false)
-            this.saveDetailInfo({})
-          }
-        })
-      } else {
-        systemMirror.addSeriesType(params).then(res => {
-          let { code, result, serviceMessage } = res.data
-          if (code === 200) {
-            this.$message.success(serviceMessage)
-            this.$emit('changeProjectBox', false)
-            this.saveDetailInfo({})
-          }
-        })
-      }
+      console.log('this.detailInfo', this.detailInfo)
+      systemMirror.updateWord(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.$message.success(serviceMessage)
+          this.$emit('getList')
+          this.$emit('changeProjectBox', false)
+          this.saveDetailInfo({})
+        }
+      })
 
     }
   }
@@ -139,7 +130,7 @@ export default {
   height: 100px;
   line-height: 100px;
 }
-.satisfaction-level {
+.score-level {
   font-size: 12px;
   color: #666666;
   padding: 0px 0px 10px 30px;

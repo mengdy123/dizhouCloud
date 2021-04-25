@@ -97,6 +97,8 @@ export default {
       menuList: state => state.system.menuList,
     })
   },
+  mounted () {
+  },
   methods: {
     ...mapActions(['changeMenuStatus']),
     handleOpen (key, keyPath) {

@@ -14,57 +14,23 @@
              label-width="100px"
              class="demo-ruleForm">
       <!-- 权限菜单 -->
-
-      <div class="menu-div">
-        <div class="menu-div-tree">
-          <div class="menu-div-tree-title">
-            <span>权限菜单</span>
-            <span>
-              <el-checkbox :indeterminate="isIndeterminateMenu"
-                           v-model="checkAllMenu"
-                           @change="handleCheckAllMenu">全选</el-checkbox>
-            </span>
-          </div>
-          <el-tree :data="menuList"
-                   show-checkbox
-                   default-expand-all
-                   node-key="id"
-                   ref="menuTree"
-                   highlight-current
-                   :props="defaultProps">
-          </el-tree>
-        </div>
-        <div class="menu-div-box">
-          <div class="menu-div-box-title">
-            <el-checkbox :indeterminate="isIndeterminate"
-                         v-model="checkAll"
-                         @change="handleCheckAllChange">全选</el-checkbox>
-          </div>
-          <div class="menu-div-box-list">
-            <el-checkbox-group v-model="checkedCities"
-                               @change="handleCheckedCitiesChange">
-              <el-checkbox v-for="city in cities"
-                           :label="city"
-                           :key="city">{{city}}</el-checkbox>
-            </el-checkbox-group>
-          </div>
-        </div>
-      </div>
+      <el-form-item label="权限名称"
+                    prop="permissionName">
+        <el-input v-model="ruleForm.permissionName"
+                  placeholder='请输入权限名称'></el-input>
+      </el-form-item>
     </el-form>
     <div class="form-footer">
       <el-button type="primary"
                  @click="submitForm">确 定</el-button>
       <el-button @click="handleClose">取 消</el-button>
-      <!-- <el-button @click="getCheckedNodes">通过 node 获取</el-button>
-      <el-button @click="getCheckedKeys">通过 key 获取</el-button>
-      <el-button @click="setCheckedNodes">通过 node 设置</el-button>
-      <el-button @click="setCheckedKeys">通过 key 设置</el-button>
-      <el-button @click="resetChecked">清空</el-button> -->
+
     </div>
   </div>
 </template>
 <script>
 import { mapState, mapActions } from 'vuex'
+import systemManageMirror from '@/resource/systemManageMirror'
 export default {
   data () {
     return {
@@ -73,86 +39,27 @@ export default {
         role: ''
       },
       rules: {
-        name: [
-          { required: true, message: '请输入角色名称', trigger: 'blur' },
+        permissionName: [
+          { required: true, message: '请输入权限名称', trigger: 'blur' },
           { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
         ],
-        role: [
-          { required: true, message: '请输入角色权限', trigger: 'change' },
-        ],
       },
-      data: [
-        {
-          id: 1,
-          label: '一级 1',
-          children: [
-            {
-              id: 4,
-              label: '二级 1-1',
-              children: [{
-                id: 9,
-                label: '三级 1-1-1'
-              }, {
-                id: 10,
-                label: '三级 1-1-2'
-              }
-              ]
-            }
-          ]
-        },
-        {
-          id: 2,
-          label: '一级 2',
-          children: [
-            {
-              id: 5,
-              label: '二级 2-1'
-            }, {
-              id: 6,
-              label: '二级 2-2'
-            }
-          ]
-        },
-        {
-          id: 3,
-          label: '一级 3',
-          children: [
-            {
-              id: 7,
-              label: '二级 3-1'
-            },
-            {
-              id: 8,
-              label: '二级 3-2'
-            }
-          ]
-        }
-      ],
-      defaultProps: {
-        children: 'children',
-        label: 'name'
-      },
-      isIndeterminate: true,
-      isIndeterminateMenu: false,
-      checkAll: false,
-      checkAllMenu: false,
-      checkedCities: ['新增'],
-      cities: ['新增', '编辑', '详情'],
-      selectMenuList: []
     };
   },
   computed: {
     ...mapState({
-      menuStatus: state => state.system.menuStatus,
-      menuList: state => state.system.menuList,
+      detailInfo: state => state.system.detailInfo,
     })
+  },
+  mounted () {
+    this.ruleForm = this.detailInfo
   },
   methods: {
     ...mapActions(['saveDetailInfo']),
-    submitForm (formName) {
-      this.$refs[formName].validate((valid) => {
+    submitForm () {
+      this.$refs['ruleForm'].validate((valid) => {
         if (valid) {
-          alert('submit!');
+          this.updatePower()
         } else {
           console.log('error submit!!');
           return false;
@@ -164,103 +71,26 @@ export default {
       this.$emit('changeProjectBox', false)
       this.saveDetailInfo({})
     },
-    resetForm (formName) {
-      this.$refs[formName].resetFields();
-    },
-    getCheckedNodes () {
-      console.log(this.$refs.tree.getCheckedNodes());
-    },
-    getCheckedKeys () {
-      console.log(this.$refs.tree.getCheckedKeys());
-    },
-    setCheckedNodes () {
-      this.$refs.tree.setCheckedNodes([{
-        id: 5,
-        label: '二级 2-1'
-      }, {
-        id: 9,
-        label: '三级 1-1-1'
-      }]);
-    },
-    setCheckedKeys () {
-      this.$refs.tree.setCheckedKeys([3]);
-    },
-    resetChecked () {
-      this.$refs.tree.setCheckedKeys([]);
-    },
-    handleCheckAllChange (val) {
-      this.checkedCities = val ? this.cities : [];
-      this.isIndeterminate = false;
-    },
-    handleCheckAllMenu (val) {
-      console.log('this.checkAllMenu', this.checkAllMenu)
-      if (this.checkAllMenu) {
-        //全选
-        this.$refs['menuTree'].setCheckedNodes(this.menuList);
-      } else {
-        //取消选中
-        this.$refs['menuTree'].setCheckedKeys([]);
+    updatePower () {
+      console.log('this.detailInfo', this.detailInfo)
+      let params = {
+        id: this.detailInfo.id,
+        permissionName: this.ruleForm.permissionName
       }
-    },
-    handleCheckedCitiesChange (value) {
-      let checkedCount = value.length;
-      this.checkAll = checkedCount === this.cities.length;
-      this.isIndeterminate = checkedCount > 0 && checkedCount < this.cities.length;
+      console.log('params', params)
+      systemManageMirror.updatePermissionById(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.$message.success(serviceMessage)
+          this.$emit('changeProjectBox', false)
+          this.$emit('getList')
+          this.saveDetailInfo({})
+        }
+      })
     }
+
   }
 }
 </script>
 <style lang="less" scoped>
-.menu-div {
-  display: flex;
-  width: 100%;
-  height: 360px;
-
-  justify-content: space-between;
-  &-tree {
-    width: 200px;
-    border: 1px solid #ebeef5;
-    border-radius: 4px;
-    display: flex;
-    flex-direction: column;
-    overflow: scroll;
-    &-title {
-      height: 40px;
-      line-height: 40px;
-      background: #f5f7fa;
-      margin: 0;
-      padding-left: 15px;
-      border-bottom: 1px solid #ebeef5;
-      box-sizing: border-box;
-      color: #000;
-      display: flex;
-      justify-content: space-between;
-      padding-right: 20px;
-    }
-  }
-  &-box {
-    width: 200px;
-    border: 1px solid #ebeef5;
-    border-radius: 4px;
-    display: flex;
-    flex-direction: column;
-    overflow: scroll;
-    &-title {
-      height: 40px;
-      line-height: 40px;
-      background: #f5f7fa;
-      margin: 0;
-      padding-left: 15px;
-      border-bottom: 1px solid #ebeef5;
-      box-sizing: border-box;
-      color: #000;
-    }
-    &-list {
-      padding: 16px;
-    }
-  }
-}
-/deep/ label {
-  margin-bottom: 0;
-}
 </style>

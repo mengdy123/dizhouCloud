@@ -364,6 +364,9 @@ export default {
         if (code === 200) {
           // this.tableData = result.content
           this.total = result.recordTotal
+          const totalPage = Math.ceil((this.total - 1) / this.pageSize)
+          this.currentPage = this.currentPage > totalPage ? totalPage : this.currentPage
+          this.currentPage = this.currentPage < 1 ? 1 : this.currentPage
         }
         this.tableData.forEach((item, index) => {
           item.createTime = timeReg.getNowFormatDate(item.createTime)

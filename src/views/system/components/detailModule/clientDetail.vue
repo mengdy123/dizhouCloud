@@ -40,8 +40,8 @@
       <div class="button-list"
            v-if="editStatus">
         <el-button type="primary"
-                   @click="updateDetail">保 存</el-button>
-        <el-button @click="goBack">取 消</el-button>
+                   @click="updateDetail(true)">保 存</el-button>
+        <el-button @click="updateDetail(false)">取 消</el-button>
       </div>
       <div class="button-list"
            v-else>
@@ -167,11 +167,11 @@ export default {
   },
   methods: {
     ...mapActions(['saveDetailInfo', 'changeEditStatus']),
-    goBack () {
-      this.$router.push('/clientManage')
-    },
     editDetail () {
       this.changeEditStatus(true)
+    },
+    goBack () {
+      this.$router.push('/clientManage')
     },
     getCompanyById (id) {
       systemMirror.getCompanyById(id).then(res => {
@@ -184,18 +184,23 @@ export default {
       })
     },
     updateDetail () {
-      let params = {
-        ...this.form,
-      }
-      params.updateTime = ''
-      params.createTime = ''
-      systemMirror.updateCompany(params).then(res => {
-        let { code, result, serviceMessage } = res.data
-        if (code === 200) {
-          this.$message.success(serviceMessage)
-          this.goBack()
+      if (status) {
+        let params = {
+          ...this.form,
         }
-      })
+        params.updateTime = ''
+        params.createTime = ''
+        systemMirror.updateCompany(params).then(res => {
+          let { code, result, serviceMessage } = res.data
+          if (code === 200) {
+            this.$message.success(serviceMessage)
+            this.changeEditStatus(false)
+          }
+        })
+      } else {
+        this.changeEditStatus(false)
+        this.form = Object.assign({}, this.detailInfo)
+      }
     },
     getProgectList () {
       let id = this.$route.query.id
@@ -209,6 +214,9 @@ export default {
         if (code === 200) {
           this.tableData = result.content
           this.total = result.recordTotal
+          const totalPage = Math.ceil((this.total - 1) / this.pageSize)
+          this.currentPage = this.currentPage > totalPage ? totalPage : this.currentPage
+          this.currentPage = this.currentPage < 1 ? 1 : this.currentPage
           this.tableData.forEach((item, index) => {
             item.createTime = timeReg.getNowFormatDate(item.createTime)
             this.projectType.forEach(it => {

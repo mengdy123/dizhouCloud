@@ -14,20 +14,20 @@
              label-width="100px"
              class="demo-ruleForm">
       <el-form-item label="故障类型"
-                    prop="failType">
-        <el-select v-model="ruleForm.failType"
+                    prop="faulttype">
+        <el-select v-model="ruleForm.faulttype"
                    filterable
                    placeholder="请选择故障类型">
           <el-option v-for="item in failTypeList"
-                     :key="item.name"
-                     :label="item.name"
-                     :value="item.id">
+                     :key="item.faultId"
+                     :label="item.faultName"
+                     :value="item.faultId">
           </el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="维修人员"
-                    prop="maintainPerson">
-        <el-select v-model="ruleForm.maintainPerson"
+                    prop="maintenance">
+        <el-select v-model="ruleForm.maintenance"
                    filterable
                    placeholder="请选择维修人员">
           <el-option v-for="item in maintainPersonList"
@@ -38,8 +38,8 @@
         </el-select>
       </el-form-item>
       <el-form-item label="审批人员"
-                    prop="approvePerson">
-        <el-select v-model="ruleForm.approvePerson"
+                    prop="auditor">
+        <el-select v-model="ruleForm.auditor"
                    filterable
                    placeholder="请选择维修人员">
           <el-option v-for="item in approvePersonList"
@@ -50,15 +50,16 @@
         </el-select>
       </el-form-item>
       <el-form-item label="故障时间"
-                    prop="failTime">
-        <el-date-picker v-model="ruleForm.failTime"
+                    prop="faultTime">
+        <el-date-picker v-model="ruleForm.faultTime"
                         type="datetime"
+                        style="width: 320px"
                         value-format="yyyy-MM-dd HH:mm:ss"
                         placeholder="选择故障时间">
         </el-date-picker>
       </el-form-item>
-      <el-form-item label="现场照片"
-                    prop="photo">
+      <!-- prop="img" -->
+      <el-form-item label="现场照片">
         <el-upload action="https://jsonplaceholder.typicode.com/posts/"
                    list-type="picture-card"
                    :on-preview="handlePictureCardPreview"
@@ -79,16 +80,17 @@
         </el-dialog>
       </el-form-item>
       <el-form-item label="预计用时"
-                    prop="useTime">
+                    prop="predictTime">
         <el-input placeholder="请输入预计维修用时"
-                  v-model="ruleForm.useTime">
+                  v-model="ruleForm.predictTime">
           <template slot="append">小时</template>
         </el-input>
       </el-form-item>
       <el-form-item label="截止时间"
-                    prop="endTime">
-        <el-date-picker v-model="ruleForm.endTime"
+                    prop="lastTime">
+        <el-date-picker v-model="ruleForm.lastTime"
                         type="datetime"
+                        style="width: 320px"
                         value-format="yyyy-MM-dd HH:mm:ss"
                         placeholder="选择截止时间">
         </el-date-picker>
@@ -112,25 +114,25 @@ export default {
       fileList: [],
       ruleForm: {},
       rules: {
-        failType: [
+        faulttype: [
           { required: true, message: '请选择故障类型', trigger: 'change' },
         ],
-        maintainPerson: [
+        maintenance: [
           { required: true, message: '请选择维修人员', trigger: 'change' },
         ],
-        approvePerson: [
+        auditor: [
           { required: true, message: '请选择审批人员', trigger: 'change' },
         ],
-        failTime: [
+        faultTime: [
           { required: true, message: '请选择故障时间', trigger: 'change' },
         ],
-        photo: [
+        img: [
           { required: true, message: '请选择现场照片', trigger: 'change' },
         ],
-        endTime: [
+        lastTime: [
           { required: true, message: '请选择截止时间', trigger: 'change' },
         ],
-        useTime: [
+        predictTime: [
           { required: true, message: '请输入预计维修时间', trigger: 'blur' },
         ]
       },
@@ -167,38 +169,31 @@ export default {
       this.dialogVisible = true;
     },
     handleClose () {
-      this.$refs['ruleForm'].resetFields();
       this.$emit('changeProjectBox', false)
-      this.saveDetailInfo({})
     },
     addCompany () {
-      let id = this.$route.query.id
       let params = {
-        ...this.ruleForm,
-        deviceTypeId: id
+        faulttype: this.ruleForm.faulttype,
+        maintenance: this.ruleForm.maintenance,
+        auditor: this.ruleForm.auditor,
+        img: this.ruleForm.img,
+        predictTime: this.ruleForm.predictTime,
+        lastTime: this.ruleForm.lastTime,
+        faultTime: this.ruleForm.faultTime,
+        deviceNumber: this.detailInfo.deviceNumber,
+        deviceId: this.detailInfo.deviceId,
+        deviceType: this.detailInfo.deviceType,
       }
-      params.createTime = ''
-      params.updateTime = ''
-      if (params.seriesId) {
-        systemMirror.updateSeries(params).then(res => {
-          let { code, result, serviceMessage } = res.data
-          if (code === 200) {
-            this.$message.success(serviceMessage)
-            this.$emit('changeProjectBox', false)
-            this.saveDetailInfo({})
-          }
-        })
-      } else {
-        systemMirror.addSeriesType(params).then(res => {
-          let { code, result, serviceMessage } = res.data
-          if (code === 200) {
-            this.$message.success(serviceMessage)
-            this.$emit('changeProjectBox', false)
-            this.saveDetailInfo({})
-          }
-        })
-      }
-
+      // console.log('params', params)
+      systemMirror.reported(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.$message.success(serviceMessage)
+          this.$emit('changeProjectBox', false)
+          this.$emit('getList')
+          this.saveDetailInfo({})
+        }
+      })
     }
   }
 }

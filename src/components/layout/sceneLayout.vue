@@ -1,7 +1,7 @@
 <template>
   <div class="dz-scene">
     <div class="dz-scene-3d">
-      <model3D></model3D>
+      <!-- <model3D></model3D> -->
     </div>
     <div class="dz-scene-body">
       <div class="dz-scene-body-top">
@@ -70,8 +70,8 @@ export default {
 .dz-scene {
   width: 100%;
   height: 100%;
-  // background: url("../../assets/scene_01.png") no-repeat;
-  // background-size: 100% 100%;
+  background: url("../../assets/scene_01.png") no-repeat;
+  background-size: 100% 100%;
   position: relative;
   display: flex;
   &-body {

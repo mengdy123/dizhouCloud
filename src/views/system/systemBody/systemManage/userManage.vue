@@ -12,6 +12,7 @@
             <el-input v-model="ruleForm.key"
                       style="width: 320px"
                       clearable
+                      @clear="submitForm('ruleForm')"
                       placeholder="请输入请输入角色名称"></el-input>
           </el-form-item>
         </el-form>
@@ -22,7 +23,7 @@
       </div>
     </div>
     <div class="dz-system-table">
-      <div class="dz-system-table-add"><span @click="changeProjectBox(true)">新增</span></div>
+      <div class="dz-system-table-add"><span @click="showBox">新增</span></div>
       <myTable ref="myTable"
                :tableData="tableDataNew"
                :tableConfigArr='tableConfigArr'
@@ -30,9 +31,9 @@
                :action='actionList'
                :height='heightTable'
                :http='http'
-               name='智能系统'
+               name='用户管理'
                @getList='getList'
-               @disebleTable='disebleTable'
+               @deletList='deletList'
                :index='true'></myTable>
     </div>
     <div class="dz-system-pagination">
@@ -51,6 +52,7 @@
             title='新增'>
       <slot slot='dialogMain'>
         <addUserForm ref="addForm"
+                     @getList='getList'
                      @changeProjectBox='changeProjectBox'></addUserForm>
       </slot>
     </addBox>
@@ -59,7 +61,7 @@
 <script>
 import addBox from '../../components/dialogModule/addDialogModule'
 import myTable from "@/components/Table";
-import systemMirror from '@/resource/systemMirror'
+import systemManageMirror from '@/resource/systemManageMirror'
 import { mapState, mapActions } from 'vuex'
 import timeReg from '@/utils/timeReg'
 import addUserForm from '../../components/formModule/addUserForm'
@@ -77,7 +79,7 @@ export default {
         },
         {
           fixed: false,
-          prop: 'name',
+          prop: 'userName',
           label: '用户名',
         },
         {
@@ -87,36 +89,31 @@ export default {
         },
         {
           fixed: false,
-          prop: 'depart',
+          prop: 'departmentName',
           label: '部门',
         },
         {
           fixed: false,
-          prop: 'duty',
+          prop: 'jobName',
           label: '职务',
         },
         {
           fixed: false,
-          prop: 'role',
+          prop: 'roleName',
           label: '角色',
         },
-        {
-          fixed: false,
-          prop: 'power',
-          label: '权限',
-        },
-        {
-          fixed: false,
-          prop: 'statusName',
-          label: '账号状态',
-        },
+        // {
+        //   fixed: false,
+        //   prop: 'power',
+        //   label: '权限',
+        // },
       ],
       tableDataNew: [],
       http: '/manage/user/getUserById?userId=',
       ruleFormHeight: {},
       currentPage: 1,
       pageSize: 10,
-      total: 1000,
+      total: 0,
       addProjectStatus: false,
       heightTable: 'calc(100vh - 402px)',
       heightStatus: false,
@@ -140,6 +137,7 @@ export default {
     this.getList()
   },
   methods: {
+    ...mapActions(['saveDetailInfo', 'changeEditStatus']),
     submitForm (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
@@ -156,40 +154,40 @@ export default {
         currentPage: this.currentPage,
         pageSize: this.pageSize,
       }
-      systemMirror.getUserList(params).then(res => {
+      systemManageMirror.getListBySeek(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
+          const totalPage = Math.ceil((this.total - 1) / this.pageSize)
+          this.currentPage = this.currentPage > totalPage ? totalPage : this.currentPage
+          this.currentPage = this.currentPage < 1 ? 1 : this.currentPage
+
           this.tableDataNew = result.content
           this.total = result.recordTotal
         }
         this.tableDataNew.forEach((item, index) => {
           item.createTime = timeReg.getNowFormatDate(item.createTime)
           if (item.status === '1') {
-            item.statusName = '正常'
+            item.statusLable = '正常'
           } else {
-            item.statusName = '已禁用'
+            item.statusLable = '已禁用'
           }
         })
       })
     },
-    disebleTable (row) {
-      let params = {
-        ...row,
+    deletList (id) {
+      let parmas = {
+        id: id
       }
-      params.updateTime = ''
-      params.createTime = ''
-      if (params.status === '1') {
-        params.status = '2'
-      } else {
-        params.status = '1'
-      }
-      systemMirror.updateUser(params).then(res => {
+      systemManageMirror.deleteUser(parmas).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
-          this.$message.success(serviceMessage)
           this.getList()
         }
       })
+    },
+    showBox () {
+      this.saveDetailInfo({})
+      this.changeProjectBox(true)
     },
     handleSizeChange (val) {
       console.log(`每页 ${val} 条`);

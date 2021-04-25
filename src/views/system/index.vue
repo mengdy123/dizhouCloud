@@ -16,6 +16,9 @@
     <div class="dz-system-content"
          :class="[{'small-content': !menuStatus},{'big-content': menuStatus}]">
       <div class="dz-system-content-top">
+        <div @click="showVersionsLogs">
+          <i class="el-icon-info"></i>
+        </div>
         <div @click="goHomeIndex">
           <i class="el-icon-picture-outline-round"></i>
           <span>智慧看板</span>
@@ -38,6 +41,12 @@
       <div class="dz-system-content-bottom">
         <router-view></router-view>
       </div>
+      <el-drawer title="版本日志"
+                 :visible.sync="versionsLogsStatus"
+                 :direction="direction"
+                 :before-close="handleClose">
+        <versionsDiv></versionsDiv>
+      </el-drawer>
     </div>
   </div>
 </template>
@@ -46,25 +55,34 @@ import menuBox from './components/menuModule'
 import systemTitle from './components/systemTitle'
 import { mapState, mapActions } from 'vuex'
 import systemMirror from '@/resource/systemMirror'
+import systemManageMirror from '@/resource/systemManageMirror'
+import versionsDiv from './systemBody/versionsLogs'
 export default {
-  components: { menuBox, systemTitle },
+  components: { menuBox, systemTitle, versionsDiv },
   data () {
     return {
-
+      versionsLogsStatus: false,
+      direction: 'rtl',
     }
+  },
+  created () {
+    this.getList()
   },
   computed: {
     ...mapState({
       menuStatus: state => state.system.menuStatus,
     })
   },
-  mounted () {
-    this.getList()
-  },
   methods: {
-    ...mapActions(['saveProjectList', 'saveSystemList', 'saveCompanyList']),
+    ...mapActions(['saveProjectList', 'saveSystemList', 'saveCompanyList', 'saveFailTypeList', 'saveRoleList', 'saveDeviceTypeList']),
     goHomeIndex () {
       this.$router.push('mainIndex')
+    },
+    handleClose (done) {
+      done();
+    },
+    showVersionsLogs () {
+      this.versionsLogsStatus = true
     },
     getList () {
       let params = {
@@ -76,7 +94,6 @@ export default {
         if (code === 200) {
           this.saveProjectList(result.content)
         }
-
       })
       systemMirror.getListBySeek(params).then(res => {
         let { code, result, serviceMessage } = res.data
@@ -90,6 +107,32 @@ export default {
           this.saveCompanyList(result.content)
         }
       })
+      systemMirror.getFailTypeList(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.saveFailTypeList(result.content)
+        }
+      })
+      // systemManageMirror.getPermissionAll(params).then(res => {
+      //   let { code, result, serviceMessage } = res.data
+      //   if (code === 200) {
+      //     this.saveRoleList(result.content)
+      //   }
+      // })
+      systemManageMirror.getRoleAll(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.saveRoleList(result)
+        }
+      })
+
+      systemMirror.getListByDevice(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.saveDeviceTypeList(result.content)
+        }
+      })
+
     },
     toPath (path) {
       console.log('dropdown', path)

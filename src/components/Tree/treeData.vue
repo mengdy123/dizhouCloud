@@ -124,7 +124,7 @@ export default {
 };
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
 table {
   border-collapse: separate !important;
   border-spacing: 0 !important;
@@ -132,7 +132,7 @@ table {
 td {
   position: relative;
   vertical-align: top;
-  padding: 0 0 50px 0;
+  padding: 0 0 20px 0;
   text-align: center;
 }
 

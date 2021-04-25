@@ -7,12 +7,15 @@ const system = {
         name: "项目中心",
         index: "project",
         icon: "01",
+        id: '1',
         children: [
           {
             name: "项目管理",
             index: "project-1",
             icon: "el-icon-menu",
             path: '/project',
+            id: '1.1',
+            parentId: '1',
             children: []
           },
           {
@@ -20,6 +23,8 @@ const system = {
             index: "project-2",
             icon: "el-icon-menu",
             path: '/clientManage',
+            id: '1.2',
+            parentId: '1',
             children: []
           },
           {
@@ -27,6 +32,8 @@ const system = {
             index: "project-3",
             icon: "el-icon-menu",
             path: '/industryManage',
+            id: '1.3',
+            parentId: '1',
             children: []
           },
           {
@@ -34,6 +41,8 @@ const system = {
             index: "project-4",
             icon: "el-icon-menu",
             path: '/distribute',
+            id: '1.4',
+            parentId: '1',
             children: []
           },
         ]
@@ -42,18 +51,23 @@ const system = {
         name: "运维中心",
         index: "operation",
         icon: "04",
+        id: '2',
         children: [
           {
             name: "设备运维",
             index: "operation-1",
             icon: "el-icon-menu",
             path: '',
+            id: '2.1',
+            parentId: '2',
             children: [
               {
                 name: "设备管理",
                 index: "operation-1-1",
                 icon: "el-icon-menu",
                 path: '/setManage',
+                id: '2.1.1',
+                parentId: '2.1',
                 children: []
               },
               {
@@ -61,6 +75,8 @@ const system = {
                 index: "operation-1-2",
                 path: '/breakdownManage',
                 icon: "el-icon-menu",
+                id: '2.1.2',
+                parentId: '2.1',
                 children: []
               },
             ]
@@ -70,6 +86,8 @@ const system = {
             index: "operation-2",
             path: '/maintainDutyManage',
             icon: "el-icon-menu",
+            id: '2.2',
+            parentId: '2',
             children: []
           },
           {
@@ -77,12 +95,16 @@ const system = {
             index: "operation-3",
             path: '/workOrderManage',
             icon: "el-icon-menu",
+            id: '2.3',
+            parentId: '2',
             children: []
           },
           {
             name: "运维消息推送",
             index: "operation-4",
             icon: "el-icon-menu",
+            id: '2.4',
+            parentId: '2',
             path: '',
             children: [
               {
@@ -90,6 +112,8 @@ const system = {
                 index: "operation-4-1",
                 icon: "el-icon-menu",
                 path: '/informationTemplate',
+                id: '2.4.1',
+                parentId: '2.4',
                 children: []
               },
               {
@@ -97,6 +121,8 @@ const system = {
                 index: "operation-4-2",
                 path: '/informationHistory',
                 icon: "el-icon-menu",
+                id: '2.4.2',
+                parentId: '2.4',
                 children: []
               },
             ]
@@ -106,6 +132,8 @@ const system = {
             index: "operation-5",
             path: '/logsManage',
             icon: "el-icon-menu",
+            id: '2.5',
+            parentId: '2',
             children: []
           },
           {
@@ -113,6 +141,8 @@ const system = {
             index: "operation-6",
             icon: "el-icon-menu",
             path: '/evaluation',
+            id: '2.6',
+            parentId: '2',
             children: []
           }
         ]
@@ -121,12 +151,15 @@ const system = {
         name: "产品中心",
         index: "product",
         icon: "02",
+        id: '3',
         children: [
           {
             name: "智能设备",
             index: "product-1",
             icon: "el-icon-menu",
             path: '/smartSet',
+            id: '3.1',
+            parentId: '3',
             children: []
           },
           {
@@ -134,6 +167,8 @@ const system = {
             index: "product-2",
             icon: "el-icon-menu",
             path: '/smartSystem',
+            id: '3.2',
+            parentId: '3',
             children: []
           }
         ]
@@ -142,12 +177,15 @@ const system = {
         name: "系统中心",
         index: "system",
         icon: "03",
+        id: '4',
         children: [
           {
             name: "部门管理",
             index: "system-4",
             path: '/departManage',
             icon: "el-icon-menu",
+            id: '4.1',
+            parentId: '4',
             children: []
           },
           {
@@ -155,6 +193,8 @@ const system = {
             index: "system-1",
             icon: "el-icon-menu",
             path: '/userManage',
+            id: '4.2',
+            parentId: '4',
             children: []
           },
           {
@@ -162,11 +202,15 @@ const system = {
             index: "system-2",
             path: '/roleManage',
             icon: "el-icon-menu",
+            id: '4.3',
+            parentId: '4',
             children: []
           },
           {
             name: "权限管理",
             index: "system-3",
+            id: '4.4',
+            parentId: '4',
             path: '/powerManage',
             icon: "el-icon-menu",
             children: []
@@ -185,6 +229,11 @@ const system = {
     maintainPersonList: [], // 维修人员
     approvePersonList: [],  //审批人员
     companyList: [], // 客户列表
+    powerList: [],  // 权限列表
+    departmentList: [], //部门列表
+    jobList: [], // 职务列表
+    roleList: [], //角色列表
+    deviceTypeList: [], // 设备类型管理
   },
   actions: {
     changeMenuStatus ({ commit, state }, params) {
@@ -217,6 +266,16 @@ const system = {
     saveCompanyList ({ commit, state }, params) {
       commit('SAVE_COMPANY_LIST', params)
     },
+    savePowerList ({ commit, state }, params) {
+      commit('SAVE_POWER_LIST', params)
+    },
+    saveRoleList ({ commit, state }, params) {
+      commit('SAVE_ROLE_LIST', params)
+    },
+    saveDeviceTypeList ({ commit, state }, params) {
+      commit('SAVE_DEVICE_TYPE_LIST', params)
+    },
+
 
   },
   mutations: {
@@ -250,6 +309,16 @@ const system = {
     SAVE_COMPANY_LIST (state, data) {
       state.companyList = data
     },
+    SAVE_POWER_LIST (state, data) {
+      state.powerList = data
+    },
+    SAVE_ROLE_LIST (state, data) {
+      state.roleList = data
+    },
+    SAVE_DEVICE_TYPE_LIST (state, data) {
+      state.deviceTypeList = data
+    },
+
 
 
   }

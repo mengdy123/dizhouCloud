@@ -23,21 +23,19 @@
         <el-input v-model="ruleForm.companyShortName"
                   placeholder="请输入客户简称"></el-input>
       </el-form-item>
-      <el-form-item label="客户编号"
+      <!-- <el-form-item label="客户编号"
                     prop="companyNumber">
         <el-input v-model.number="ruleForm.companyNumber"
-                  placeholder="请输入5位客户编号"></el-input>
-      </el-form-item>
-      <el-form-item label="项目"
-                    prop="project">
+                  placeholder="请输入5位客户编号"></el-input> -->
+      <!-- </el-form-item> -->
+      <el-form-item label="项目">
         <el-select v-model="ruleForm.project"
-                   filterable
+                   clearable=""
                    placeholder="请选择项目">
           <el-option v-for="item in projectList"
-                     :key="item.name"
-                     :label="item.name"
-                     :value="item.id">
-          </el-option>
+                     :label="item.projectName"
+                     :key="item.projectId"
+                     :value="item.projectId"></el-option>
         </el-select>
       </el-form-item>
     </el-form>
@@ -84,13 +82,12 @@ export default {
           { required: true, validator: checkNum, trigger: 'blur' },
         ]
       },
-      projectList: [
-        {
-          name: '项目1',
-          id: '1'
-        }
-      ]
     };
+  },
+  computed: {
+    ...mapState({
+      projectList: state => state.system.projectList,
+    })
   },
   methods: {
     ...mapActions(['saveDetailInfo']),
@@ -117,6 +114,7 @@ export default {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
           this.$message.success(serviceMessage)
+          this.$emit('getList')
           this.$emit('changeProjectBox', false)
           this.saveDetailInfo({})
         }

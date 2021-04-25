@@ -17,7 +17,6 @@
       <el-form-item label="项目地址"
                     prop="projectSite">
         <!-- @focus='getProjectSite' -->
-
         <span style="cursor:pointer"
               v-if="!projectAddress"
               @click="getProjectSite">点击获取项目地址</span>
@@ -74,24 +73,16 @@
                  @click="submitForm">确 定</el-button>
       <el-button @click="handleClose">取 消</el-button>
     </div>
-    <addBox v-if="addProjectStatus"
-            @changeProjectBox='changeProjectBox'
-            title='新增'>
-      <slot slot='dialogMain'>
-        <addMapForm ref="addForm"
-                    @changeProjectBox='changeProjectBox'></addMapForm>
-      </slot>
-    </addBox>
+
   </div>
 </template>
 <script>
 import { mapState, mapActions } from 'vuex'
 import systemMirror from '@/resource/systemMirror'
 import { isPhone } from '@/utils/validate'
-import addBox from '../dialogModule/addDialogModule'
-import addMapForm from '../mapBox/index'
+
 export default {
-  components: { addBox, addMapForm },
+  components: {},
   data () {
     return {
       addressInfo: {},
@@ -99,15 +90,12 @@ export default {
       rules: {
         projectName: [
           { required: true, message: '请输入项目名称', trigger: 'blur' },
-          { min: 4, max: 60, message: '长度在 4 到 60 个字符', trigger: 'blur' }
         ],
         projectAbbreviation: [
           { required: true, message: '请输入项目简称', trigger: 'blur' },
-          { min: 4, max: 60, message: '长度在 4 到 60 个字符', trigger: 'blur' }
         ],
         projectSite: [
-          { required: true, message: '请输入项目地址', trigger: 'blur' },
-          { min: 4, max: 60, message: '长度在 4 到 60 个字符', trigger: 'blur' }
+          { required: true, message: '请输入项目地址', trigger: 'change' },
         ],
         companyId: [
           { required: true, message: '请输入客户名称', trigger: 'change' }
@@ -122,7 +110,7 @@ export default {
       deep: true,
       handler (newVal, oldVal) {
         console.log('projectAddress---watch', newVal)
-        this.ruleForm.projectSite = newVal.name
+        this.ruleForm.projectSite = newVal.formattedAddress
         this.addressInfo = newVal.addressComponent
       }
     }
@@ -176,10 +164,8 @@ export default {
     },
     getProjectSite () {
       // this.$emit('changeInnerVisible', true)
-      this.changeProjectBox(true)
-      this.$nextTick(() => {
-        // this.$refs.addForm.changeDialogVisible(true)
-      })
+      // this.changeProjectBox(true)
+      this.$emit('changeMapBox', true)
     },
     addProjectFun () {
       let params = {
@@ -193,13 +179,14 @@ export default {
         province: this.addressInfo.province || this.ruleForm.province,
         city: this.addressInfo.district || this.ruleForm.city,
         county: this.addressInfo.township || this.ruleForm.county,
-        projectSite: this.addressInfo.street + this.ruleForm.streetNumber,
+        projectSite: this.ruleForm.projectSite,
       }
       console.log('ruleForm', params)
       systemMirror.addProject(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
           this.$message.success(serviceMessage)
+          this.$emit('getList')
           this.$emit('changeProjectBox', false)
           this.saveDetailInfo({})
         }

@@ -74,6 +74,18 @@ export default [
     }]
   },
   {
+    path: '/powerManageDetail',
+    name: 'powerManageDetail',
+    component: systemLayout,
+    children: [{
+      path: '/',
+      title: '权限详情',
+      component: resolve => {
+        require(['../../views/system/components/detailModule/powerManageDetail.vue'], resolve)
+      }
+    }]
+  },
+  {
     path: '/logsManageDetail',
     name: 'logsManageDetail',
     component: systemLayout,

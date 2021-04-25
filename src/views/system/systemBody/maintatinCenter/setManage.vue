@@ -67,7 +67,7 @@
     </div>
     <div class="dz-system-table">
       <!-- <div class="dz-system-table-add"><span @click="changeProjectBox(true)">新增</span></div> -->
-      <myTable :tableData="tableDataNew"
+      <myTable :tableData="tableData"
                :tableConfigArr='tableConfigArr'
                :selection="false"
                :action='actionList'
@@ -75,6 +75,7 @@
                :http='http'
                name='设备管理'
                :detail='true'
+               @getDetail='getDetail'
                @getList='getProgectList'
                @disebleTable='disebleTable'
                @changeProjectBox='upFailBox'
@@ -96,6 +97,7 @@
             title='上报'>
       <slot slot='dialogMain'>
         <addFailForm ref="addForm"
+                     v-if="addFailBoxStatus"
                      @changeProjectBox='upFailBox'></addFailForm>
       </slot>
     </addBox>
@@ -118,48 +120,35 @@ export default {
       tableConfigArr: [
         {
           fixed: false,
-          prop: 'deviceTypeNumber',
+          prop: 'deviceNumber',
           label: '设备编号',
           tooltip: false,
         },
         {
           fixed: false,
-          prop: 'deviceTypeName',
+          prop: 'deviceTypeLabel',
           label: '设备类型',
           tooltip: false,
         },
         {
           fixed: false,
-          prop: 'deviceTypeNumber',
+          prop: 'systemName',
           label: '系统名称',
           tooltip: false,
         },
         {
           fixed: false,
-          prop: 'deviceTypeName',
+          prop: 'projectName',
           label: '项目名称',
           tooltip: false,
         },
         {
           fixed: false,
-          prop: 'deviceTypeName',
+          prop: 'installationArea',
           label: '安装区域',
           tooltip: false,
         },
-        {
-          fixed: false,
-          prop: 'deviceTypeName',
-          label: '设备状态',
-          tooltip: false,
-        },
-        {
-          fixed: false,
-          prop: 'deviceNumber',
-          label: '设备数量',
-          tooltip: false,
-        },
       ],
-      tableDataNew: [],
       currentPage: 1,
       pageSize: 10,
       total: 1000,
@@ -177,26 +166,26 @@ export default {
           style: 'view-screen'
         },
         {
-          name: '禁用',
+          name: '删除',
           style: 'disable-button'
         },
-        {
-          name: '启用',
-          style: 'view-screen'
-        }
       ]
     };
   },
   computed: {
     ...mapState({
-      projectType: state => state.common.projectType,
-      projectStatus: state => state.common.projectStatus,
+      deviceType: state => state.common.deviceType,
+      maintainPersonList: state => state.system.maintainPersonList,
+      deviceStatus: state => state.common.deviceStatus,
     })
   },
   mounted () {
+    console.log('deviceType', this.deviceType)
     this.getProgectList()
+    this.getFailTypeList()
   },
   methods: {
+    ...mapActions(['saveDetailInfo', 'saveMaintainPersonList', 'saveApprovePersonList', 'saveFailTypeList']),
     handleClick (row) {
       console.log(row);
     },
@@ -210,8 +199,75 @@ export default {
         }
       });
     },
+    formatSetKey (arr, key) {
+      let name
+      if (arr.length) {
+        arr.forEach(item => {
+          if (item.id == key) {
+            name = item.name
+          }
+        })
+      }
+      return name
+    },
+    formatKey (arr, key) {
+      let name
+      if (arr.length) {
+        arr.forEach(item => {
+          if (item.id == key) {
+            name = item.name
+          }
+        })
+      }
+      return name
+    },
+    // 点击获取设备系列的详情
+    getDetail (data) {
+      this.dialogData = Object.assign({}, data)
+      this.saveDetailInfo(this.dialogData)
+      this.getMaintenance()
+      this.getAuditor()
+    },
     resetForm (formName) {
       this.$refs[formName].resetFields();
+    },
+    //获取故障类型
+    getFailTypeList () {
+      let params = {
+        currentPage: 1,
+        pageSize: 10000,
+      }
+      systemMirror.getFailTypeList(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          // setTimeout(() => {
+          this.saveFailTypeList(result.content)
+          // }, 500)
+
+        }
+      })
+    },
+    //获取维修工列表
+    getMaintenance () {
+      console.log('this.dialogData', this.dialogData)
+      let id = this.dialogData.deviceId
+      systemMirror.getMaintenance(id).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.saveMaintainPersonList(result)
+        }
+      })
+    },
+    //获取审核人列表
+    getAuditor () {
+      console.log('this.dialogData', this.dialogData)
+      let id = this.dialogData.deviceId
+      systemMirror.getAuditor(id).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.saveApprovePersonList(result)
+        }
+      })
     },
     getProgectList () {
       let startTime, endTime
@@ -220,6 +276,7 @@ export default {
         endTime = this.ruleFormHeight.time[1]
       }
       let params = {
+        seek: this.ruleForm.key,
         projectName: this.ruleForm.key,
         projectLeader: this.ruleFormHeight.leader,
         projectType: this.ruleFormHeight.projectType,
@@ -230,26 +287,19 @@ export default {
         currentPage: this.currentPage,
         pageSize: this.pageSize,
       }
-      systemMirror.getListByDevice(params).then(res => {
+      systemMirror.getListBySeek(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
           this.tableData = result.content
           this.total = result.recordTotal
+          const totalPage = Math.ceil((this.total - 1) / this.pageSize)
+          this.currentPage = this.currentPage > totalPage ? totalPage : this.currentPage
+          this.currentPage = this.currentPage < 1 ? 1 : this.currentPage
         }
         this.tableData.forEach((item, index) => {
-          item.createTime = timeReg.getNowFormatDate(item.createTime)
-          this.projectType.forEach(it => {
-            if (item.projectType && item.projectType === it.id) {
-              item.projectTypeLable = it.name
-            }
-          })
-          this.projectStatus.forEach(it => {
-            if (item.status && item.status === it.id) {
-              item.statusLable = it.name
-            }
-          })
+          item.statusLable = this.formatKey(this.deviceStatus, item.status)
+          item.deviceTypeLabel = this.formatSetKey(this.deviceType, item.deviceType)
         })
-        this.tableDataNew = this.tableData
       })
     },
     disebleTable (row) {
@@ -282,15 +332,8 @@ export default {
     },
     heightSearch () {
       if (!this.heightStatus) {
-        this.pageSize = 8
-        this.getProgectList()
         this.heightTable = 'calc(100vh - 498px)'
       } else {
-        this.tableDataNew = this.tableData
-        this.ruleFormHeight = {}
-        this.currentPage = 1
-        this.pageSize = 10
-        this.getProgectList()
         this.heightTable = 'calc(100vh - 402px)'
       }
       this.heightStatus = !this.heightStatus

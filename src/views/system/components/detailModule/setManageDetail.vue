@@ -17,6 +17,7 @@
           </el-form-item>
           <el-form-item label="设备系列">
             <el-select v-model="form.systemType"
+                       style="width: 312px"
                        placeholder="请选择设备系列">
               <el-option v-for="item in systemType"
                          :label="item.name"
@@ -29,7 +30,8 @@
           </el-form-item>
           <el-form-item label="设备类型">
             <el-select v-model="form.projectType"
-                       placeholder="请选择设备类型">
+                       placeholder="请选择设备类型"
+                       style="width: 312px">
               <el-option v-for="item in projectType"
                          :label="item.name"
                          :key="item.id"
@@ -41,6 +43,7 @@
           </el-form-item>
           <el-form-item label="系统名称">
             <el-select v-model="form.systemName"
+                       style="width: 312px"
                        placeholder="请选择系统名称">
               <el-option v-for="item in projectList"
                          :label="item.projectName"
@@ -50,7 +53,8 @@
           </el-form-item>
           <el-form-item label="系统编号">
             <el-select v-model="form.systemName"
-                       placeholder="请选择系统编号">
+                       placeholder="请选择系统编号"
+                       style="width: 312px">
               <el-option v-for="item in projectList"
                          :label="item.projectName"
                          :key="item.projectId"
@@ -83,7 +87,7 @@
     </div>
     <div class="detail-module-row">
       <titleDiv2 title='维修日志'></titleDiv2>
-      <div class="detail-form history-table">
+      <div class="detail-form history-table logs-list">
         <logsDiv></logsDiv>
       </div>
     </div>
@@ -214,7 +218,7 @@ export default {
     this.getSystemById(id)
   },
   mounted () {
-    console.log('projectList', this.projectList)
+    console.log('projectList', this.detailInfo)
     this.form = this.detailInfo
     this.form.createTime = timeReg.getNowFormatDate(this.form.createTime)
   },
@@ -296,5 +300,9 @@ export default {
       margin-right: 10px;
     }
   }
+}
+.logs-list {
+  height: 200px;
+  overflow-y: scroll;
 }
 </style>

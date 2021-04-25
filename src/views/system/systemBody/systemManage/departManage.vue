@@ -2,6 +2,10 @@
   <div class="dz-system">
     <div class="dz-system-title">部门管理</div>
     <div class="dz-system-tree">
+      <div>
+        <el-button type="primary"
+                   @click="addOrganization">新增组织架构</el-button>
+      </div>
       <div v-if="treeData.length > 0">
         <div class="tree-list"
              v-for="(item, index) in treeData"
@@ -13,10 +17,7 @@
                      @delete="deleteStock" />
         </div>
       </div>
-      <div v-else>
-        <el-button type="primary"
-                   @click="addOrganization">新增组织架构</el-button>
-      </div>
+
     </div>
     <!-- 删除提示弹框 -->
     <!-- <el-dialog title="提示"

@@ -14,66 +14,63 @@
              label-width="100px"
              class="demo-ruleForm">
       <el-form-item label="故障类型"
-                    prop="failType">
-        <el-select v-model="ruleForm.failType"
-                   filterable
-                   :disabled='disabledMaintain'
+                    prop="faulttype">
+        <el-select v-model="ruleForm.faulttype"
+                   disabled
                    placeholder="请选择故障类型">
           <el-option v-for="item in failTypeList"
-                     :key="item.name"
-                     :label="item.name"
-                     :value="item.id">
+                     :key="item.faultId"
+                     :label="item.faultName"
+                     :value="item.faultId">
           </el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="安装区域"
-                    prop="deviceSit">
-        <el-input v-model="ruleForm.deviceSit"
+                    prop="installationArea">
+        <el-input v-model="ruleForm.installationArea"
                   placeholder='请输入安装区域'
-                  :disabled='disabledMaintain' />
+                  disabled />
       </el-form-item>
       <el-form-item label="维修人员"
-                    prop="maintainPerson">
-        <el-select v-model="ruleForm.maintainPerson"
+                    prop="maintenance">
+        <el-select v-model="ruleForm.maintenance"
                    :disabled='disabledMaintain'
-                   filterable
                    placeholder="请选择维修人员">
           <el-option v-for="item in maintainPersonList"
                      :key="item.name"
-                     :label="item.name"
+                     :label='`${item.name}` + "--" + `${item.phone}`'
                      :value="item.id">
           </el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="审批人员"
-                    prop="approvePerson">
-        <el-select v-model="ruleForm.approvePerson"
+                    prop="auditor">
+        <el-select v-model="ruleForm.auditor"
                    :disabled='disabledMaintain'
                    filterable
                    placeholder="请选择维修人员">
           <el-option v-for="item in approvePersonList"
                      :key="item.name"
-                     :label="item.name"
+                     :label='`${item.name}` + "--" + `${item.phone}`'
                      :value="item.id">
           </el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="故障时间"
-                    prop="failTime">
-        <el-date-picker v-model="ruleForm.failTime"
+                    prop="faultTime">
+        <el-date-picker v-model="ruleForm.faultTime"
                         type="datetime"
-                        :disabled='disabledMaintain'
+                        disabled
                         value-format="yyyy-MM-dd HH:mm:ss"
                         placeholder="选择故障时间">
         </el-date-picker>
       </el-form-item>
-      <el-form-item label="现场照片"
-                    prop="photo">
+      <el-form-item label="现场照片">
         <el-upload action="https://jsonplaceholder.typicode.com/posts/"
                    list-type="picture-card"
                    :on-preview="handlePictureCardPreview"
                    :limit="3"
-                   :disabled='disabledMaintain'
+                   disabled
                    :multiple='true'
                    :auto-upload='false'
                    :file-list="fileList"
@@ -90,17 +87,17 @@
         </el-dialog>
       </el-form-item>
       <el-form-item label="预计用时"
-                    prop="useTime">
+                    prop="predictTime">
         <el-input placeholder="请输入预计维修用时"
-                  v-model="ruleForm.useTime"
-                  :disabled='disabledMaintain'>
+                  v-model="ruleForm.predictTime"
+                  disabled>
           <template slot="append">小时</template>
         </el-input>
       </el-form-item>
       <el-form-item label="截止时间"
-                    prop="endTime">
-        <el-date-picker v-model="ruleForm.endTime"
-                        :disabled='disabledMaintain'
+                    prop="lastTime">
+        <el-date-picker v-model="ruleForm.lastTime"
+                        disabled
                         type="datetime"
                         value-format="yyyy-MM-dd HH:mm:ss"
                         placeholder="选择截止时间">
@@ -146,7 +143,7 @@
          v-if="!disabledMaintain">
       <el-button type="primary"
                  @click="submitForm">同 意</el-button>
-      <el-button @click="handleClose">拒 绝</el-button>
+      <!-- <el-button @click="handleClose">拒 绝</el-button> -->
       <el-button @click="handleClose">取 消</el-button>
     </div>
   </div>
@@ -166,32 +163,30 @@ export default {
       dialogImageUrl: '',
       dialogVisible: false,
       fileList: [],
-      ruleForm: {
-        handleType: '1'
-      },
+      ruleForm: {},
       rules: {
-        deviceSit: [
+        installationArea: [
           { required: true, message: '请输入安装区域', trigger: 'blur' },
         ],
-        failType: [
+        faulttype: [
           { required: true, message: '请选择故障类型', trigger: 'change' },
         ],
-        maintainPerson: [
+        maintenance: [
           { required: true, message: '请选择维修人员', trigger: 'change' },
         ],
-        approvePerson: [
+        auditor: [
           { required: true, message: '请选择审批人员', trigger: 'change' },
         ],
-        failTime: [
+        faultTime: [
           { required: true, message: '请选择故障时间', trigger: 'change' },
         ],
-        photo: [
+        img: [
           { required: true, message: '请选择现场照片', trigger: 'change' },
         ],
-        endTime: [
+        lastTime: [
           { required: true, message: '请选择截止时间', trigger: 'change' },
         ],
-        useTime: [
+        predictTime: [
           { required: true, message: '请输入预计维修时间', trigger: 'blur' },
         ]
       },
@@ -218,7 +213,12 @@ export default {
   },
   mounted () {
     this.ruleForm = this.detailInfo
-    console.log('this.name', this.name)
+    this.ruleForm.faulttype = Number(this.ruleForm.faulttype)
+    this.ruleForm.maintenance = Number(this.ruleForm.maintenance)
+    this.ruleForm.auditor = Number(this.ruleForm.auditor)
+    this.ruleForm.installationArea = this.detailInfo.installationArea || '无'
+    console.log('this.detailInfo', this.detailInfo)
+    console.log('this.ruleForm', this.ruleForm)
     if (this.name === '维修') {
       this.disabledMaintain = true
     } else {
@@ -250,33 +250,26 @@ export default {
       this.saveDetailInfo({})
     },
     addCompany () {
-      let id = this.$route.query.id
+      let status
+      if (this.name === '维修') {
+        status = '3'
+      } else if (this.name === '审批') {
+        status = '2'
+      }
       let params = {
-        ...this.ruleForm,
-        deviceTypeId: id
+        id: this.detailInfo.id,
+        status: status,
       }
-      params.createTime = ''
-      params.updateTime = ''
-      if (params.seriesId) {
-        systemMirror.updateSeries(params).then(res => {
-          let { code, result, serviceMessage } = res.data
-          if (code === 200) {
-            this.$message.success(serviceMessage)
-            this.$emit('changeProjectBox', false)
-            this.saveDetailInfo({})
-          }
-        })
-      } else {
-        systemMirror.addSeriesType(params).then(res => {
-          let { code, result, serviceMessage } = res.data
-          if (code === 200) {
-            this.$message.success(serviceMessage)
-            this.$emit('changeProjectBox', false)
-            this.saveDetailInfo({})
-          }
-        })
-      }
-
+      console.log('this.detailInfo', this.detailInfo)
+      systemMirror.updateWord(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.$message.success(serviceMessage)
+          this.$emit('getList')
+          this.$emit('changeProjectBox', false)
+          this.saveDetailInfo({})
+        }
+      })
     }
   }
 }

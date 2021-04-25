@@ -25,7 +25,7 @@
       </div>
     </div>
     <div class="dz-system-table">
-      <div class="dz-system-table-add"><span @click="changeProjectBox(true)">新增</span></div>
+      <div class="dz-system-table-add"><span @click="showBox">新增</span></div>
       <myTable ref="myTable"
                :tableData="tableDataNew"
                :tableConfigArr='tableConfigArr'
@@ -194,6 +194,9 @@ export default {
         if (code === 200) {
           this.tableData = result.content
           this.total = result.recordTotal
+          const totalPage = Math.ceil((this.total - 1) / this.pageSize)
+          this.currentPage = this.currentPage > totalPage ? totalPage : this.currentPage
+          this.currentPage = this.currentPage < 1 ? 1 : this.currentPage
         }
         if (this.tableData && this.tableData.length > 0) {
           this.tableData.forEach((item, index) => {
@@ -234,6 +237,10 @@ export default {
     },
     handleSizeChange (val) {
       console.log(`每页 ${val} 条`);
+    },
+    showBox () {
+      this.saveDetailInfo({})
+      this.changeProjectBox(true)
     },
     handleCurrentChange (val) {
       console.log(`当前页: ${val}`);

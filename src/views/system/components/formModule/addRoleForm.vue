@@ -14,19 +14,19 @@
              label-width="100px"
              class="demo-ruleForm">
       <el-form-item label="角色名"
-                    prop="name">
-        <el-input v-model="ruleForm.name"
+                    prop="roleName">
+        <el-input v-model="ruleForm.roleName"
                   placeholder="请输入角色名"></el-input>
       </el-form-item>
 
       <el-form-item label="权限"
-                    prop='roleId'>
-        <el-select v-model="ruleForm.roleId"
+                    prop='permissionId'>
+        <el-select v-model="ruleForm.permissionId"
                    placeholder="请选择权限">
-          <el-option label="权限1"
-                     value="1"></el-option>
-          <el-option label="权限2"
-                     value="2"></el-option>
+          <el-option v-for="(item, index) in powerList"
+                     :key="index"
+                     :label="item.permissionName"
+                     :value="item.id"></el-option>
         </el-select>
       </el-form-item>
     </el-form>
@@ -39,84 +39,38 @@
 </template>
 <script>
 import { mapState, mapActions } from 'vuex'
-import systemMirror from '@/resource/systemMirror'
+import systemManageMirror from '@/resource/systemManageMirror'
 export default {
   data () {
-    var checkNum = (rule, value, callback) => {
-      if (!value) {
-        return callback(new Error('请输入客户编号'));
-      }
-      setTimeout(() => {
-        if (!Number.isInteger(value)) {
-          callback(new Error('请输入数字值'));
-        } else {
-          let valueString = value.toString()
-          if (valueString.length < 5) {
-            callback(new Error('客户编号必须是5位数字'));
-          } else {
-            callback();
-          }
-        }
-      }, 500);
-    };
-    var validatePass = (rule, value, callback) => {
-      if (value === '') {
-        callback(new Error('请输入密码'));
-      } else {
-        if (this.ruleForm.checkPass !== '') {
-          this.$refs.ruleForm.validateField('checkPass');
-        }
-        callback();
-      }
-    };
-    var validatePass2 = (rule, value, callback) => {
-      if (value === '') {
-        callback(new Error('请再次输入密码'));
-      } else if (value !== this.ruleForm.pass) {
-        callback(new Error('两次输入密码不一致!'));
-      } else {
-        callback();
-      }
-    };
     return {
       ruleForm: {
         status: '1',
         imageUrl: ''
       },
       rules: {
-        name: [
+        roleName: [
           { required: true, message: '请输入用户名称', trigger: 'blur' },
-          { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
         ],
-        roleId: [
+        permissionId: [
           { required: true, message: '请选择用户角色', trigger: 'change' },
         ],
-        phone: [
-          { required: true, message: '请输入用户手机号', trigger: 'blur' },
-        ],
-        pass: [
-          { required: true, validator: validatePass, trigger: 'blur' },
-        ],
-        checkPass: [
-          { required: true, validator: validatePass2, trigger: 'blur' },
-        ],
-        depart: [
-          { required: true, message: '请选择部门', trigger: 'change' },
-        ],
-        duty: [
-          { required: true, message: '请选择部门', trigger: 'change' },
-        ],
-        photo: [
-          { required: true, message: '请上传免冠照片', trigger: 'change' },
-        ]
       }
     };
+  },
+  computed: {
+    ...mapState({
+      powerList: state => state.system.powerList,
+      detailInfo: state => state.system.detailInfo,
+    })
+  },
+  mounted () {
+    this.ruleForm = this.detailInfo
   },
   methods: {
     submitForm () {
       this.$refs['ruleForm'].validate((valid) => {
         if (valid) {
-          this.addUser()
+          this.addRole()
         } else {
           console.log('error submit!!');
           return false;
@@ -128,32 +82,30 @@ export default {
       this.$emit('changeProjectBox', false)
       this.saveDetailInfo({})
     },
-    handleAvatarSuccess (res, file) {
-      this.imageUrl = URL.createObjectURL(file.raw);
-    },
-    beforeAvatarUpload (file) {
-      const isJPG = file.type === 'image/jpeg';
-      const isLt2M = file.size / 1024 / 1024 < 2;
-
-      if (!isJPG) {
-        this.$message.error('上传头像图片只能是 JPG 格式!');
-      }
-      if (!isLt2M) {
-        this.$message.error('上传头像图片大小不能超过 2MB!');
-      }
-      return isJPG && isLt2M;
-    },
-    addUser () {
+    addRole () {
       let params = {
         ...this.ruleForm,
       }
-      systemMirror.addUser(params).then(res => {
-        let { code, result, serviceMessage } = res.data
-        if (code === 200) {
-          this.$emit('changeProjectBox', false)
-          this.$message.success(serviceMessage)
-        }
-      })
+      if (this.ruleForm.id) {
+        systemManageMirror.updateRoleById(params).then(res => {
+          let { code, result, serviceMessage } = res.data
+          if (code === 200) {
+            this.$emit('changeProjectBox', false)
+            this.$emit('getList')
+            this.$message.success(serviceMessage)
+          }
+        })
+      } else {
+        systemManageMirror.addRole(params).then(res => {
+          let { code, result, serviceMessage } = res.data
+          if (code === 200) {
+            this.$emit('changeProjectBox', false)
+            this.$emit('getList')
+            this.$message.success(serviceMessage)
+          }
+        })
+      }
+
     },
   }
 }

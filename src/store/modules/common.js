@@ -48,6 +48,16 @@ const common = {
         type: 'stopBar'
       },
     ],
+    deviceStatus: [
+      {
+        name: '正常',
+        id: '1'
+      },
+      {
+        name: '异常',
+        id: '0'
+      },
+    ],
     projectType: [
       {
         name: '交通',
@@ -146,11 +156,11 @@ const common = {
         id: '3'
       },
       {
-        name: '刑侦案件',
+        name: '重点人员',
         id: '4'
       },
       {
-        name: '行政事件',
+        name: '失踪人口',
         id: '5'
       }
     ],
@@ -218,6 +228,34 @@ const common = {
       {
         name: '关闭',
         id: '4'
+      },
+    ],
+    wordStatusList: [
+      {
+        name: '待审批',
+        type: '1'
+      },
+      {
+        name: '待维修',
+        type: '2'
+      },
+      {
+        name: '待考评',
+        type: '3'
+      },
+      {
+        name: '已完成',
+        type: '4'
+      },
+    ],
+    companyStatus: [
+      {
+        name: '正常',
+        id: '1'
+      },
+      {
+        name: '禁用',
+        id: '0'
       },
     ]
   },

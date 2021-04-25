@@ -159,12 +159,6 @@ export default {
         },
         {
           fixed: false,
-          prop: 'statusLable',
-          label: '状态',
-          tooltip: false,
-        },
-        {
-          fixed: false,
           prop: 'createTime',
           label: '运行时间',
           tooltip: false,

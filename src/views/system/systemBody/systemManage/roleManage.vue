@@ -2,15 +2,17 @@
   <div class="dz-system">
     <div class="dz-system-title">角色管理</div>
     <div class="dz-system-table">
-      <div class="dz-system-table-add"><span @click="changeProjectBox(true)">新增</span></div>
+      <div class="dz-system-table-add"><span @click="addList('新增')">新增</span></div>
       <myTable ref="myTable"
-               :tableData="tableDataNew"
+               :tableData="tableData"
                :tableConfigArr='tableConfigArr'
                :selection="false"
                :action='actionList'
                :height='heightTable'
                :http='http'
                name='角色管理'
+               @deletList='deletList'
+               @getDetail='getDetail'
                @changeProjectBox='changeProjectBox'
                @getList='getList'
                @disebleTable='disebleTable'
@@ -32,6 +34,7 @@
             title='新增'>
       <slot slot='dialogMain'>
         <addRoleForm ref="addForm"
+                     @getList='getList'
                      @changeProjectBox='changeProjectBox'></addRoleForm>
       </slot>
     </addBox>
@@ -40,7 +43,7 @@
 <script>
 import addBox from '../../components/dialogModule/addDialogModule'
 import myTable from "@/components/Table";
-import systemMirror from '@/resource/systemMirror'
+import systemManageMirror from '@/resource/systemManageMirror'
 import { mapState, mapActions } from 'vuex'
 import timeReg from '@/utils/timeReg'
 import addRoleForm from '../../components/formModule/addRoleForm'
@@ -53,18 +56,16 @@ export default {
       tableConfigArr: [
         {
           fixed: false,
-          prop: 'name',
+          prop: 'roleName',
           label: '角色名',
         },
         {
           fixed: false,
-          prop: 'power',
+          prop: 'permissionName',
           label: '权限',
-        },
-
+        }
       ],
-      tableDataNew: [],
-      http: '/manage/user/getUserById?userId=',
+      http: '',
       ruleFormHeight: {},
       currentPage: 1,
       pageSize: 10,
@@ -81,13 +82,16 @@ export default {
           name: '删除',
           style: 'disable-button'
         }
-      ]
+      ],
+      dialogData: {}
     };
   },
   mounted () {
     this.getList()
+    this.getPowerList()
   },
   methods: {
+    ...mapActions(['savePowerList', 'saveDetailInfo']),
     submitForm (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
@@ -100,41 +104,67 @@ export default {
     },
     getList () {
       let params = {
-        seek: this.ruleForm.key,
         currentPage: this.currentPage,
         pageSize: this.pageSize,
       }
-      systemMirror.getUserList(params).then(res => {
+      systemManageMirror.getRolePermissionAll(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
-          this.tableDataNew = result.content
+          this.tableData = result.content
           this.total = result.recordTotal
+          const totalPage = Math.ceil((this.total - 1) / this.pageSize)
+          this.currentPage = this.currentPage > totalPage ? totalPage : this.currentPage
+          this.currentPage = this.currentPage < 1 ? 1 : this.currentPage
         }
-        this.tableDataNew.forEach((item, index) => {
-          item.createTime = timeReg.getNowFormatDate(item.createTime)
-          if (item.status === '1') {
-            item.statusName = '正常'
-          } else {
-            item.statusName = '已禁用'
-          }
-        })
       })
     },
-    disebleTable (row) {
+    addList (name) {
+      this.saveDetailInfo({})
+      this.changeProjectBox(true)
+    },
+    getPowerList () {
       let params = {
-        ...row,
+        currentPage: this.currentPage,
+        pageSize: this.pageSize,
       }
-      params.updateTime = ''
-      params.createTime = ''
-      if (params.status === '1') {
-        params.status = '2'
-      } else {
-        params.status = '1'
-      }
-      systemMirror.updateUser(params).then(res => {
+      systemManageMirror.getPowerPermissionAll(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
-          this.$message.success(serviceMessage)
+          this.savePowerList(result)
+          // this.total = result.recordTotal
+        }
+      })
+    },
+    getDetail (data) {
+      this.dialogData = Object.assign({}, data)
+      this.saveDetailInfo(this.dialogData)
+    },
+    disebleTable (row) {
+      // let params = {
+      //   ...row,
+      // }
+      // params.updateTime = ''
+      // params.createTime = ''
+      // if (params.status === '1') {
+      //   params.status = '2'
+      // } else {
+      //   params.status = '1'
+      // }
+      // systemManageMirror.updateUser(params).then(res => {
+      //   let { code, result, serviceMessage } = res.data
+      //   if (code === 200) {
+      //     this.$message.success(serviceMessage)
+      //     this.getList()
+      //   }
+      // })
+    },
+    deletList (id) {
+      let parmas = {
+        id: id
+      }
+      systemManageMirror.deleteRoleById(parmas).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
           this.getList()
         }
       })

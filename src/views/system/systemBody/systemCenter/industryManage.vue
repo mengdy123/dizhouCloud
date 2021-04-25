@@ -23,7 +23,7 @@
     </div>
 
     <div class="dz-system-table">
-      <div class="dz-system-table-add"><span @click="changeProjectBox(true)">新增</span></div>
+      <div class="dz-system-table-add"><span @click="showBox">新增</span></div>
       <myTable :tableData="tableData"
                :tableConfigArr='tableConfigArr'
                :selection="false"
@@ -150,6 +150,9 @@ export default {
         if (code === 200) {
           this.tableData = result.content
           this.total = result.recordTotal
+          const totalPage = Math.ceil((this.total - 1) / this.pageSize)
+          this.currentPage = this.currentPage > totalPage ? totalPage : this.currentPage
+          this.currentPage = this.currentPage < 1 ? 1 : this.currentPage
           this.tableData.forEach((item, index) => {
             item.createTime = timeReg.getNowFormatDate(item.createTime)
             if (item.show === '1') {
@@ -233,6 +236,10 @@ export default {
           this.getList()
         }
       })
+    },
+    showBox () {
+      this.saveDetailInfo({})
+      this.changeProjectBox(true)
     },
     handleSizeChange (val) {
       console.log(`每页 ${val} 条`);

@@ -63,4 +63,108 @@ export default {
         ...params
       }
     }),
+  /*
+  *   系统中心
+  *   角色管理
+  */
+  //  查询所有角色
+  getRoleAll: params =>
+    DutyMirror.get('/role/getRoleAll', {
+      params: {
+        ...params
+      }
+    }),
+  getRolePermissionAll: params =>
+    DutyMirror.get('/role/getRolePermissionAll', {
+      params: {
+        ...params
+      }
+    }),
+  // 获取角色权限
+  selectRolePermission: params =>
+    DutyMirror.get(`/role/selectRolePermission?id=${params}`, {
+    }),
+  // 添加角色
+  addRole: params =>
+    DutyMirror.post('/role/addRole', {
+      ...params
+    }),
+  // 修改角色
+  updateRoleById: params =>
+    DutyMirror.post('/role/updateRoleById', {
+      ...params
+    }),
+  // 删除角色
+  deleteRoleById: params =>
+    DutyMirror.post(`/role/deleteRoleById`, {
+      ...params
+    }),
+
+
+  /*
+  *   系统中心
+  *   角色管理
+  */
+  //  查询所有权限
+  getPowerPermissionAll: params =>
+    DutyMirror.get('/permission/getPermissionAll', {
+      params: {
+        ...params
+      }
+    }),
+  // 修改权限
+  updatePermissionById: params =>
+    DutyMirror.post('/permission/updatePermissionById', {
+      ...params
+    }),
+  // 获取权限信息
+  selectPermission: params =>
+    DutyMirror.get(`/permission/selectPermission?id=${params}`, {
+
+    }),
+  //  查询一个权限关联的菜单
+  getMenuByPermissionId: params =>
+    DutyMirror.get('/permission/getMenuByPermissionId', {
+      params: {
+        ...params
+      }
+    }),
+
+
+
+  /*
+*   系统中心
+*   用户管理
+*/
+  //  查询所有用户列表
+  getListBySeek: params =>
+    DutyMirror.get('/manage/user/getListBySeek', {
+      params: {
+        ...params
+      }
+    }),
+  //  新增用户
+  addUser: params =>
+    DutyMirror.post('/manage/user/addUser', {
+      ...params
+    }),
+
+  // 获取用户信息
+  getUserById: params =>
+    DutyMirror.get(`/manage/user/getUserById?userId=${params}`, {
+
+    }),
+  // 删除用户信息
+  deleteUser: params =>
+    DutyMirror.post(`/manage/user/deleteUser`, {
+      ...params
+    }),
+  // 修改用户信息
+  update: params =>
+    DutyMirror.post('/manage/user/update', {
+      ...params
+    }),
+
+
+
 }
