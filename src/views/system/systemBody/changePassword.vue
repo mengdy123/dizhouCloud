@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="width: 500px">
     <el-form :model="ruleForm"
              :rules="rules"
              ref="ruleForm"
@@ -7,30 +7,33 @@
              class="demo-ruleForm">
       <el-form-item label="原始密码"
                     prop="oldPass">
-        <el-input v-model.number="ruleForm.oldPass"></el-input>
+        <el-input v-model="ruleForm.oldPass"
+                  type="password"></el-input>
       </el-form-item>
-      <el-form-item label="密码"
+      <el-form-item label="新密码"
                     prop="pass">
         <el-input type="password"
                   v-model="ruleForm.pass"
                   autocomplete="off"></el-input>
       </el-form-item>
-      <el-form-item label="确认密码"
+      <!-- <el-form-item label="确认密码"
                     prop="checkPass">
         <el-input type="password"
                   v-model="ruleForm.checkPass"
                   autocomplete="off"></el-input>
-      </el-form-item>
+      </el-form-item> -->
 
       <el-form-item>
         <el-button type="primary"
-                   @click="submitForm('ruleForm')">提交</el-button>
-        <el-button @click="resetForm('ruleForm')">重置</el-button>
+                   @click="submitForm('ruleForm')">提 交</el-button>
+        <el-button @click="resetForm('ruleForm')">取 消</el-button>
       </el-form-item>
     </el-form>
   </div>
 </template>
 <script>
+import { mapState, mapActions } from 'vuex'
+import systemManageMirror from '@/resource/systemManageMirror'
 export default {
   data () {
     var validatePass = (rule, value, callback) => {
@@ -67,20 +70,38 @@ export default {
         ],
         oldPass: [
           { required: true, validator: validatePass, trigger: 'blur' }
-        ]
+        ],
+        userInfo: {}
       }
     };
   },
+
+  mounted () {
+    this.userInfo = JSON.parse(this.Cookie.get("userInfo"))
+  },
   methods: {
-    submitForm (formName) {
-      this.$refs[formName].validate((valid) => {
+    submitForm () {
+      this.$refs['ruleForm'].validate((valid) => {
         if (valid) {
-          alert('submit!');
+          this.updateUserPassword()
         } else {
           console.log('error submit!!');
           return false;
         }
       });
+    },
+    updateUserPassword () {
+      let params = {
+        id: this.userInfo.id,
+        oldUserPassword: String(this.ruleForm.oldPass),
+        newUserPassword: String('this.ruleForm.pass')
+      }
+      systemManageMirror.updateUserPassword(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.$message.success(serviceMessage)
+        }
+      })
     },
     resetForm (formName) {
       this.$refs[formName].resetFields();

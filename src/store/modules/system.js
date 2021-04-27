@@ -4,216 +4,216 @@ const system = {
     menuStatus: false,
     menuList: [
       {
-        name: "项目中心",
-        index: "project",
+        menuName: "项目中心",
+        text: "project",
         icon: "01",
         id: '1',
-        children: [
+        childrenMenu: [
           {
-            name: "项目管理",
-            index: "project-1",
+            menuName: "项目管理",
+            text: "project-1",
             icon: "el-icon-menu",
-            path: '/project',
+            url: '/project',
             id: '1.1',
             parentId: '1',
-            children: []
+            childrenMenu: []
           },
           {
-            name: "客户管理",
-            index: "project-2",
+            menuName: "客户管理",
+            text: "project-2",
             icon: "el-icon-menu",
-            path: '/clientManage',
+            url: '/clientManage',
             id: '1.2',
             parentId: '1',
-            children: []
+            childrenMenu: []
           },
           {
-            name: "行业管理",
-            index: "project-3",
+            menuName: "行业管理",
+            text: "project-3",
             icon: "el-icon-menu",
-            path: '/industryManage',
+            url: '/industryManage',
             id: '1.3',
             parentId: '1',
-            children: []
+            childrenMenu: []
           },
           {
-            name: "项目分布",
-            index: "project-4",
+            menuName: "项目分布",
+            text: "project-4",
             icon: "el-icon-menu",
-            path: '/distribute',
+            url: '/distribute',
             id: '1.4',
             parentId: '1',
-            children: []
+            childrenMenu: []
           },
         ]
       },
       {
-        name: "运维中心",
-        index: "operation",
+        menuName: "运维中心",
+        text: "operation",
         icon: "04",
         id: '2',
-        children: [
+        childrenMenu: [
           {
-            name: "设备运维",
-            index: "operation-1",
+            menuName: "设备运维",
+            text: "operation-1",
             icon: "el-icon-menu",
-            path: '',
+            url: '',
             id: '2.1',
             parentId: '2',
-            children: [
+            childrenMenu: [
               {
-                name: "设备管理",
-                index: "operation-1-1",
+                menuName: "设备管理",
+                text: "operation-1-1",
                 icon: "el-icon-menu",
-                path: '/setManage',
+                url: '/setManage',
                 id: '2.1.1',
                 parentId: '2.1',
-                children: []
+                childrenMenu: []
               },
               {
-                name: "故障类型管理",
-                index: "operation-1-2",
-                path: '/breakdownManage',
+                menuName: "故障类型管理",
+                text: "operation-1-2",
+                url: '/breakdownManage',
                 icon: "el-icon-menu",
                 id: '2.1.2',
                 parentId: '2.1',
-                children: []
+                childrenMenu: []
               },
             ]
           },
           {
-            name: "运维职责管理",
-            index: "operation-2",
-            path: '/maintainDutyManage',
+            menuName: "运维职责管理",
+            text: "operation-2",
+            url: '/maintainDutyManage',
             icon: "el-icon-menu",
             id: '2.2',
             parentId: '2',
-            children: []
+            childrenMenu: []
           },
           {
-            name: "工单管理",
-            index: "operation-3",
-            path: '/workOrderManage',
+            menuName: "工单管理",
+            text: "operation-3",
+            url: '/workOrderManage',
             icon: "el-icon-menu",
             id: '2.3',
             parentId: '2',
-            children: []
+            childrenMenu: []
           },
           {
-            name: "运维消息推送",
-            index: "operation-4",
+            menuName: "运维消息推送",
+            text: "operation-4",
             icon: "el-icon-menu",
             id: '2.4',
             parentId: '2',
-            path: '',
-            children: [
+            url: '',
+            childrenMenu: [
               {
-                name: "信息模板",
-                index: "operation-4-1",
+                menuName: "信息模板",
+                text: "operation-4-1",
                 icon: "el-icon-menu",
-                path: '/informationTemplate',
+                url: '/informationTemplate',
                 id: '2.4.1',
                 parentId: '2.4',
-                children: []
+                childrenMenu: []
               },
               {
-                name: "历史信息",
-                index: "operation-4-2",
-                path: '/informationHistory',
+                menuName: "历史信息",
+                text: "operation-4-2",
+                url: '/informationHistory',
                 icon: "el-icon-menu",
                 id: '2.4.2',
                 parentId: '2.4',
-                children: []
+                childrenMenu: []
               },
             ]
           },
           {
-            name: "运维日志管理",
-            index: "operation-5",
-            path: '/logsManage',
+            menuName: "运维日志管理",
+            text: "operation-5",
+            url: '/logsManage',
             icon: "el-icon-menu",
             id: '2.5',
             parentId: '2',
-            children: []
+            childrenMenu: []
           },
           {
-            name: "满意度考评",
-            index: "operation-6",
+            menuName: "满意度考评",
+            text: "operation-6",
             icon: "el-icon-menu",
-            path: '/evaluation',
+            url: '/evaluation',
             id: '2.6',
             parentId: '2',
-            children: []
+            childrenMenu: []
           }
         ]
       },
       {
-        name: "产品中心",
-        index: "product",
+        menuName: "产品中心",
+        text: "product",
         icon: "02",
         id: '3',
-        children: [
+        childrenMenu: [
           {
-            name: "智能设备",
-            index: "product-1",
+            menuName: "智能设备",
+            text: "product-1",
             icon: "el-icon-menu",
-            path: '/smartSet',
+            url: '/smartSet',
             id: '3.1',
             parentId: '3',
-            children: []
+            childrenMenu: []
           },
           {
-            name: "智能系统",
-            index: "product-2",
+            menuName: "智能系统",
+            text: "product-2",
             icon: "el-icon-menu",
-            path: '/smartSystem',
+            url: '/smartSystem',
             id: '3.2',
             parentId: '3',
-            children: []
+            childrenMenu: []
           }
         ]
       },
       {
-        name: "系统中心",
-        index: "system",
+        menuName: "系统中心",
+        text: "system",
         icon: "03",
         id: '4',
-        children: [
+        childrenMenu: [
           {
-            name: "部门管理",
-            index: "system-4",
-            path: '/departManage',
+            menuName: "部门管理",
+            text: "system-4",
+            url: '/departManage',
             icon: "el-icon-menu",
             id: '4.1',
             parentId: '4',
-            children: []
+            childrenMenu: []
           },
           {
-            name: "用户管理",
-            index: "system-1",
+            menuName: "用户管理",
+            text: "system-1",
             icon: "el-icon-menu",
-            path: '/userManage',
+            url: '/userManage',
             id: '4.2',
             parentId: '4',
-            children: []
+            childrenMenu: []
           },
           {
-            name: "角色管理",
-            index: "system-2",
-            path: '/roleManage',
+            menuName: "角色管理",
+            text: "system-2",
+            url: '/roleManage',
             icon: "el-icon-menu",
             id: '4.3',
             parentId: '4',
-            children: []
+            childrenMenu: []
           },
           {
-            name: "权限管理",
-            index: "system-3",
+            menuName: "权限管理",
+            text: "system-3",
             id: '4.4',
             parentId: '4',
-            path: '/powerManage',
+            url: '/powerManage',
             icon: "el-icon-menu",
-            children: []
+            childrenMenu: []
           },
 
         ]

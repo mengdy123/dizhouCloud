@@ -13,7 +13,7 @@
         <li><span>设备类型：</span>{{projectInfoData.row.deviceType || '暂无数据'}}</li>
         <li><span>设备编号：</span>{{projectInfoData.row.deviceCode || '暂无数据'}}</li>
         <li><span>设备地址：</span>{{projectInfoData.row.deivceSite || '暂无数据'}}</li>
-        <li><span>维修进度：</span>{{projectInfoData.row.plan || '进行中'}}</li>
+        <li><span>维修进度：</span>{{projectInfoData.row.status || '暂无数据'}}</li>
       </ul>
       <div class="project-box-info-close"
            @click="closeInfoBox">

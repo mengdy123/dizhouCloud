@@ -36,6 +36,7 @@
 </template>
 <script>
 import sourceMirror from '@/resource/sourceMirror'
+import { mapActions } from 'vuex';
 export default {
   name: "login",
   data () {
@@ -79,7 +80,6 @@ export default {
           let params = this.ruleForm
           this.login(params)
         } else {
-          console.log('error submit!!');
           return false;
         }
       });
@@ -88,6 +88,10 @@ export default {
       sourceMirror.login(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
+          //存
+          this.Cookie.set("userInfo", result);
+          //取
+          // this.Cookie.get("a");
           this.$router.push('mainIndex')
         } else {
           this.$message.error(serviceMessage)

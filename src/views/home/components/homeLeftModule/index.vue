@@ -2,13 +2,15 @@
   <div class="dz-left-module">
     <div class="dz-left-module-row progect-div">
       <titleDiv title='项目分布'></titleDiv>
-      <pieChartBg :value='projectPlan'></pieChartBg>
+      <pieChartBg :value='projectPlan'
+                  class="pie-chart-dom"></pieChartBg>
     </div>
-    <div class="dz-left-module-row progect-div">
+    <div class="dz-left-module-row progect-all">
       <titleDiv title='项目总数'></titleDiv>
       <pieChart4 :color='colorPie2'
                  :value='valuePie2'
                  :type='"project"'
+                 class="pie-chart-dom"
                  ref="pieChartProject"></pieChart4>
       <div class="chart-pie-center"
            @click="getAllPoint('project')">{{totalPie2}}</div>
@@ -20,6 +22,7 @@
                  :labelShow='true'
                  :legendShow='true'
                  :type='"system"'
+                 class="pie-chart-dom"
                  ref="pieChartSystem"></pieChart4>
       <div class="chart-pie-center"
            @click="getAllPoint('system')">{{totalPie3}}</div>
@@ -30,6 +33,7 @@
                    :type='"equipment"'
                    :color='colors'
                    :center='center'
+                   class="pie-chart-dom"
                    ref="pieChartEquipment"></randarChart>
       <div class="chart-randar-center"
            @click="getAllPoint('equipment')">{{randarTotal}}</div>
@@ -203,6 +207,9 @@ export default {
 </script>
 <style lang="less" scoped>
 @import "../../../../style/color.less";
+.pie-chart-dom {
+  margin-top: 10px;
+}
 .dz-left-module {
   width: 100%;
   height: 100%;
@@ -215,9 +222,14 @@ export default {
     display: flex;
     flex-direction: column;
     width: 100%;
+    margin-bottom: 10px;
   }
   .progect-div {
-    height: 20%;
+    height: 240px;
+    position: relative;
+  }
+  .progect-all {
+    height: 220px;
     position: relative;
   }
   .chart-pie-center {
@@ -235,14 +247,14 @@ export default {
     cursor: pointer;
   }
   .chart-div {
-    height: 30%;
+    height: 360px;
     position: relative;
     .chart-pie-center {
-      top: 35%;
+      top: 100px;
     }
   }
   .system-div {
-    height: 30%;
+    height: 380px;
     position: relative;
   }
 

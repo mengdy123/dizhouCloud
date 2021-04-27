@@ -251,9 +251,10 @@ export default {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
           this.total = result.recordTotal
-          const totalPage = Math.ceil((this.total - 1) / this.pageSize)
-          this.currentPage = this.currentPage > totalPage ? totalPage : this.currentPage
-          this.currentPage = this.currentPage < 1 ? 1 : this.currentPage
+          if (this.total > 0 && this.tableData.length === 0 && this.currentPage > 1) {
+            this.currentPage = this.currentPage - 1
+            this.getList()
+          }
           // console.log('this.currentPage', this.currentPage)
 
           this.tableData = result.content
@@ -273,7 +274,6 @@ export default {
           })
         })
         console.log('this.tableData111', this.tableData)
-
       })
     },
     disebleTable (row) {

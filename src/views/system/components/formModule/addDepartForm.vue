@@ -13,7 +13,7 @@
              ref="ruleForm"
              label-width="100px"
              class="demo-ruleForm">
-      <!-- <el-form-item label="类型"
+      <el-form-item label="类型"
                     prop="type"
                     v-if="!editStatus">
         <el-select v-model="ruleForm.type"
@@ -24,7 +24,7 @@
                      :value="item.value">
           </el-option>
         </el-select>
-      </el-form-item> -->
+      </el-form-item>
       <el-form-item label="名称"
                     prop="name">
         <el-input placeholder="输入名称"
@@ -117,7 +117,7 @@ export default {
         params = {
           name: this.ruleForm.name,
           parentId: this.detailInfo.id,
-          // level: this.ruleForm.type,
+          level: this.ruleForm.type,
           seq: 1,
           remark: ""
         }

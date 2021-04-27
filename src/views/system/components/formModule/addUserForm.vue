@@ -64,24 +64,36 @@
                   autocomplete="off"
                   placeholder="请输入确认密码"></el-input>
       </el-form-item> -->
-      <!-- prop="departmentId" -->
-      <el-form-item label="部门">
-        <el-select v-model="ruleForm.departmentId"
-                   placeholder="请选择部门">
-          <el-option label="销售部"
-                     value="1"></el-option>
-          <el-option label="研发部"
-                     value="2"></el-option>
+      <el-form-item label="组织架构"
+                    prop="orgId">
+        <el-select v-model="ruleForm.orgId"
+                   placeholder="请选择组织架构"
+                   @change="changeOrgId">
+          <el-option v-for="item in orgList"
+                     :key="item.id"
+                     :label="item.name"
+                     :value="item.id"></el-option>
         </el-select>
       </el-form-item>
-      <!-- prop="jobId" -->
-      <el-form-item label="职务">
+      <el-form-item label="部门"
+                    prop="departmentId">
+        <el-select v-model="ruleForm.departmentId"
+                   placeholder="请选择部门"
+                   @change="changeDeparmentId">
+          <el-option v-for="item in departmentArr"
+                     :key="item.id"
+                     :label="item.name"
+                     :value="item.id"></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="职务"
+                    prop="jobId">
         <el-select v-model="ruleForm.jobId"
                    placeholder="请选择职务">
-          <el-option label="员工"
-                     value="1"></el-option>
-          <el-option label="经理"
-                     value="2"></el-option>
+          <el-option v-for="item in jobArr"
+                     :key="item.id"
+                     :label="item.name"
+                     :value="item.id"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="用户角色"
@@ -191,6 +203,9 @@ export default {
         checkPass: [
           { required: true, validator: validatePass2, trigger: 'blur' },
         ],
+        orgId: [
+          { required: true, message: '请选择组织架构', trigger: 'change' },
+        ],
         departmentId: [
           { required: true, message: '请选择部门', trigger: 'change' },
         ],
@@ -201,7 +216,10 @@ export default {
         //   { required: true, message: '请上传免冠照片', trigger: 'change' },
         // ]
       },
-      companyInfo: {}
+      companyInfo: {},
+      orgList: [],
+      departmentArr: [],
+      jobArr: []
     };
   },
   computed: {
@@ -211,12 +229,79 @@ export default {
     })
   },
   mounted () {
+    this.getDepartmentAll()
   },
   methods: {
     ...mapActions(['saveDetailInfo', 'changeEditStatus']),
     changeCompanyInfo (val) {
       console.log('companyInfo', val)
       this.companyInfo = val
+    },
+    //组织架构树
+    getDepartmentAll () {
+      let params = {}
+      systemManageMirror.getDepartmentAll(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.orgList = result
+        }
+      })
+    },
+    changeOrgId (val) {
+      this.getDepartmentsByOrganizationId(val)
+    },
+    // 获取组织架构下的部门
+    getDepartmentsByOrganizationId (id) {
+      let parmas = {
+        id: id
+      }
+      systemManageMirror.getDepartmentsByOrganizationId(parmas).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.departmentArr = result
+        }
+      })
+    },
+    changeDeparmentId (val) {
+      this.getJobs(val)
+    },
+    // 获取部门的职务
+    getJobs (id) {
+      let parmas = {
+        id: id
+      }
+      systemManageMirror.getJobs(parmas).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.jobArr = result
+        }
+      })
+    },
+    recursionItem (item) {
+      // 一层一层往下面执行，循环，直到不满足情况的条件下，会自动跳出这个递归方法，然后又到上面方法的源头处，开始执行下一个对象。。。
+      if (item.childrenDepartment && item.childrenDepartment.length > 0) {
+        item.childrenDepartment = item.childrenDepartment
+        item.id = item.id
+        item.level = item.level
+        item.name = item.name
+        item.parentId = item.parentId
+        item.remark = item.remark
+        item.seq = item.seq
+        // 因为三级联动的数据格式是value和label,所以需要自己手动添加，没有的忽略。
+        item.childrenDepartment.forEach(ff => {
+          // 这里就是判断他的children下面还有没有值，有的话我就要往下挖，就又开始自己调用自己了
+          this.recursionItem(ff)
+        })
+      } else {
+        // 这里就是判断，如果我这一层的children下面没有东西的时候该做什么操作 
+        item.childrenDepartment = item.childrenDepartment
+        item.id = item.id
+        item.level = item.level
+        item.name = item.name
+        item.parentId = item.parentId
+        item.remark = item.remark
+        item.seq = item.seq // 要添加value和label,否则会看不到标签名字和值
+      }
     },
     submitForm () {
       this.$refs['ruleForm'].validate((valid) => {

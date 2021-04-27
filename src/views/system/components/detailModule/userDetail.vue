@@ -30,13 +30,48 @@
               </el-col>
             </el-row>
           </el-form-item>
-          <el-form-item label="用户姓名">
+          <el-form-item label="账号">
             <el-input v-model="form.userName"
-                      :disabled="isDisabled"></el-input>
+                      disabled></el-input>
           </el-form-item>
           <el-form-item label="真实姓名">
             <el-input v-model="form.name"
                       :disabled="isDisabled"></el-input>
+          </el-form-item>
+          <el-form-item label="组织架构">
+            <el-select v-model="form.orgId"
+                       placeholder="请选择组织架构"
+                       @change="changeOrgId"
+                       :disabled="isDisabled"
+                       style="width: 314px">
+              <el-option v-for="item in orgList"
+                         :key="item.id"
+                         :label="item.name"
+                         :value="item.id"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="部门">
+            <el-select v-model="form.departmentName"
+                       placeholder="请选择部门"
+                       @change="changeDeparmentId"
+                       :disabled="isDisabled"
+                       style="width: 314px">
+              <el-option v-for="item in departmentArr"
+                         :key="item.id"
+                         :label="item.name"
+                         :value="item.id"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="职务">
+            <el-select v-model="form.jobName"
+                       placeholder="请选择职务"
+                       :disabled="isDisabled"
+                       style="width: 314px">
+              <el-option v-for="item in jobArr"
+                         :key="item.id"
+                         :label="item.name"
+                         :value="item.id"></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="用户角色">
             <el-input v-model="form.roleName"
@@ -49,7 +84,8 @@
           <el-form-item label="账号状态">
             <el-select v-model="form.status"
                        placeholder="请选择设备状态"
-                       :disabled="isDisabled">
+                       :disabled="isDisabled"
+                       style="width: 314px">
               <el-option label="正常"
                          value="1"></el-option>
               <el-option label="异常"
@@ -208,6 +244,10 @@ export default {
         },
       ],
       isDisabled: true,
+      companyInfo: {},
+      orgList: [],
+      departmentArr: [],
+      jobArr: []
     }
   },
   watch: {
@@ -234,11 +274,16 @@ export default {
     this.isDisabled = !this.editStatus
     this.form = this.detailInfo
     this.form.createTime = timeReg.getNowFormatDate(this.form.createTime)
+    this.getDepartmentAll()
   },
   methods: {
     ...mapActions(['saveDetailInfo', 'changeEditStatus']),
     resetUpdateDetail () {
       this.changeEditStatus(false)
+    },
+    changeCompanyInfo (val) {
+      console.log('companyInfo', val)
+      this.companyInfo = val
     },
     editDetail () {
       this.changeEditStatus(true)
@@ -253,6 +298,46 @@ export default {
           this.form = result
           this.saveDetailInfo(result)
           this.form.createTime = timeReg.getNowFormatDate(this.form.createTime)
+        }
+      })
+    },
+    //组织架构树
+    getDepartmentAll () {
+      let params = {}
+      systemManageMirror.getDepartmentAll(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.orgList = result
+        }
+      })
+    },
+    changeOrgId (val) {
+      this.getDepartmentsByOrganizationId(val)
+    },
+    // 获取组织架构下的部门
+    getDepartmentsByOrganizationId (id) {
+      let parmas = {
+        id: id
+      }
+      systemManageMirror.getDepartmentsByOrganizationId(parmas).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.departmentArr = result
+        }
+      })
+    },
+    changeDeparmentId (val) {
+      this.getJobs(val)
+    },
+    // 获取部门的职务
+    getJobs (id) {
+      let parmas = {
+        id: id
+      }
+      systemManageMirror.getJobs(parmas).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.jobArr = result
         }
       })
     },
@@ -276,6 +361,7 @@ export default {
 </script>
 <style lang="less" scoped>
 .detail-module {
+  overflow-y: scroll;
   &-row {
     margin-top: 30px;
   }

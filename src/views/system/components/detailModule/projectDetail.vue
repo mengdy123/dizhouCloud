@@ -41,7 +41,8 @@
           <el-form-item label="项目类型">
             <el-select v-model="form.projectType"
                        placeholder="请选择项目类型"
-                       :disabled="isDisabled">
+                       :disabled="isDisabled"
+                       style="width: 314px">
               <el-option v-for="item in projectType"
                          :label="item.name"
                          :key="item.id"
@@ -75,7 +76,8 @@
           <el-form-item label="项目状态">
             <el-select v-model="form.status"
                        placeholder="请选择项目状态"
-                       :disabled="isDisabled">
+                       :disabled="isDisabled"
+                       style="width: 314px">
               <el-option v-for="item in projectStatus"
                          :label="item.name"
                          :key="item.id"
@@ -379,9 +381,10 @@ export default {
         params.updateTime = ''
         console.log('ruleForm', params)
         systemMirror.updateProject(params).then(res => {
-          console.log('updateDetail', res.data)
+          // console.log('updateDetail', res.data)
           let { code, result, serviceMessage } = res.data
           if (code === 200) {
+            this.changeEditStatus(false)
             this.$message.success(serviceMessage)
             // this.goBack()
           }

@@ -6,6 +6,8 @@ import home from './modules/home'
 import common from './modules/common'
 import system from './modules/system'
 import weather from './modules/weather'
+import operation from './modules/operationList'
+
 
 
 import { getCookie } from '../utils/cookie.js'
@@ -19,6 +21,7 @@ export default new Vuex.Store({
     home,
     common,
     system,
-    weather
+    weather,
+    operation
   },
 })

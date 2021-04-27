@@ -80,7 +80,12 @@ export default {
         {
           fixed: false,
           prop: 'userName',
-          label: '用户名',
+          label: '账号',
+        },
+        {
+          fixed: false,
+          prop: 'name',
+          label: '真实姓名',
         },
         {
           fixed: false,
@@ -157,12 +162,12 @@ export default {
       systemManageMirror.getListBySeek(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
-          const totalPage = Math.ceil((this.total - 1) / this.pageSize)
-          this.currentPage = this.currentPage > totalPage ? totalPage : this.currentPage
-          this.currentPage = this.currentPage < 1 ? 1 : this.currentPage
-
           this.tableDataNew = result.content
           this.total = result.recordTotal
+          if (this.total > 0 && this.tableData.length === 0 && this.currentPage > 1) {
+            this.currentPage = this.currentPage - 1
+            this.getList()
+          }
         }
         this.tableDataNew.forEach((item, index) => {
           item.createTime = timeReg.getNowFormatDate(item.createTime)

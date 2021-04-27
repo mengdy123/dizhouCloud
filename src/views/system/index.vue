@@ -28,7 +28,7 @@
           <el-dropdown>
             <!-- <span>超级管理员</span> -->
             <span class="el-dropdown-link">
-              超级管理员<i class="el-icon-arrow-down el-icon--right"></i>
+              {{userInfo.userName || 'null'}}<i class="el-icon-arrow-down el-icon--right"></i>
             </span>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item @click.native="toPath('/information')">个人中心</el-dropdown-item>
@@ -63,6 +63,7 @@ export default {
     return {
       versionsLogsStatus: false,
       direction: 'rtl',
+      userInfo: {}
     }
   },
   created () {
@@ -72,6 +73,10 @@ export default {
     ...mapState({
       menuStatus: state => state.system.menuStatus,
     })
+  },
+  mounted () {
+    this.userInfo = JSON.parse(this.Cookie.get("userInfo"))
+    // console.log('this.userInfo', this.userInfo)
   },
   methods: {
     ...mapActions(['saveProjectList', 'saveSystemList', 'saveCompanyList', 'saveFailTypeList', 'saveRoleList', 'saveDeviceTypeList']),
@@ -138,6 +143,9 @@ export default {
       console.log('dropdown', path)
       this.$router.push(path)
     }
+  },
+  beforeDestroy () {
+    this.Cookie.set('defaultActive', '')
   }
 
 }
@@ -192,7 +200,7 @@ export default {
   }
   .small-menu {
     width: 240px;
-    overflow-y: scroll;
+    // overflow-y: scroll;
   }
   .big-menu {
     width: 64px;

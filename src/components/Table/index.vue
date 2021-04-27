@@ -13,7 +13,7 @@
       <!-- 展开行 -->
       <el-table-column v-if="expand"
                        type="expand">
-        <template slot-scope="scope">
+        <template>
           <div class="row-main"
                :data-rowData="rowData">
             <ul v-for="(item, index) in rowData"
@@ -87,7 +87,7 @@
                        v-if="name !== '客户管理' && name !=='故障类型管理' 
                        && name !=='运维职责管理' && name !=='历史信息' && name !=='满意度考评'  && name !=='权限配置' && name !=='行业管理'
                        && name !=='项目分布' && name !=='智能设备' && name !=='智能系统' && name !=='角色管理'">
-        <template scope="scope">
+        <template slot-scope="scope">
           <span v-if="scope.row.statusLable == '正常' || scope.row.statusLable == '待审批' "
                 style="color: #518EEA">{{ scope.row.statusLable }}</span>
           <span v-else-if="scope.row.statusLable == '待维修' || scope.row.statusLable == '维修'"
@@ -421,7 +421,20 @@ export default {
     },
     // 修改色值
     changeColor (row) {
-      this.$emit('changeColor', row)
+      let parmas = {}
+      if (row.color !== null) {
+        parmas = {
+          ...row,
+        }
+        this.$emit('changeColor', parmas)
+      } else {
+        row.show = false
+        row.color = ''
+        parmas = {
+          ...row,
+        }
+        this.$emit('changeColor', parmas)
+      }
     },
     viewScreen () {
       this.$router.push('/sceneIndex')
@@ -479,9 +492,7 @@ export default {
             console.log(error)
           })
       } else {
-        if (this.name === '满意度考评') {
-          this.$emit('updateInfo', row)
-        }
+
       }
     },
     toPath (data) {
@@ -530,5 +541,8 @@ export default {
 }
 .table-button-list {
   display: flex;
+}
+/deep/ .el-color-picker__trigger {
+  border: 0;
 }
 </style>

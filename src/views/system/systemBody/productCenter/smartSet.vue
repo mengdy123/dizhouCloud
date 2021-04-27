@@ -165,6 +165,10 @@ export default {
         if (code === 200) {
           this.tableDataNew = result.content
           this.total = result.recordTotal
+          if (this.total > 0 && this.tableData.length === 0 && this.currentPage > 1) {
+            this.currentPage = this.currentPage - 1
+            this.getList()
+          }
         }
         this.tableDataNew.forEach((item, index) => {
           item.createTime = timeReg.getNowFormatDate(item.createTime)

@@ -129,6 +129,25 @@ export default {
         ...params
       }
     }),
+  //  获取某个组织架构下的所有部门
+  getDepartmentsByOrganizationId: params =>
+    DutyMirror.get('/department/getDepartmentsByOrganizationId', {
+      params: {
+        ...params
+      }
+    }),
+  //  获取该部门的职务(传入的id为部门的id)
+  getJobs: params =>
+    DutyMirror.get('/department/getJobs', {
+      params: {
+        ...params
+      }
+    }),
+  // 配置权限
+  addPermissionmenu: params =>
+    DutyMirror.post('/permission/addPermissionmenu', {
+      ...params
+    }),
 
 
 
@@ -162,6 +181,12 @@ export default {
   // 修改用户信息
   update: params =>
     DutyMirror.post('/manage/user/update', {
+      ...params
+    }),
+
+  // 修改密码
+  updateUserPassword: params =>
+    DutyMirror.post('/user/updateUserPassword', {
       ...params
     }),
 

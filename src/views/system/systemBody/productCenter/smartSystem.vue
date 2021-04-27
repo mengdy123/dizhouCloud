@@ -39,8 +39,11 @@
                :showIndex='true'
                :showColors='true'
                name='智能系统'
+               @deletList='deletList'
                @getList='getList'
                @disebleTable='disebleTable'
+               @changeColor='changeColor'
+               @selectChangeShow='selectChangeShow'
                :index='true'></myTable>
     </div>
     <div class="dz-system-pagination">
@@ -59,6 +62,7 @@
             title='新增'>
       <slot slot='dialogMain'>
         <addSystemForm ref="addForm"
+                       @getList='getList'
                        @changeProjectBox='changeProjectBox'>
         </addSystemForm>
       </slot>
@@ -173,6 +177,7 @@ export default {
     this.getList()
   },
   methods: {
+    ...mapActions(['saveDetailInfo']),
     submitForm (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
@@ -194,9 +199,10 @@ export default {
         if (code === 200) {
           this.tableData = result.content
           this.total = result.recordTotal
-          const totalPage = Math.ceil((this.total - 1) / this.pageSize)
-          this.currentPage = this.currentPage > totalPage ? totalPage : this.currentPage
-          this.currentPage = this.currentPage < 1 ? 1 : this.currentPage
+          if (this.total > 0 && this.tableData.length === 0 && this.currentPage > 1) {
+            this.currentPage = this.currentPage - 1
+            this.getList()
+          }
         }
         if (this.tableData && this.tableData.length > 0) {
           this.tableData.forEach((item, index) => {
@@ -206,6 +212,11 @@ export default {
                 item.projectTypeLable = it.name
               }
             })
+            if (item.show === '1') {
+              item.show = true
+            } else {
+              item.show = false
+            }
             this.systemType.forEach(it => {
               if (item.systemType && item.systemType === it.id) {
                 item.systemTypeLable = it.name
@@ -238,6 +249,17 @@ export default {
     handleSizeChange (val) {
       console.log(`每页 ${val} 条`);
     },
+    deletList (id) {
+      let params = {
+        systemTypeId: id
+      }
+      systemMirror.deleteSysType(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.getList()
+        }
+      })
+    },
     showBox () {
       this.saveDetailInfo({})
       this.changeProjectBox(true)
@@ -248,6 +270,46 @@ export default {
     },
     changeProjectBox (status) {
       this.addProjectStatus = status
+    },
+    // 是否显示
+    selectChangeShow (row) {
+      if (!row.color) {
+        this.$message.error('请先设置显示的色值')
+        row.show = '0'
+        return false
+      }
+      this.editDetail(row)
+    },
+    //修改色值
+    changeColor (row) {
+      this.editDetail(row)
+    },
+    // 修改详情
+    editDetail (row) {
+      let show
+      if (row.show) {
+        show = '1'
+      } else {
+        show = '0'
+      }
+      let params = {
+        areaName: row.areaName,
+        color: row.color,
+        show: show,
+        id: row.id
+      }
+      console.log('row.show', row.show)
+      console.log('show', show)
+      console.log('params', params)
+      params.createTime = ''
+      params.updateTime = ''
+      systemMirror.updateSysType(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.$message.success(serviceMessage)
+          this.getList()
+        }
+      })
     },
   },
 }

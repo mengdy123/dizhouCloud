@@ -136,6 +136,13 @@ export default {
     DutyMirror.post('/manage/system/updateSysType', {
       ...params
     }),
+  // 删除 系统
+  deleteSysType: params =>
+    DutyMirror.post('/manage/system/deleteSysType', {
+      ...params
+    }),
+
+
 
 
 
@@ -444,5 +451,26 @@ export default {
         ...params
       }
     }),
+  /*
+  * 根据型号分页查询设备列表
+  */
+  getDeviceByVer: params =>
+    DutyMirror.get(`/manage/device/getDeviceByVer`, {
+      params: {
+        ...params
+      }
+    }),
+
+  /*
+  * 根据设备id分页查询维修日志列表
+  */
+  getListByDeviceId: params =>
+    DutyMirror.get(`/manage/log/getListByDeviceId`, {
+      params: {
+        ...params
+      }
+    }),
+
+
 
 }

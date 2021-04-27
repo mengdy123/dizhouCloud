@@ -120,7 +120,7 @@ export default {
   padding: 2px 0;
 }
 /deep/ .el-table thead {
-  color: #ffffff;
-  opacity: 0.5;
+  color: #e1e6fa;
+  opacity: 0.8;
 }
 </style>

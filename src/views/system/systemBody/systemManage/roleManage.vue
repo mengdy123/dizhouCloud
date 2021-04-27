@@ -69,7 +69,7 @@ export default {
       ruleFormHeight: {},
       currentPage: 1,
       pageSize: 10,
-      total: 1000,
+      total: 0,
       addProjectStatus: false,
       heightTable: 'calc(100vh - 402px)',
       heightStatus: false,
@@ -88,10 +88,10 @@ export default {
   },
   mounted () {
     this.getList()
-    this.getPowerList()
+
   },
   methods: {
-    ...mapActions(['savePowerList', 'saveDetailInfo']),
+    ...mapActions(['saveDetailInfo']),
     submitForm (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
@@ -110,11 +110,12 @@ export default {
       systemManageMirror.getRolePermissionAll(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
-          this.tableData = result.content
           this.total = result.recordTotal
-          const totalPage = Math.ceil((this.total - 1) / this.pageSize)
-          this.currentPage = this.currentPage > totalPage ? totalPage : this.currentPage
-          this.currentPage = this.currentPage < 1 ? 1 : this.currentPage
+          this.tableData = result.content
+          if (this.total > 0 && this.tableData.length === 0 && this.currentPage > 1) {
+            this.currentPage = this.currentPage - 1
+            this.getList()
+          }
         }
       })
     },
@@ -122,41 +123,13 @@ export default {
       this.saveDetailInfo({})
       this.changeProjectBox(true)
     },
-    getPowerList () {
-      let params = {
-        currentPage: this.currentPage,
-        pageSize: this.pageSize,
-      }
-      systemManageMirror.getPowerPermissionAll(params).then(res => {
-        let { code, result, serviceMessage } = res.data
-        if (code === 200) {
-          this.savePowerList(result)
-          // this.total = result.recordTotal
-        }
-      })
-    },
+
     getDetail (data) {
       this.dialogData = Object.assign({}, data)
       this.saveDetailInfo(this.dialogData)
     },
     disebleTable (row) {
-      // let params = {
-      //   ...row,
-      // }
-      // params.updateTime = ''
-      // params.createTime = ''
-      // if (params.status === '1') {
-      //   params.status = '2'
-      // } else {
-      //   params.status = '1'
-      // }
-      // systemManageMirror.updateUser(params).then(res => {
-      //   let { code, result, serviceMessage } = res.data
-      //   if (code === 200) {
-      //     this.$message.success(serviceMessage)
-      //     this.getList()
-      //   }
-      // })
+
     },
     deletList (id) {
       let parmas = {

@@ -1,12 +1,6 @@
 <template>
   <div class="dz-system">
-    <div class="dz-system-title back-span"
-         v-if="detailStatus"
-         @click="goBack">{{title}}</div>
-    <div class="dz-system-title"
-         v-if="!detailStatus">{{title}}</div>
-    <!-- <el-page-header @back="goBack">
-    </el-page-header> -->
+    <div class="dz-system-title">{{title}}</div>
     <div class="dz-system-module">
       <ul v-for="(item, index) in evaluationTypeNew"
           :key="index">
@@ -34,33 +28,14 @@
         </li>
       </ul>
     </div>
-    <div class="dz-system-title"
-         v-if="!detailStatus">团队成员</div>
-    <div class="dz-system-table"
-         v-if="!detailStatus">
+    <div class="dz-system-title">团队成员</div>
+    <div class="dz-system-table">
       <myTable :tableData="tableData"
                :tableConfigArr='tableConfigArr'
                :selection="false"
                :action='actionList'
                :height='heightTable'
                :http='http'
-               :detail='false'
-               name='满意度考评'
-               @updateInfo='updateInfo'
-               @getList='getProgectList'
-               :index='true'></myTable>
-    </div>
-    <div class="dz-system-title"
-         v-if="detailStatus">维修记录</div>
-    <div class="dz-system-table"
-         v-if="detailStatus">
-      <myTable :tableData="tableData2"
-               :tableConfigArr='tableConfigArr2'
-               :selection="false"
-               :action='actionList2'
-               height='250px'
-               http=''
-               :detail='false'
                name='满意度考评'
                @updateInfo='updateInfo'
                @getList='getProgectList'
@@ -164,10 +139,6 @@ export default {
         {
           name: '详情',
           style: 'view-screen'
-        },
-        {
-          name: '删除',
-          style: 'disable-button'
         },
       ],
       evaluationType: [

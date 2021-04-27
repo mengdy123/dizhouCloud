@@ -13,7 +13,6 @@
                :indexWidth='"300%"'
                :action='actionList'
                :index='true'
-               @changeProjectBox='changePowerBox'
                @getDetail='getDetail'
                @changePowerMenuBox='changePowerMenuBox'></myTable>
     </div>
@@ -37,17 +36,6 @@
                           @changeProjectBox='changePowerMenuBox'></addPowerMenuForm>
       </slot>
     </addBox>
-    <!-- <addBox v-if="addPowerStatus"
-            name='权限配置'
-            @getList='getList'
-            @changeProjectBox='changePowerBox'
-            title='修改'>
-      <slot slot='dialogMain'>
-        <addPowerForm ref="addForm"
-                      @getList='getList'
-                      @changeProjectBox='changePowerBox'></addPowerForm>
-      </slot>
-    </addBox> -->
   </div>
 </template>
 <script>
@@ -108,9 +96,8 @@ export default {
       ],
       currentPage: 1,
       pageSize: 10,
-      total: 1000,
+      total: 0,
       addProjectStatus: false,
-      addPowerStatus: false,
       heightTable: 'calc(100vh - 402px)',
       actionList: [
         {
@@ -134,6 +121,7 @@ export default {
 
   mounted () {
     this.getList()
+
   },
   methods: {
     ...mapActions(['saveDetailInfo']),
@@ -150,9 +138,10 @@ export default {
         if (code === 200) {
           this.tableData = result.content
           this.total = result.recordTotal
-          const totalPage = Math.ceil((this.total - 1) / this.pageSize)
-          this.currentPage = this.currentPage > totalPage ? totalPage : this.currentPage
-          this.currentPage = this.currentPage < 1 ? 1 : this.currentPage
+          if (this.total > 0 && this.tableData.length === 0 && this.currentPage > 1) {
+            this.currentPage = this.currentPage - 1
+            this.getList()
+          }
         }
       })
     },
@@ -160,6 +149,7 @@ export default {
       this.dialogData = Object.assign({}, data)
       this.saveDetailInfo(this.dialogData)
     },
+
     submitForm (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
@@ -182,10 +172,6 @@ export default {
     changePowerMenuBox (status) {
       this.addProjectStatus = status
     },
-    changePowerBox (status) {
-      this.addPowerStatus = status
-    },
-
   },
 }
 </script>

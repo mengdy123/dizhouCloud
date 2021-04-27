@@ -6,7 +6,7 @@
         <el-button type="primary"
                    @click="addOrganization">新增组织架构</el-button>
       </div>
-      <div v-if="treeData.length > 0">
+      <div>
         <div class="tree-list"
              v-for="(item, index) in treeData"
              :key="index">
@@ -19,23 +19,6 @@
       </div>
 
     </div>
-    <!-- 删除提示弹框 -->
-    <!-- <el-dialog title="提示"
-               :visible.sync="dialogVisible2"
-               width="30%">
-      <div class="tips">
-        <p style="text-align: left">确定删除该股东信息?</p>
-      </div>
-      <span slot="footer"
-            class="dialog-footer">
-        <div class="tip-left">
-          <el-button type="info"
-                     @click="dialogVisible2=false">取消</el-button>
-          <el-button type="primary"
-                     @click="confimdelete">确定</el-button>
-        </div>
-      </span>
-    </el-dialog> -->
     <addBox v-if="dialogVisible"
             name='部门管理'
             @getList='getDepartmentAll'

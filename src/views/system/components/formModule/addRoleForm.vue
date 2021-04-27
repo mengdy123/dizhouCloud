@@ -54,19 +54,22 @@ export default {
         permissionId: [
           { required: true, message: '请选择用户角色', trigger: 'change' },
         ],
-      }
+      },
+      powerList: []
     };
   },
   computed: {
     ...mapState({
-      powerList: state => state.system.powerList,
+      // powerList: state => state.system.powerList,
       detailInfo: state => state.system.detailInfo,
     })
   },
   mounted () {
     this.ruleForm = this.detailInfo
+    this.getPowerList()
   },
   methods: {
+    ...mapActions(['savePowerList']),
     submitForm () {
       this.$refs['ruleForm'].validate((valid) => {
         if (valid) {
@@ -76,6 +79,18 @@ export default {
           return false;
         }
       });
+    },
+    getPowerList () {
+      let params = {
+        currentPage: 1,
+        pageSize: 100000,
+      }
+      systemManageMirror.getPowerPermissionAll(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.powerList = result.content
+        }
+      })
     },
     handleClose () {
       this.$refs['ruleForm'].resetFields();

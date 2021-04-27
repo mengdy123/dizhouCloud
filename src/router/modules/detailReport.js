@@ -109,6 +109,18 @@ export default [
       }
     }]
   },
+  {
+    path: '/evaluationDetail',
+    name: 'evaluationDetail',
+    component: systemLayout,
+    children: [{
+      path: '/',
+      title: '满意度考评个人的详情',
+      component: resolve => {
+        require(['../../views/system/components/detailModule/evaluationDetail.vue'], resolve)
+      }
+    }]
+  },
 
 
 ]

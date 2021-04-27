@@ -41,7 +41,7 @@
                     prop="auditor">
         <el-select v-model="ruleForm.auditor"
                    filterable
-                   placeholder="请选择维修人员">
+                   placeholder="请选择审批人员">
           <el-option v-for="item in approvePersonList"
                      :key="item.name"
                      :label="item.name"
@@ -136,6 +136,7 @@ export default {
           { required: true, message: '请输入预计维修时间', trigger: 'blur' },
         ]
       },
+      approvePersonList: []
     };
   },
   computed: {
@@ -143,11 +144,12 @@ export default {
       detailInfo: state => state.system.detailInfo,
       failTypeList: state => state.system.failTypeList,
       maintainPersonList: state => state.system.maintainPersonList,
-      approvePersonList: state => state.system.approvePersonList,
     })
   },
   mounted () {
     this.ruleForm = this.detailInfo
+    this.getAuditor()
+    console.log('approvePersonList', this.approvePersonList)
   },
   methods: {
     ...mapActions(['saveDetailInfo']),
@@ -160,6 +162,16 @@ export default {
           return false;
         }
       });
+    },
+    //获取审核人列表
+    getAuditor () {
+      let id = this.detailInfo.deviceId
+      systemMirror.getAuditor(id).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.approvePersonList = result
+        }
+      })
     },
     handleRemove (file, fileList) {
       console.log(file, fileList);
@@ -184,7 +196,6 @@ export default {
         deviceId: this.detailInfo.deviceId,
         deviceType: this.detailInfo.deviceType,
       }
-      // console.log('params', params)
       systemMirror.reported(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {

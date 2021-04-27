@@ -6,6 +6,7 @@ import Interceptor, {
 const common = {
   state: {
     // homeIndexInfo: {},
+    // 设备类型
     deviceType: [
       {
         name: '发光标线',
@@ -48,6 +49,7 @@ const common = {
         type: 'stopBar'
       },
     ],
+    // 设备状态
     deviceStatus: [
       {
         name: '正常',
@@ -58,6 +60,7 @@ const common = {
         id: '0'
       },
     ],
+    // 项目类型
     projectType: [
       {
         name: '交通',
@@ -88,6 +91,7 @@ const common = {
         id: '7'
       }
     ],
+    // 系统类型
     systemType: [
       {
         name: '过街系统',
@@ -142,6 +146,7 @@ const common = {
         id: '13'
       }
     ],
+    // 告警类型
     warningType: [
       {
         name: '设备故障',
@@ -164,6 +169,7 @@ const common = {
         id: '5'
       }
     ],
+    // 井盖类型
     wellTypeList: [
       {
         type: '1',
@@ -194,6 +200,7 @@ const common = {
         name: '燃气'
       }
     ],
+    // 停车类型
     parkTypeList: [
       {
         name: '全部',
@@ -212,6 +219,7 @@ const common = {
         type: '4'
       }
     ],
+    // 项目状态
     projectStatus: [
       {
         name: '在建',
@@ -230,6 +238,7 @@ const common = {
         id: '4'
       },
     ],
+    // 工单状态状态
     wordStatusList: [
       {
         name: '待审批',
@@ -248,6 +257,7 @@ const common = {
         type: '4'
       },
     ],
+    // 客户状态
     companyStatus: [
       {
         name: '正常',
@@ -257,7 +267,18 @@ const common = {
         name: '禁用',
         id: '0'
       },
-    ]
+    ],
+    // 维修方式
+    repairModeList: [
+      {
+        name: '更换',
+        type: '1'
+      },
+      {
+        name: '维修',
+        type: '2'
+      }
+    ],
   },
   actions: {
     // this.$store.dispatch('getHomeIndexInfo')

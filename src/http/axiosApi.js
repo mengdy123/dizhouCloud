@@ -104,8 +104,8 @@ switch (process.env.NODE_ENV) {
     FILE_URL = ''
     break
   default:
-    DUTY_URL = 'http://192.168.124.43:8080/'
-    // DUTY_URL = 'http://106.15.77.69:8080/'
+    // DUTY_URL = 'http://192.168.124.43:8080/'
+    DUTY_URL = 'http://106.15.77.69:8080/'
     GIS_URL = '' // 四维
     FILE_URL = ''
     break

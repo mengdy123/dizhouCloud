@@ -48,12 +48,11 @@
             </el-select>
           </el-form-item>
         </el-form>
-        <div class="button-list">
-          <el-button type="primary"
-                     @click="submitForm('ruleForm')">搜索</el-button>
-        </div>
       </div>
-
+      <div class="dz-system-table log-module">
+        <logsDiv :activities='logList'
+                 type='运维日志'></logsDiv>
+      </div>
     </div>
   </div>
 </template>
@@ -63,14 +62,16 @@ import { mapState, mapActions } from 'vuex'
 import timeReg from '@/utils/timeReg'
 import myTable from "@/components/Table";
 import addBreakdown from '../../components/formModule/addBreakdown'
+import logsDiv from '@/components/Logs'
 export default {
-  components: { myTable, addBreakdown },
+  components: { myTable, addBreakdown, logsDiv },
   data () {
     return {
       ruleForm: {},
       seriesList: [],
       modelList: [],
-      deviceList: []
+      deviceList: [],
+      logList: [],
     };
   },
   computed: {
@@ -78,6 +79,8 @@ export default {
       projectType: state => state.common.projectType,
       projectStatus: state => state.common.projectStatus,
       deviceTypeList: state => state.system.deviceTypeList,
+      failTypeList: state => state.system.failTypeList,
+      repairModeList: state => state.common.repairModeList
     })
   },
   mounted () {
@@ -85,24 +88,33 @@ export default {
   },
   methods: {
     ...mapActions(['saveDeviceTypeList']),
+    formatFailKey (arr, key) {
+      let name
+      if (arr.length) {
+        arr.forEach(item => {
+          if (item.faultId == key) {
+            name = item.faultName
+          }
+        })
+      }
+      return name
+    },
     changeDeviceByType (type, val) {
       console.log(val);
       console.log(type);
       let name = type
       switch (name) {
         case 'type':
-          console.log('1111')
           this.getSeriesList(val)
           break;
         case 'series':
           this.getModelList(val)
-          console.log('2222')
           break;
         case 'model':
-          console.log('3333')
+          this.getDeviceByVer(val)
           break;
         case 'code':
-          console.log('4444 ')
+          this.getListByDeviceId(val)
           break;
 
       }
@@ -117,6 +129,7 @@ export default {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
           this.saveDeviceTypeList(result.content)
+          console.log('获取设备类型', result.content)
         }
       })
     },
@@ -127,30 +140,66 @@ export default {
         currentPage: 1,
         pageSize: 10000,
       }
+      this.seriesList = []
       systemMirror.getListBySeries(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
           this.seriesList = result.content
-          // console.log('result.content', result.content)
+          console.log('获取设备系列列表', result.content)
         }
       })
     },
     //获取设备型号
     getModelList (id) {
-      console.log('id', id)
+      // console.log('id', id)
       let params = {
         seriesId: id,
         currentPage: 1,
         pageSize: 10000,
       }
+      this.modelList = []
       systemMirror.getListByVer(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
-          // this.$nextTick(() => {
           this.modelList = result.content
-          console.log('result', result.content)
-          // })
-
+          console.log('获取设备型号', result.content)
+        }
+      })
+    },
+    // 获取设备编号
+    getDeviceByVer (id) {
+      let params = {
+        versiontype: id,
+        currentPage: 1,
+        pageSize: 10000,
+      }
+      this.deviceList = []
+      systemMirror.getDeviceByVer(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.deviceList = result.content
+          console.log('获取设备编号', result.content)
+        }
+      })
+    },
+    //查询设备日志列表
+    getListByDeviceId (id) {
+      let params = {
+        deviceId: id,
+        currentPage: 1,
+        pageSize: 10000,
+      }
+      this.logList = []
+      systemMirror.getListByDeviceId(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.logList = result.content
+          if (this.logList.length) {
+            this.logList.forEach(item => {
+              item.faultName = this.formatFailKey(this.failTypeList, item.faulttype)
+            })
+          }
+          // console.log('查询设备日志列表', result.content)
         }
       })
     },
@@ -171,4 +220,8 @@ export default {
 }
 </script>
 <style lang="less" scoped>
+.log-module {
+  height: calc(100vh - 260px);
+  overflow-y: scroll;
+}
 </style>

@@ -21,6 +21,10 @@ export default {
         return []
       }
     },
+    type: {
+      type: Number,
+      default: 0
+    }
   },
   mounted () {
     this.initChart()
@@ -44,11 +48,17 @@ export default {
           trigger: 'item',
           formatter: function (value) {
             let tootipData = null
-            if (value.data.type === '1') {
-              tootipData = `车位总数: ${value.data.sum || 0}<br/>已用/空余: ${value.data.use || 0}/${value.data.unoccupied || 0}<br/>使用率：${value.data.value || 0}%`
+            if (_this.type === 0) {
+              if (value.data.type === '1') {
+                tootipData = `车位总数: ${value.data.sum || 0}<br/>已用/空余: ${value.data.use || 0}/${value.data.unoccupied || 0}<br/>使用率：${value.data.value || 0}%`
+              } else {
+                tootipData = `已用/空余: ${value.data.use || 0}/${value.data.unoccupied || 0}<br/> 使用率：${value.data.sumZb || 0}%`
+              }
             } else {
-              tootipData = `已用/空余: ${value.data.use || 0}/${value.data.unoccupied || 0}<br/> 使用率：${value.data.sumZb || 0}%`
+              console.log('value', value)
+              tootipData = `${value.name}` + `${value.percent}%`
             }
+
             return tootipData
           },
           backgroundColor: 'rgba(0,0,0,0.9)',//背景颜色（此时为默认色）

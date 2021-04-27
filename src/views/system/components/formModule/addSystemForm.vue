@@ -108,6 +108,7 @@ export default {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
           this.$emit('changeProjectBox', false)
+          this.$emit('getList')
           this.$message.success(serviceMessage)
         }
       })

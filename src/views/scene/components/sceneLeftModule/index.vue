@@ -48,7 +48,7 @@
                         @changeResource='changeResource'></changeTitleDiv>
         <div class="retract-content">
           <div class="change-chart-time">
-            <div class="title-span">车位使用实时占比</div>
+            <div class="title-span">{{resourceTypeTitle}}</div>
             <div>
             </div>
           </div>
@@ -63,7 +63,8 @@
           <pieChart7 class="flow-chart-div2"
                      ref="parkChart"
                      :value='parkData'
-                     :valuePer='parkDataPer'></pieChart7>
+                     :valuePer='parkDataPer'
+                     :type='resourceSelected'></pieChart7>
         </div>
       </div>
       <div class="flow-div-content2">
@@ -166,6 +167,7 @@ export default {
           type: 'well'
         }
       ],
+      resourceTypeTitle: '车位使用实时占比',
       resourceSelected: 0,
       parkList: [],
       parkList1: [
@@ -430,6 +432,8 @@ export default {
         this.parkData = []
         this.parkList = this.wellTypeList
         this.chartTitle = '有毒气体浓度'
+        this.resourceTypeTitle = '有毒气体监测占比'
+        this.parkTitle = ['有毒气体浓度']
         let params = {
           projectId: id,
           time: this.resourceSelectedTime,
@@ -444,6 +448,8 @@ export default {
         this.parkData = []
         this.parkList = this.parkList1
         this.getCarParkInfo('1')
+        this.resourceTypeTitle = '车位使用实时占比'
+        this.parkTitle = ['已用车位', '空闲车位']
       }
     },
     // 资源分类 type

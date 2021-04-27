@@ -22,9 +22,10 @@
       </div>
     </div>
     <div class="button-list">
-      <el-button @click="closeMapBpx">取 消</el-button>
       <el-button type="primary"
                  @click="saveMapInfo">确 定</el-button>
+      <el-button @click="closeMapBpx">取 消</el-button>
+
     </div>
   </div>
 </template>

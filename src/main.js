@@ -14,6 +14,10 @@ import * as THREE from "three";
 import store from './store'
 import IconSvg from '@/components/Icon'
 import './style/common.less'
+//导入
+import cookie from "js-cookie"
+//将cookie转换为 vue 原型
+Vue.prototype.Cookie = cookie
 Vue.prototype.$eventBus = new Vue()
 Vue.component('icon-svg', IconSvg)
 Vue.use(THREE)

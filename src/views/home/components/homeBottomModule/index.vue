@@ -27,8 +27,6 @@
                 <li>设备类型：{{item.deviceType || '暂无数据'}}</li>
                 <li>设备编号：{{item.deviceCode || '暂无数据'}}</li>
                 <li>设备地址：{{item.deivceSite || '暂无数据'}}</li>
-                <li>维修进度：进行中</li>
-                <!-- {{item.schedule || '暂无数据'}} -->
               </ul>
             </div>
           </el-carousel-item>
@@ -96,6 +94,7 @@ export default {
     ...mapState({
       homeIndexInfo: state => state.home.homeIndexInfo,
       deviceType: state => state.common.deviceType,
+      projectStatus: state => state.common.projectStatus,
     })
   },
   watch: {
@@ -255,15 +254,21 @@ export default {
       margin: 30px 20px;
     }
     ul {
+      width: 100%;
       li {
         color: #e1e6fa;
         font-size: 14px;
         opacity: 0.7;
+        width: 100%;
       }
       li:first-child {
         color: #ffa321;
         opacity: 1;
       }
+      // li:last-child {
+      //   text-overflow: ellipsis;
+      //   overflow: hidden;
+      // }
     }
   }
   /deep/ .el-carousel__indicators--horizontal {

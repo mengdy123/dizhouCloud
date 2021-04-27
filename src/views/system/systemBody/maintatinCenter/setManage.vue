@@ -18,6 +18,7 @@
           </el-form-item>
         </el-form>
         <div class="button-list">
+          <el-button @click="resetList">重置</el-button>
           <el-button @click="heightSearch">{{heightStatus ? '关闭高级' : '高级'}}搜索</el-button>
           <el-button type="primary"
                      @click="submitForm('ruleForm')">搜索</el-button>
@@ -185,9 +186,14 @@ export default {
     this.getFailTypeList()
   },
   methods: {
-    ...mapActions(['saveDetailInfo', 'saveMaintainPersonList', 'saveApprovePersonList', 'saveFailTypeList']),
+    ...mapActions(['saveDetailInfo', 'saveMaintainPersonList', 'saveFailTypeList']),
     handleClick (row) {
       console.log(row);
+    },
+    resetList () {
+      this.ruleForm = {}
+      this.ruleFormHeight = {}
+      this.getProgectList()
     },
     submitForm (formName) {
       this.$refs[formName].validate((valid) => {
@@ -258,17 +264,6 @@ export default {
         }
       })
     },
-    //获取审核人列表
-    getAuditor () {
-      console.log('this.dialogData', this.dialogData)
-      let id = this.dialogData.deviceId
-      systemMirror.getAuditor(id).then(res => {
-        let { code, result, serviceMessage } = res.data
-        if (code === 200) {
-          this.saveApprovePersonList(result)
-        }
-      })
-    },
     getProgectList () {
       let startTime, endTime
       if (this.ruleFormHeight.time) {
@@ -292,9 +287,10 @@ export default {
         if (code === 200) {
           this.tableData = result.content
           this.total = result.recordTotal
-          const totalPage = Math.ceil((this.total - 1) / this.pageSize)
-          this.currentPage = this.currentPage > totalPage ? totalPage : this.currentPage
-          this.currentPage = this.currentPage < 1 ? 1 : this.currentPage
+          if (this.total > 0 && this.tableData.length === 0 && this.currentPage > 1) {
+            this.currentPage = this.currentPage - 1
+            this.getList()
+          }
         }
         this.tableData.forEach((item, index) => {
           item.statusLable = this.formatKey(this.deviceStatus, item.status)
@@ -332,8 +328,9 @@ export default {
     },
     heightSearch () {
       if (!this.heightStatus) {
-        this.heightTable = 'calc(100vh - 498px)'
+        this.heightTable = 'calc(100vh - 548px)'
       } else {
+        this.ruleFormHeight = {}
         this.heightTable = 'calc(100vh - 402px)'
       }
       this.heightStatus = !this.heightStatus
