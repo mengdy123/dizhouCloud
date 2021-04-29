@@ -18,8 +18,8 @@
           </el-form-item>
         </el-form>
         <div class="button-list">
-          <el-button @click="resetList">重置</el-button>
-          <el-button @click="heightSearch">{{heightStatus ? '关闭高级' : '高级'}}搜索</el-button>
+          <!-- <el-button @click="resetList">重置</el-button> -->
+          <!-- <el-button @click="heightSearch">{{heightStatus ? '关闭高级' : '高级'}}搜索</el-button> -->
           <el-button type="primary"
                      @click="submitForm('ruleForm')">搜索</el-button>
         </div>

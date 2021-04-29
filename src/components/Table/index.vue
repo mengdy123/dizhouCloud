@@ -504,6 +504,7 @@ export default {
 <style lang="less" scoped>
 .dz-table-module {
   height: 100%;
+  min-width: 800px;
   /deep/ label {
     margin-bottom: 0;
   }
@@ -544,5 +545,12 @@ export default {
 }
 /deep/ .el-color-picker__trigger {
   border: 0;
+  height: 16px;
+  width: 16px;
+  padding: 0;
+  margin-top: 6px;
+}
+/deep/ .el-color-picker {
+  height: 22px;
 }
 </style>

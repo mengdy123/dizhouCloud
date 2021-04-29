@@ -7,24 +7,25 @@
         <el-form :model="ruleForm"
                  ref="ruleForm"
                  label-width="100px">
-          <el-form-item>
-            <span class="label-key">关键字</span>
-            <!-- 设备编号， 系统名称、项目名称、项目编号，设备安装区域、设备安装位置（位置编号）、维修人员、审核人员-->
-            <el-input v-model="ruleForm.key"
+          <!-- <el-form-item> -->
+          <!-- <span class="label-key">关键字</span> -->
+          <!-- 设备编号， 系统名称、项目名称、项目编号，设备安装区域、设备安装位置（位置编号）、维修人员、审核人员-->
+          <!-- <el-input v-model="ruleForm.key"
                       style="width: 260px"
                       placeholder="请输入关键字"
                       clearable></el-input>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item label="项目名称"
                         prop="industry">
-            <el-select v-model="ruleFormHeight.projectType"
+            <el-select v-model="ruleFormHeight.projectId"
                        placeholder="请选择项目名称"
                        style="width: 260px"
-                       clearable>
-              <el-option v-for="item in setTypeList"
-                         :label="item.label"
-                         :key="item.value"
-                         :value="item.label"></el-option>
+                       clearable
+                       @change="changeProject">
+              <el-option v-for="item in projectList"
+                         :label="item.projectName"
+                         :key="item.projectId"
+                         :value="item.projectId"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="配置模式"
@@ -40,7 +41,7 @@
                          :value="item.value"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item>
+          <!-- <el-form-item>
             <el-select v-model="ruleFormHeight.type"
                        :placeholder="placeholderInfo"
                        style="width: 160px"
@@ -50,230 +51,53 @@
                          :key="item.value"
                          :value="item.value"></el-option>
             </el-select>
-          </el-form-item>
+          </el-form-item> -->
         </el-form>
         <div class="button-list">
           <el-button type="primary"
                      @click="submitForm('ruleForm')">搜索</el-button>
           <el-button type="primary"
-                     @click="maintainFun('level')">维修级别</el-button>
-          <el-button type="primary"
-                     @click="maintainFun('person')">维修人员</el-button>
+                     @click="maintainFun('level')">维修参数配置</el-button>
+          <!-- <el-button type="primary"
+                     @click="maintainFun('person')">维修人员</el-button> -->
         </div>
       </div>
     </div>
     <div class="dz-system-table">
-      <myTable :tableData="tableDataNew"
-               :tableConfigArr='tableConfigArr'
-               :selection="true"
-               :action='actionList'
-               :height='heightTable'
-               :expand='true'
-               :detail='false'
-               name='运维职责管理'
-               @getList='getProgectList'
-               :index='true'>
-        <slot slot='rowMain'>
-          <div class="row-main">
-            <myTable :tableData="tableDataNew"
-                     :tableConfigArr='tableConfigArr'
-                     :selection="true"
-                     :action='actionList'
-                     :height='heightTable'
-                     :expand='true'
-                     :detail='false'
-                     name='运维职责管理'
-                     @getList='getProgectList'
-                     :index='true'>
-            </myTable>
-          </div>
-        </slot>
-      </myTable>
+      <cascaderTable ref="cascaderTable"
+                     :projectId='projectId'></cascaderTable>
     </div>
-    <div class="dz-system-pagination">
-      <el-pagination @size-change="handleSizeChange"
-                     @current-change="handleCurrentChange"
-                     :current-page.sync="currentPage"
-                     :page-size="pageSize"
-                     layout="total, prev, pager, next"
-                     :total="total">
-      </el-pagination>
-    </div>
+    <addBox v-if="addProjectStatus"
+            name='维修参数配置'
+            @getList='getProgectList'
+            :treeInfo='treeInfo'
+            @changeProjectBox='changeProjectBox'
+            title='维修参数配置'>
+      <slot slot='dialogMain'>
+        <maintenanceSet ref="addForm"
+                        :treeInfo='treeInfo'
+                        @getList='getProgectList'
+                        @changeProjectBox='changeProjectBox'>
+        </maintenanceSet>
+      </slot>
+    </addBox>
+
   </div>
 </template>
 <script>
 import systemMirror from '@/resource/systemMirror'
 import { mapState, mapActions } from 'vuex'
 import timeReg from '@/utils/timeReg'
-import myTable from "@/components/Table";
+import cascaderTable from "@/components/Table/cascaderTable";
+import addBox from '../../components/dialogModule/addDialogModule'
+import maintenanceSet from '../../components/formModule/maintenanceSet'
 export default {
-  components: { myTable },
+  components: { cascaderTable, addBox, maintenanceSet },
   data () {
     return {
       ruleForm: {},
       ruleFormHeight: {},
-      tableData: [],
-      tableConfigArr: [
-        {
-          fixed: false,
-          prop: 'id',
-          label: '设备类型编号',
-          tooltip: false,
-        },
-        {
-          fixed: false,
-          prop: 'deviceTypeName',
-          label: '设备类型',
-          tooltip: false,
-        },
-        {
-          fixed: false,
-          prop: 'deviceNumber',
-          label: '设备数量',
-          tooltip: false,
-        },
-      ],
-      tableConfigArr2: [],
-      tableConfigArr3: [
-      ],
-      tableConfigArr4: [
-        {
-          fixed: false,
-          prop: 'id',
-          label: '设备编号',
-          tooltip: true,
-        },
-        {
-          fixed: false,
-          prop: 'deviceType',
-          label: '设备型号',
-          tooltip: true,
-        },
-        {
-          fixed: false,
-          prop: 'name',
-          label: '设备系列',
-          tooltip: true,
-        },
-        {
-          fixed: false,
-          prop: 'deviceType',
-          label: '设备类型',
-          tooltip: true,
-        },
-        {
-          fixed: false,
-          prop: 'deviceNumber',
-          label: '系统名称',
-          tooltip: true,
-        },
-        {
-          fixed: false,
-          prop: 'deviceType',
-          label: '项目名称',
-          tooltip: true,
-        },
-        {
-          fixed: false,
-          prop: 'deviceNumber',
-          label: '项目编号',
-          tooltip: true,
-        },
-        {
-          fixed: false,
-          prop: 'deviceType',
-          width: '160px',
-          label: '设备安装区域',
-          tooltip: true,
-        },
-        {
-          fixed: false,
-          prop: 'deviceNumber',
-          width: '160px',
-          label: '设备安装位置',
-          tooltip: true,
-        },
-        {
-          fixed: false,
-          prop: 'deviceType',
-          label: '维护级别',
-          tooltip: true,
-        },
-        {
-          fixed: false,
-          prop: 'deviceType',
-          label: '维修人员',
-          tooltip: true,
-        },
-        {
-          fixed: false,
-          prop: 'deviceType',
-          width: '160px',
-          label: '维修人员联系方式',
-          tooltip: true,
-        },
-        {
-          fixed: false,
-          prop: 'deviceType',
-          label: '审核人员',
-          tooltip: true,
-        },
-        {
-          fixed: false,
-          width: '160px',
-          prop: 'deviceType',
-          label: '审核人员联系方式',
-          tooltip: true,
-        },
-      ],
-      tableDataNew: [
-        {
-          id: '12987122',
-          name: '好滋好味鸡蛋仔1',
-          category: '江浙小吃、小吃零食',
-          desc: '荷兰优质淡奶，奶香浓而不腻',
-          address: '上海市普陀区真北路',
-          shop: '王小虎夫妻店',
-          shopId: '10333'
-        }, {
-          id: '12987123',
-          name: '好滋好味鸡蛋仔2',
-          category: '江浙小吃、小吃零食',
-          desc: '荷兰优质淡奶，奶香浓而不腻',
-          address: '上海市普陀区真北路',
-          shop: '王小虎夫妻店',
-          shopId: '10333'
-        }, {
-          id: '12987125',
-          name: '好滋好味鸡蛋仔3',
-          category: '江浙小吃、小吃零食',
-          desc: '荷兰优质淡奶，奶香浓而不腻',
-          address: '上海市普陀区真北路',
-          shop: '王小虎夫妻店',
-          shopId: '10333'
-        }, {
-          id: '12987126',
-          name: '好滋好味鸡蛋仔4',
-          category: '江浙小吃、小吃零食',
-          desc: '荷兰优质淡奶，奶香浓而不腻',
-          address: '上海市普陀区真北路',
-          shop: '王小虎夫妻店',
-          shopId: '10333'
-        }
-      ],
-      currentPage: 1,
-      pageSize: 10,
-      total: 1000,
-      addProjectStatus: false,
-      heightStatus: false,
-      heightTable: 'calc(100vh - 402px)',
-      http: '',
-      actionList: [
-        {
-          name: '编辑',
-          style: 'view-screen'
-        },
-      ],
+      projectList: [],
       setTypeList: [
         {
           label: '系统',
@@ -288,7 +112,10 @@ export default {
           value: '3'
         }
       ],
-      placeholderInfo: ''
+      placeholderInfo: '',
+      projectId: '1',
+      addProjectStatus: false,
+      treeInfo: {}
     };
   },
   computed: {
@@ -298,17 +125,26 @@ export default {
     })
   },
   mounted () {
-    // this.getProgectList()
+    this.getProgectList()
   },
   methods: {
-    handleClick (row) {
-      console.log(row);
+    ...mapActions(['saveDetailInfo']),
+    changeProject (data) {
+      this.projectId = String(data)
+    },
+    changeProjectBox (status) {
+      this.addProjectStatus = status
     },
     //搜索按钮
     submitForm (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          this.getProgectList()
+          let params = {
+            // this.ruleFormHeight.projectId
+            projectId: '1',
+            type: this.ruleFormHeight.setType
+          }
+          this.$refs.cascaderTable.getListByProjectId(params)
         } else {
           console.log('error submit!!');
           return false;
@@ -332,69 +168,46 @@ export default {
     },
     //设置 维修人员  维修级别
     maintainFun (type) {
-      switch (type) {
-        case 'level':
-          //设置 维修级别
-          break
-        case 'person':
-          //设置 维修人员
-          break
+      let data = this.$refs.cascaderTable.resourceIntegration()
+      if (!this.ruleFormHeight.projectId) {
+        this.$message.warning('请选择项目')
+      } else if (!this.ruleFormHeight.projectId) {
+        this.$message.warning('请选择项目配置模式')
+      } else if (data.systemIdList && data.systemIdList.length === 0) {
+        this.$message.warning('请先配置项目设备')
+      } else {
+        this.saveDetailInfo({})
+        data.type = this.ruleFormHeight.setType
+        // data.level = '' // 设备级别
+        // data.maintenance = ''
+        // data.auditor = ''
+        console.log('data', data)
+        this.treeInfo = data
+        this.changeProjectBox(true)
       }
+
+      // switch (type) {
+      //   case 'level':
+      //     //设置 维修级别
+      //     break
+      //   case 'person':
+      //     //设置 维修人员
+      //     break
+      // }
     },
-    //获取列表
+    //获取项目列表
     getProgectList () {
-      let startTime, endTime
-      if (this.ruleFormHeight.time) {
-        startTime = this.ruleFormHeight.time[0]
-        endTime = this.ruleFormHeight.time[1]
-      }
       let params = {
-        projectName: this.ruleForm.key,
-        projectLeader: this.ruleFormHeight.leader,
-        projectType: this.ruleFormHeight.projectType,
-        projectSite: this.ruleFormHeight.address,
-        status: this.ruleFormHeight.status,
-        startTime: startTime,
-        endTime: endTime,
-        currentPage: this.currentPage,
-        pageSize: this.pageSize,
+        projectName: '',
+        currentPage: 1,
+        pageSize: 100000,
       }
       systemMirror.getProjectList(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
-          // this.tableData = result.content
-          this.total = result.recordTotal
-          if (this.total > 0 && this.tableData.length === 0 && this.currentPage > 1) {
-            this.currentPage = this.currentPage - 1
-            this.getList()
-          }
+          this.projectList = result.content
         }
-        this.tableData.forEach((item, index) => {
-          item.createTime = timeReg.getNowFormatDate(item.createTime)
-          this.projectType.forEach(it => {
-            if (item.projectType && item.projectType === it.id) {
-              item.projectTypeLable = it.name
-            }
-          })
-          this.projectStatus.forEach(it => {
-            if (item.status && item.status === it.id) {
-              item.statusLable = it.name
-            }
-          })
-        })
-        this.tableDataNew = this.tableData
       })
-    },
-
-    handleSizeChange (val) {
-      console.log(`每页 ${val} 条`);
-    },
-    handleCurrentChange (val) {
-      console.log(`当前页: ${val}`);
-      this.getProgectList()
-    },
-    changeProjectBox (status) {
-      this.addProjectStatus = status
     },
 
   },
@@ -427,5 +240,8 @@ export default {
   position: absolute;
   right: 160px;
   top: -10px;
+}
+.dz-system-table {
+  height: calc(100vh - 300px);
 }
 </style>

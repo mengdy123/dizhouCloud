@@ -33,7 +33,7 @@ export default {
     DutyMirror.get(`/manage/project/getProjectById?projectId=${params}`),
   // 项目详情 修改
   updateProject: params =>
-    DutyMirror.post('manage/project/update', {
+    DutyMirror.post('/manage/project/update', {
       ...params
     }),
   // 分页查询客户列表信息
@@ -47,6 +47,46 @@ export default {
   // 删除项目
   deleteProjectById: params =>
     DutyMirror.get(`/manage/project/delete?projectId=${params}`),
+
+  // 单条导入的时候提前配置好的一些数据接口
+  // 产品中心已经配置好的系统的列表
+  getListSystemType: params =>
+    DutyMirror.get(`/manage/system/getListSystemType`),
+  // 根据系统类型id查询该系统类型下的设备类型
+  getListRelationBySystemTypeId: params =>
+    DutyMirror.get(`/manage/system/getListRelationBySystemTypeId`, {
+      params: {
+        ...params
+      }
+    }),
+  // 根据设备类型id查询该设备类型下的设备系列
+  getListRelationByDeviceTypeId: params =>
+    DutyMirror.get(`/manage/system/getListRelationByDeviceTypeId`, {
+      params: {
+        ...params
+      }
+    }),
+  // 根据设备系列id查询该设备类型下的设备型号
+  getListRelationBySeriesId: params =>
+    DutyMirror.get(`/manage/system/getListRelationBySeriesId`, {
+      params: {
+        ...params
+      }
+    }),
+  // 
+  addProjectRelation: params =>
+    DutyMirror.post('/manage/system/addProjectRelation', {
+      ...params
+    }),
+  // 项目中设备单条导入
+  addDevice: params =>
+    DutyMirror.post('/manage/device/addDevice', {
+      ...params
+    }),
+
+
+
+
 
   // 客户详情
   getCompanyById: params =>
@@ -179,11 +219,6 @@ export default {
   // 修改 系统设备
   updateDevice: params =>
     DutyMirror.post('/manage/device/update', {
-      ...params
-    }),
-  // 新增
-  addDevice: params =>
-    DutyMirror.post('/manage/device/addDevice', {
       ...params
     }),
 
@@ -471,6 +506,60 @@ export default {
       }
     }),
 
+
+  // 运维职能配置
+  /*
+  * 根据项目id查询所有已经部署的系统
+  */
+  getListByProjectId: params =>
+    DutyMirror.get(`/manage/system/getListByProjectId`, {
+      params: {
+        ...params
+      }
+    }),
+  /*
+  * 根据项目id和系统id查询设备类型
+  */
+  getListTypeBySystem: params =>
+    DutyMirror.get(`/manage/device/getListTypeBySystem`, {
+      params: {
+        ...params
+      }
+    }),
+  /*
+  * 根据项目id和系统id和设备id查询系列
+  */
+  getListTypeByDevice: params =>
+    DutyMirror.get(`/manage/device/getListTypeByDevice`, {
+      params: {
+        ...params
+      }
+    }),
+  /*
+  * 根据项目id和系统id和设备id和设备系列id查询型号
+  */
+  getListTypeBySeries: params =>
+    DutyMirror.get(`/manage/device/getListTypeBySeries`, {
+      params: {
+        ...params
+      }
+    }),
+  /*
+  * 根据项目id和系统id和设备id和设备系列id和设备型号id查询具体的设备
+  */
+  getListTypeByVersion: params =>
+    DutyMirror.get(`/manage/device/getListTypeByVersion`, {
+      params: {
+        ...params
+      }
+    }),
+  /*
+  * 运维职能配置主接口
+  */
+  setMaintainManage: params =>
+    DutyMirror.post(`/manage/device/setMaintainManage`, {
+      ...params
+    }),
 
 
 }

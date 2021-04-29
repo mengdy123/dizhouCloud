@@ -28,7 +28,6 @@
             </div>
           </div>
         </dv-border-box-13>
-
       </div>
     </div>
   </div>
@@ -84,7 +83,7 @@ export default {
   z-index: 2;
 }
 .dz-time-module {
-  width: 360px;
+  width: 400px;
   height: 36px;
   line-height: 36px;
   position: fixed;

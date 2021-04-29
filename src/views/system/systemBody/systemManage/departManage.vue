@@ -155,7 +155,7 @@ export default {
 .dz-system {
   &-tree {
     margin: 30px 0;
-    overflow: scroll;
+    overflow: auto;
     height: calc(100% - 60px);
   }
 }

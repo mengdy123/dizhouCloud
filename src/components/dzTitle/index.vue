@@ -16,6 +16,9 @@ export default {
     } else {
       this.title = '地洲智慧云平台'
     }
+  },
+  methods: {
+
   }
 }
 </script>

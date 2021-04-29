@@ -145,7 +145,7 @@ export default {
     }
   },
   beforeDestroy () {
-    this.Cookie.set('defaultActive', '')
+    this.Cookie.set('defaultActive', null)
   }
 
 }
@@ -155,6 +155,7 @@ export default {
   width: 100%;
   height: 100%;
   display: flex;
+  min-width: 1440px;
   .dz-system-menu {
     height: 100%;
     background: #001529;

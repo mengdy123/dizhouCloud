@@ -1,3 +1,11 @@
+<!--
+ * @Description: 
+ * @Version: 2.0
+ * @Autor: mandy
+ * @Date: 2021-03-24 09:18:12
+ * @LastEditors: mandy
+ * @LastEditTime: 2021-04-28 09:50:36
+-->
 <template>
   <div class="form-module">
     <el-form :model="ruleForm"
@@ -10,38 +18,14 @@
         <el-input v-model="ruleForm.systemTypeName"
                   placeholder="请输入系统名称"></el-input>
       </el-form-item>
-      <!-- <el-form-item label="系统类型"
-                    prop="systemType">
-        <el-select v-model="ruleForm.systemType"
-                   placeholder="请选择系统类型">
-          <el-option v-for="item in systemType"
-                     :label="item.name"
-                     :key="item.id"
-                     :value="item.id">
-          </el-option>
-        </el-select>
+      <el-form-item label="系统配置"
+                    prop="systemSet">
+        <el-cascader :props="props"
+                     style="width: 322px"
+                     clearable
+                     ref="systemTree"
+                     @change='changeSystemSet'></el-cascader>
       </el-form-item>
-     <el-form-item label="所属项目"
-                    prop="projectId">
-        <el-select v-model="ruleForm.projectId"
-                   placeholder="请选择所属项目">
-          <el-option v-for="item in projectList"
-                     :label="item.projectName"
-                     :key="item.projectId"
-                     :value="item.projectId">
-          </el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="项目类型">
-        <el-select v-model="ruleForm.industry"
-                   placeholder="请选择项目类型">
-          <el-option v-for="item in projectType"
-                     :label="item.name"
-                     :key="item.id"
-                     :value="item.id">
-          </el-option>
-        </el-select>
-      </el-form-item> -->
     </el-form>
     <div class="form-footer">
       <el-button type="primary"
@@ -55,20 +39,126 @@ import { mapState, mapActions } from 'vuex'
 import systemMirror from '@/resource/systemMirror'
 export default {
   data () {
+    let id = 0;
     return {
       ruleForm: {
       },
       rules: {
         systemTypeName: [
           { required: true, message: '请输入系统名称', trigger: 'blur' },
-          { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
         ],
-        systemType: [
-          { required: true, message: '请选择系统类型', trigger: 'change' },
+        systemSet: [
+          { required: true, message: '请选择系统配置', trigger: 'change' },
         ],
-        projectId: [
-          { required: true, message: '请选择所属项目', trigger: 'change' },
-        ],
+      },
+      props: {
+        lazy: true,
+        multiple: true,
+        checkStrictly: true,
+        lazyLoad (node, resolve) {
+          console.log('node', node)
+          // console.log('resolve', resolve)
+          const { level } = node;
+          let id = null
+          id = node.value || null
+          if (node.level == 0) {
+            console.log('加载系统类型列表')
+            let params = {
+              currentPage: 1,
+              pageSize: 10000,
+            }
+            systemMirror.getListByDevice(params).then(res => {
+              let { code, result, serviceMessage } = res.data
+              if (code === 200) {
+                let listNew = []
+                let list = []
+                // console.log('获取设备类型111', result.content)
+                list = result.content
+                if (list.length) {
+                  list.forEach(item => {
+                    listNew.push({
+                      value: item.deviceTypeId,
+                      label: item.deviceTypeName,
+                      num: item.deviceTypeNumber
+                    })
+                  });
+                }
+                setTimeout(() => {
+                  console.log('listNew111', listNew)
+                  // 通过调用resolve将子节点数据返回，通知组件数据加载完成
+                  resolve(listNew);
+                }, 500);
+              }
+            })
+          } else if (node.level === 1) {
+            console.log('加载第二列表')
+            let params2 = {
+              deviceTypeId: id,
+              currentPage: 1,
+              pageSize: 10000,
+            }
+            console.log('params2', params2)
+            systemMirror.getListBySeries(params2).then(res => {
+              let { code, result, serviceMessage } = res.data
+              if (code === 200) {
+                console.log('获取设备系列列表', result.content)
+                let listNew = []
+                let list = []
+                // console.log('获取设备类型111', result.content)
+                list = result.content
+                if (list.length) {
+                  list.forEach(item => {
+                    listNew.push({
+                      value: item.seriesId,
+                      label: item.seriesName,
+                      num: item.deviceNumber
+                    })
+                  });
+                }
+                setTimeout(() => {
+                  console.log('listNew222', listNew)
+                  // 通过调用resolve将子节点数据返回，通知组件数据加载完成
+                  resolve(listNew);
+                }, 500);
+              }
+            })
+
+          } else if (node.level === 2) {
+            console.log('加载系统型号列表')
+            node.hasChildren = false
+            let params = {
+              seriesId: id,
+              currentPage: 1,
+              pageSize: 10000,
+            }
+            systemMirror.getListByVer(params).then(res => {
+              let { code, result, serviceMessage } = res.data
+              if (code === 200) {
+                let listNew = []
+                let list = []
+                // console.log('获取设备型号333', result.content)
+                list = result.content
+                if (list.length) {
+                  list.forEach(item => {
+                    listNew.push({
+                      value: item.versiontypeId,
+                      label: item.versiontypeName,
+                      num: item.deviceNumber
+                    })
+                  });
+                }
+                setTimeout(() => {
+                  console.log('listNew333', listNew)
+                  resolve(listNew);
+                }, 500);
+              }
+            })
+          } else {
+
+            return false
+          }
+
+        }
       }
     };
   },
@@ -78,13 +168,14 @@ export default {
       projectType: state => state.common.projectType,
       systemType: state => state.common.systemType,
       projectList: state => state.system.projectList,
+      deviceTypeList: state => state.system.deviceTypeList,
     })
   },
   mounted () {
     this.ruleForm = this.detailInfo
   },
   methods: {
-    ...mapActions(['saveDetailInfo']),
+    ...mapActions(['saveDetailInfo', 'saveDeviceTypeList']),
     submitForm () {
       this.$refs['ruleForm'].validate((valid) => {
         if (valid) {
@@ -95,15 +186,41 @@ export default {
         }
       });
     },
+    // 选择系统配置
+    changeSystemSet (val) {
+      if (val && val.length) {
+        this.ruleForm.systemSet = val[0][val.length - 1]
+      }
+      console.log('点击选择系统配置---systemSet', val)
+    },
     handleClose () {
       this.$refs['ruleForm'].resetFields();
       this.$emit('changeProjectBox', false)
       this.saveDetailInfo({})
     },
     addSystem () {
-      let params = {
-        ...this.ruleForm,
+      let list = this.$refs.systemTree.getCheckedNodes()
+      let deviceList = []
+      let seriesList = []
+      let versionList = []
+      if (list.length) {
+        list.forEach(item => {
+          if (item.level === 1) {
+            deviceList.push(item.value)
+          } else if (item.level === 2) {
+            seriesList.push(item.value)
+          } else if (item.level === 3) {
+            versionList.push(item.value)
+          }
+        })
       }
+      let params = {
+        systemTypeName: this.ruleForm.systemTypeName,
+        deviceList: deviceList,
+        seriesList: seriesList,
+        versionList: versionList,
+      }
+      console.log('params', params)
       systemMirror.addSystemType(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {

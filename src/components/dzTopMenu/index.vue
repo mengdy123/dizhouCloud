@@ -1,5 +1,7 @@
 <template>
   <div class="dz-time-div">
+    <!-- <div class="full-screen"
+         @click="showScreen">{{screenTitle}}</div> -->
     <div class="time">{{nowTime}}</div>
     <div class="set"
          @click="goBackName('/project')">
@@ -20,13 +22,36 @@
 </template>
 <script>
 export default {
+  inject: ['reload'],
   data () {
     return {
-      nowTime: ''
+      nowTime: '',
+      screenTitle: '全屏',
+      fullscreenState: null
     }
   },
   mounted () {
+    this.screenTitle = this.Cookie.get('screenTitle') || '全屏'
     this.nowTimes()
+    document.addEventListener("fullscreenchange", function () {
+
+      this.fullscreenState.innerHTML = (document.fullscreen) ? "" : "not ";
+    }, false);
+
+    document.addEventListener("mozfullscreenchange", function () {
+
+      this.fullscreenState.innerHTML = (document.mozFullScreen) ? "" : "not ";
+    }, false);
+
+    document.addEventListener("webkitfullscreenchange", function () {
+
+      this.fullscreenState.innerHTML = (document.webkitIsFullScreen) ? "" : "not ";
+    }, false);
+
+    document.addEventListener("msfullscreenchange", function () {
+
+      this.fullscreenState.innerHTML = (document.msFullscreenElement) ? "" : "not ";
+    }, false);
   },
   methods: {
     //显示当前时间（年月日时分秒）
@@ -41,6 +66,51 @@ export default {
       let weeks = ["日", "一", "二", "三", "四", "五", "六"];
       let getWeek = "星期" + weeks[week];
       this.nowTime = year + "年" + month + "月" + date + "日" + "      " + hh + ":" + mm + ':' + ss + "      " + getWeek;
+    },
+    //全屏
+    fullScreen () {
+      var docElm = document.documentElement;
+      //W3C   
+      if (docElm.requestFullscreen) {
+        docElm.requestFullscreen();
+      }
+      //FireFox   
+      else if (docElm.mozRequestFullScreen) {
+        docElm.mozRequestFullScreen();
+      }
+      //Chrome等   
+      else if (docElm.webkitRequestFullScreen) {
+        docElm.webkitRequestFullScreen();
+      }
+      //IE11   
+      else if (elem.msRequestFullscreen) {
+        elem.msRequestFullscreen();
+      }
+    },
+    escScreen () {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+      else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      }
+      else if (document.webkitCancelFullScreen) {
+        document.webkitCancelFullScreen();
+      }
+      else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    },
+    showScreen () {
+      if (this.screenTitle === '全屏') {
+        this.reload();
+        this.Cookie.set('screenTitle', '退出全屏')
+        this.fullScreen()
+      } else {
+        this.reload();
+        this.Cookie.set('screenTitle', '全屏')
+        this.escScreen()
+      }
     },
     nowTimes () {
       this.timeFormate(new Date());
@@ -62,20 +132,20 @@ export default {
 /deep/ .el-dropdown {
   font-size: 12px;
 }
-
 .dz-time-div {
   width: 100%;
   height: 100%;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   flex: 1;
   line-height: 100%;
   .user-info,
   .set,
-  .time {
+  .time,
+  .full-screen {
     font-size: 12px;
     color: @white;
-    padding-right: 6px;
+    margin-left: 10px;
     display: flex;
     a,
     /deep/ .el-dropdown {
@@ -86,7 +156,8 @@ export default {
       text-decoration: none;
     }
   }
-  .set {
+  .set,
+  .full-screen {
     cursor: pointer;
   }
   /deep/ .svg-icon {

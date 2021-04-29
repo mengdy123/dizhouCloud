@@ -28,6 +28,7 @@ import model3D from '../model3D'
 import dzTitle from '../dzTitle'
 import dzTopMenu from '../dzTopMenu'
 export default {
+
   name: 'mainIndex',
   components: { model3D, dzTitle, dzTopMenu },
 
@@ -58,7 +59,7 @@ export default {
   z-index: 2;
 }
 .dz-time-module {
-  width: 360px;
+  width: 400px;
   height: 36px;
   line-height: 36px;
   position: fixed;

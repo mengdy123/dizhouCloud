@@ -106,14 +106,15 @@
       </div>
     </div> -->
     <div class="detail-module-row">
-      <titleDiv2 title='设备列表'></titleDiv2>
+      <titleDiv2 title='系统列表'></titleDiv2>
+      <div class="history-table-set"><span @click="systemSet">新增</span></div>
       <div class="detail-form history-table">
         <myTable :tableData="tableDataHis"
                  :tableConfigArr='tableConfigArrHis'
                  :selection="false"
                  :action='actionList'
                  height='298px'
-                 name='设备列表'
+                 name='系统列表'
                  @getList='getSetList'
                  @disebleTable='disebleTable'
                  :index='true'></myTable>
@@ -128,7 +129,7 @@
     <div class="button-list"
          v-else>
       <el-button type="primary"
-                 @click="changeOnlySetBox(true)">单条导入</el-button>
+                 @click="addOnly">单条导入</el-button>
       <el-button type="primary"
                  @click="changeBatchSetBox(true)">批量导入</el-button>
       <el-button @click="updateDetail(false)">下载导入模板</el-button>
@@ -141,6 +142,8 @@
             title='单条导入'>
       <slot slot='dialogMain'>
         <addOnlySetForm ref="addForm"
+                        :detailInfo='detailInfo'
+                        @getList='getSetList'
                         @changeProjectBox='changeOnlySetBox'></addOnlySetForm>
       </slot>
     </addBox>
@@ -161,6 +164,14 @@
         <mapBox @changeProjectBox='changeMapBox'></mapBox>
       </slot>
     </addBox>
+    <addBox v-if="systemSetBox"
+            @changeProjectBox='systemBoxStatus'
+            title='新增'>
+      <slot slot='dialogMain'>
+        <systemSet @getList='getSetList'
+                   @changeProjectBox='systemBoxStatus'></systemSet>
+      </slot>
+    </addBox>
   </div>
 </template>
 <script>
@@ -173,8 +184,10 @@ import myTable from "@/components/Table";
 import addOnlySetForm from '../../components/formModule/addOnlySetForm'
 import addBatchSetForm from '../../components/formModule/addBatchSetForm'
 import mapBox from '../mapBox'
+import systemSet from '../../components/formModule/systemSet'
+
 export default {
-  components: { titleDiv2, myTable, addBox, addOnlySetForm, addBatchSetForm, mapBox },
+  components: { titleDiv2, myTable, addBox, addOnlySetForm, addBatchSetForm, mapBox, systemSet },
   data () {
     return {
       form: {},
@@ -292,7 +305,8 @@ export default {
       actionList: [],
       onlyUploadStatus: false,
       batchUploadStatus: false,
-      addMapStatus: false
+      addMapStatus: false,
+      systemSetBox: false,
     }
   },
   computed: {
@@ -342,6 +356,9 @@ export default {
     goBack () {
       this.$router.push('/project')
     },
+    addOnly () {
+      this.changeOnlySetBox(true)
+    },
     getProjectSite () {
       this.changeMapBox(true)
     },
@@ -353,6 +370,14 @@ export default {
     },
     changeBatchSetBox (status) {
       this.batchUploadStatus = status
+    },
+    //新增
+    systemSet () {
+      this.systemBoxStatus(true)
+    },
+    //系统配置框的状态
+    systemBoxStatus (status) {
+      this.systemSetBox = status
     },
     //设备列表
     getSetList () { },
@@ -402,8 +427,10 @@ export default {
 </script>
 <style lang="less" scoped>
 .detail-module {
+  font-weight: 500;
   &-row {
     margin-top: 30px;
+    position: relative;
   }
   .detail-form {
     margin-top: 30px;
@@ -424,6 +451,13 @@ export default {
       height: 190px;
       overflow-y: scroll;
     }
+  }
+  .history-table-set {
+    position: absolute;
+    right: 0;
+    top: 0;
+    cursor: pointer;
+    color: #2761ff;
   }
   .button-list {
     display: flex;

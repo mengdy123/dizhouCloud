@@ -5,25 +5,62 @@
              ref="ruleForm"
              label-width="100px"
              class="demo-ruleForm">
+      <el-form-item label="系统类型"
+                    prop="systemId">
+        <el-select v-model="ruleForm.systemId"
+                   placeholder="请选择系统类型"
+                   @change="changeDeviceByType('system',$event)">
+          <el-option v-for="item in systemList"
+                     :label="item.systemTypeName"
+                     :key="item.systemTypeId"
+                     :value="item.systemTypeId"></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="设备类型"
+                    prop="deviceType">
+        <el-select v-model="ruleForm.deviceType"
+                   placeholder="请选择设备类型"
+                   @change="changeDeviceByType('type',$event)">
+          <el-option v-for="item in deviceTypeList"
+                     :label="item.deviceTypeName"
+                     :key="item.deviceTypeId"
+                     :value="item.deviceTypeId"></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="设备系列"
+                    prop="series">
+        <el-select v-model="ruleForm.series"
+                   placeholder="请选择设备系列"
+                   @change="changeDeviceByType('series',$event)">
+          <el-option v-for="item in seriesList"
+                     :label="item.seriesName"
+                     :key="item.seriesId"
+                     :value="item.seriesId"></el-option>
+        </el-select>
+      </el-form-item>
       <el-form-item label="设备型号"
-                    prop="seriesModel">
-        <el-input v-model="ruleForm.deviceModel"
-                  placeholder="请输入设备型号"></el-input>
+                    prop="versionType">
+        <el-select v-model="ruleForm.versionType"
+                   placeholder="请选择设备型号">
+          <el-option v-for="item in modelList"
+                     :label="item.versiontypeName"
+                     :key="item.versionTypeId"
+                     :value="item.versionTypeId"></el-option>
+        </el-select>
       </el-form-item>
       <el-form-item label="设备编号"
                     prop="deviceNumber">
         <el-input v-model="ruleForm.deviceNumber"
                   placeholder="请输入设备编号"></el-input>
       </el-form-item>
-
       <el-form-item label="安装区域"
-                    prop="deviceArea">
-        <el-input v-model="ruleForm.deviceArea"
+                    prop="installationArea">
+        <el-input v-model="ruleForm.installationArea"
                   placeholder="请输入安装区域"> </el-input>
       </el-form-item>
       <el-form-item label="安装位置"
-                    prop="deviceSit">
-        <el-input v-model="ruleForm.deviceSit"
+                    prop="installationSite">
+        <el-input v-model="ruleForm.installationSite"
                   placeholder="请输入安装位置"></el-input>
       </el-form-item>
     </el-form>
@@ -42,67 +79,54 @@ export default {
   data () {
     return {
       addressInfo: {},
-      ruleForm: {},
-      rules: {
-        seriesModel: [
-          { required: true, message: '请输入设备型号', trigger: 'blur' },
-        ],
-        deviceNumber: [
-          { required: true, message: '请输入设备编号', trigger: 'blur' },
-        ],
-        deviceSit: [
-          { required: true, message: '请输入安装位置', trigger: 'blur' },
-        ],
-        deviceArea: [
-          { required: true, message: '请输入安装区域', trigger: 'blur' }
-        ],
+      ruleForm: {
       },
-      companyList: []
+      rules: {
+        // deviceType: [
+        //   { required: true, message: '请选择设备类型', trigger: 'change' },
+        // ],
+        // systemId: [
+        //   { required: true, message: '请选择系统类型', trigger: 'change' },
+        // ],
+        // series: [
+        //   { required: true, message: '请选择设备系列', trigger: 'change' },
+        // ],
+        // versionType: [
+        //   { required: true, message: '请选择设备型号', trigger: 'change' },
+        // ],
+        // deviceNumber: [
+        //   { required: true, message: '请输入设备编号', trigger: 'blur' },
+        // ],
+        // installationSite: [
+        //   { required: true, message: '请输入安装位置', trigger: 'blur' },
+        // ],
+        // installationArea: [
+        //   { required: true, message: '请输入安装区域', trigger: 'blur' }
+        // ],
+      },
+      systemList: [],
+      deviceTypeList: [],
+      seriesList: [],
+      modelList: [],
     };
-  },
-  watch: {
-    projectAddress: {
-      deep: true,
-      handler (newVal, oldVal) {
-        console.log('projectAddress---watch', newVal)
-        this.ruleForm.projectSite = newVal.name
-        this.addressInfo = newVal.addressComponent
-      }
-    }
   },
   computed: {
     ...mapState({
+      detailInfo: state => state.system.detailInfo,
       projectType: state => state.common.projectType,
       projectStatus: state => state.common.projectStatus,
       projectAddress: state => state.system.projectAddress
     })
   },
   mounted () {
-    this.getcCompanyList()
+    this.getListSystemType()
+    console.log(' this.detailInfo', this.detailInfo)
   },
   methods: {
-    ...mapActions(['saveDetailInfo']),
-    getcCompanyList () {
-      let params = {
-        companyName: '',
-        currentPage: 1,
-        pageSize: 10000,
-      }
-      systemMirror.getCompanyList(params).then(res => {
-        let { code, result, serviceMessage } = res.data
-        if (code === 200) {
-          this.companyList = result.content
-        }
-      })
-    },
     submitForm () {
       this.$refs['ruleForm'].validate((valid) => {
         if (valid) {
-          if (!isPhone(this.ruleForm.phone)) {
-            this.$message.error('请输入正确的联系方式')
-          } else {
-            this.addProjectFun()
-          }
+          this.addProjectSetFun()
         } else {
           console.log('error submit!!');
           return false
@@ -112,32 +136,89 @@ export default {
     handleClose () {
       this.$refs['ruleForm'].resetFields();
       this.$emit('changeProjectBox', false)
-      this.saveDetailInfo({})
     },
-    getProjectSite () {
-      this.$emit('changeInnerVisible', true)
+    changeDeviceByType (type, val) {
+      console.log(val);
+      console.log(type);
+      let name = type
+      switch (name) {
+        case 'system':
+          this.getListByDevice(val)
+          break;
+        case 'type':
+          this.getSeriesList(val)
+          break;
+        case 'series':
+          this.getModelList(val)
+          break;
+      }
     },
-    addProjectFun () {
+    //获取系统列表
+    getListSystemType () {
+      let params = {
+        projectId: this.detailInfo.id,
+      }
+      systemMirror.getListSystemType(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.systemList = result
+          console.log('获取系统类型', result)
+        }
+      })
+    },
+    //获取设备类型
+    getListByDevice (id) {
+      let params = {
+        projectId: this.detailInfo.id,
+        systemTypeId: id
+      }
+      systemMirror.getListRelationBySystemTypeId(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.deviceTypeList = result
+          console.log('获取设备类型', result)
+        }
+      })
+    },
+    //获取设备系列列表
+    getSeriesList (id) {
+      let params = {
+        projectId: this.detailInfo.id,
+        deviceTypeId: id
+      }
+      systemMirror.getListRelationByDeviceTypeId(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.seriesList = result
+          console.log('获取设备系列列表', result)
+        }
+      })
+    },
+    //获取设备型号
+    getModelList (id) {
+      // console.log('id', id)
+      let params = {
+        projectId: this.detailInfo.id,
+        seriesId: id
+      }
+      systemMirror.getListRelationBySeriesId(params).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          this.modelList = result
+          console.log('获取设备型号', result)
+        }
+      })
+    },
+    addProjectSetFun () {
       let params = {
         ...this.ruleForm,
-        latitude: this.projectAddress.lnglat[1],
-        longitude: this.projectAddress.lnglat[0],
-        continent: "亚洲",
-        companyId: this.ruleForm.companyId,
-        status: this.ruleForm.status,
-        country: this.addressInfo.country || this.ruleForm.country,
-        province: this.addressInfo.province || this.ruleForm.province,
-        city: this.addressInfo.district || this.ruleForm.city,
-        county: this.addressInfo.township || this.ruleForm.county,
-        projectSite: this.addressInfo.street + this.ruleForm.streetNumber,
       }
       console.log('ruleForm', params)
-      systemMirror.addProject(params).then(res => {
+      systemMirror.addDevice(params).then(res => {
         let { code, result, serviceMessage } = res.data
         if (code === 200) {
           this.$message.success(serviceMessage)
           this.$emit('changeProjectBox', false)
-          this.saveDetailInfo({})
         }
       })
     },

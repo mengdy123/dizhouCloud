@@ -90,6 +90,7 @@ export default {
         if (code === 200) {
           //存
           this.Cookie.set("userInfo", result);
+          this.getUserById(result.id)
           //取
           // this.Cookie.get("a");
           this.$router.push('mainIndex')
@@ -97,7 +98,79 @@ export default {
           this.$message.error(serviceMessage)
         }
       })
-    }
+    },
+    getUserById (id) {
+      systemManageMirror.getUserById(id).then(res => {
+        let { code, result, serviceMessage } = res.data
+        if (code === 200) {
+          // console.log('个人中心', result)
+          let data = result
+          this.baseInfo.forEach(item => {
+            if (item.type) {
+              item.value = data[item.type]
+            }
+          })
+          this.tableDataNew = result.projectList
+          this.menuArr = result.menuList
+          if (this.menuArr && this.menuArr.length) {
+            this.menuArr.forEach(item => {
+              if (item.childrenMenu.length > 0) {
+                // 即：this.recursionItem(item);在这地方添加的
+                item.childrenMenu.forEach(items => {
+                  // 下面的就是执行递归的方法，因为我是从第二层才开始需要往下挖的，所以这里多了个forEach,如果从第一层起，从item就好了，即：this.recursionItem(item);在上面添加
+                  this.recursionItem(items); // 这里是源头，把一个对象开始递归，开始循环
+                  // 如果想看完整数据，那么是在这里打印数据哦
+                  console.log(items, '看我查看完整的数据哦')
+                  if (items.flag) {
+                    this.checkedKeys.push(items.id)
+                  }
+                  if (items.level === '1') {
+                    this.checkAll = true
+                  } else {
+                    this.checkAll = false
+                  }
+                  // if (this.checkAll) {
+                  //   items.level = '1'
+                  // } else {
+                  //   items.level = '0'
+                  // }
+                  // 因为上一步递归时，就已经把循环children的动作做完了，这里是验收递归方法的地方。
+                })
+              } else {
+                // 如果第一层没有子项做的操作。。。。。
+              }
+            })
+          }
+        }
+      })
+    },
+    //递归
+    recursionItem (item) {
+      // 一层一层往下面执行，循环，直到不满足情况的条件下，会自动跳出这个递归方法，然后又到上面方法的源头处，开始执行下一个对象。。。
+      if (item.childrenMenu && item.childrenMenu.length > 0) {
+        item.value = item.id
+        item.label = item.menuName
+        item.path = item.url
+        item.level = item.level
+        item.parentId = item.parentId
+        item.permissionId = item.permissionId
+        item.flag = item.flag
+        // 因为三级联动的数据格式是value和label,所以需要自己手动添加，没有的忽略。
+        item.childrenMenu.forEach(ff => {
+          // 这里就是判断他的children下面还有没有值，有的话我就要往下挖，就又开始自己调用自己了
+          this.recursionItem(ff)
+        })
+      } else {
+        // 这里就是判断，如果我这一层的children下面没有东西的时候该做什么操作 
+        item.value = item.id
+        item.label = item.menuName
+        item.path = item.url
+        item.level = item.level
+        item.parentId = item.parentId
+        item.permissionId = item.permissionId
+        item.flag = item.flag // 要添加value和label,否则会看不到标签名字和值
+      }
+    },
   }
 }
 </script>

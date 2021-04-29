@@ -280,7 +280,7 @@ export default {
       let list = this.$refs.menuTree.getCheckedNodes()
       list.forEach(item => {
         if (this.nowSelectBox.id === item.id) {
-          console.log('item', item)
+          // console.log('item', item)
           item.level = this.nowSelectBox.level
         }
       })

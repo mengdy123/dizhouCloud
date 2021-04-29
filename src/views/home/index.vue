@@ -108,8 +108,8 @@ export default {
   color: @white;
   &-left {
     width: 420px;
-    // height: calc(100vh - 60px);
-    height: 1020px;
+    height: calc(100vh - 60px);
+    // height: 1020px;
     background: @bgBlue;
     padding: 20px 20px;
     position: fixed;
@@ -118,8 +118,8 @@ export default {
   }
   &-right {
     width: 420px;
-    height: 1020px;
-    // height: calc(100vh - 60px);
+    // height: 1020px;
+    height: calc(100vh - 60px);
     // background: @bgBlue;
     position: fixed;
     right: 0;

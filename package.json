@@ -29,6 +29,7 @@
     "less-loader": "^4.1.0",
     "lib-flexible": "^0.3.2",
     "nprogress": "^0.2.0",
+    "screenfull": "^4.2.0",
     "three": "^0.125.2",
     "three-css2drender": "^1.0.0",
     "three-obj-mtl-loader": "^1.0.3",

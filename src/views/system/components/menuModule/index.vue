@@ -207,7 +207,7 @@ export default {
   position: relative;
   width: 100%;
   height: calc(100vh - 130px);
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 .dz-menu-radio {
   position: fixed;

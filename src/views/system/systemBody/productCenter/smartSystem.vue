@@ -146,7 +146,7 @@ export default {
       pageSize: 10,
       total: 1000,
       addProjectStatus: false,
-      heightTable: 'calc(100vh - 402px)',
+      heightTable: 'calc(100vh - 350px)',
       actionList: [
         {
           name: '详情',
